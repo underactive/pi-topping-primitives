@@ -5,3 +5,7 @@ All notable changes to this package are documented here. The format follows
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+### Added
+
+- Package scaffold: subpath exports whose default target is the TypeScript source and whose compiled target is the dist output. Every subpath is an empty stub until its phase lands. Tested against Pi 1.3.0.
