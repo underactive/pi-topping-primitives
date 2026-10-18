@@ -18,7 +18,7 @@ That writes a `dependencies` entry. The code is loaded by pi at runtime, so it d
 
 | Subpath | Planned contents | Phase | Status |
 | --- | --- | --- | --- |
-| `./contracts` | `CHANNELS`, `ENTRY_TYPES`, `PI_VIRTUAL_MODEL_API`, `WORKING_STATUS_SLIDE_MS`, `parseRoutedModel`, `parseEmbeddedAnnouncement`, `emit`, `subscribe` | 1 | planned |
+| `./contracts` | `CHANNELS`, `ENTRY_TYPES`, `PI_VIRTUAL_MODEL_API`, `WORKING_STATUS_SLIDE_MS`, `parseRoutedModel`, `parseEmbeddedAnnouncement`, `emit`, `subscribe` | 1 | implemented for 0.1.0 |
 | `./settings` | `createSettingsStore`, `memorySettingsStore`, `cached`, `atomicWriteFile`, the sanitisers, `toppingSettingsPath` | 2 | planned |
 | `./activity` | `ActivityMeter`, `StreamingWordCounter`, `OutputTokenAccount`, `RateHoldFade`, `RunClock`, `easeFade`, `fadeShade`, `slideOutTail`, the elapsed formatters | 3 | planned |
 | `./activity-tui` | `dimAttribute`, `colorizeMeterCell`, `renderMeter`, `renderIdleMeter`, `thinkingLevelThemeColor`, `shimmerString`, `ansiToRgb`, `formatToolActivity` | 3 | planned |
@@ -29,9 +29,43 @@ That writes a `dependencies` entry. The code is loaded by pi at runtime, so it d
 | `./glyphs` | `BoxGlyphs`, `BOX_STYLES`, `SPINNER_FRAMES`, `SPINNER_FRAME_MS`, the braille and quadrant spinner sets | 6 | planned |
 | `./process` | `resolvePiInvocation`, `escalateKill`, `spawnCollect`, `mapWithConcurrencyLimit`, `parsePiVersion`, `versionAtLeast`, `loadAgentsFromDir`, `findNearestProjectAgentsDir` | 7 | planned |
 
-Every subpath is an empty stub (`export {};`) until its phase lands. That is a problem only at publish time: the guard described under [Releases](#releases) refuses to publish while any listed subpath is still empty.
+Every planned subpath other than `./contracts` is an empty stub (`export {};`) until its phase lands. The guard described under [Releases](#releases) refuses to publish while any listed subpath is still empty.
 
 There is deliberately no root `"."` export. Narrow subpaths keep a contracts-only consumer from transpiling menu code at session start.
+
+## Contracts
+
+`./contracts` is the permanent cross-extension wire registry. The names never change, payloads only gain fields, and parsers ignore unknown fields. The `V1` suffix appears only on versioned payloads; an incompatible change to an unversioned payload takes a new name.
+
+| Name | Value | Publisher | Payload type | Parser / validation |
+| --- | --- | --- | --- | --- |
+| `CHANNELS.routedModel` | `pi-topping-routesense:routed-model` | routesense | `RoutedModelAnnouncementV1` | `parseRoutedModel` |
+| `CHANNELS.workingStatusEmbedded` | `pi-topping-statusline:working-status-embedded` | statusline | `EmbeddedAnnouncement` | `parseEmbeddedAnnouncement` |
+| `ENTRY_TYPES.compactSavings` | `pi-topping-compact/savings` | compact | `SavingsEntry` | Consumer validates its fields |
+| `ENTRY_TYPES.compactCompactionSavings` | `pi-topping-compact/compaction-savings` | compact | `SavingsEntry` | Consumer validates its fields |
+| `ENTRY_TYPES.compactCompaction` | `pi-topping-compact/compaction` | compact | `CompactionOutcomeEntry` | Consumer validates its fields |
+| `ENTRY_TYPES.browser` | `pi-topping-web-tools/browser` | web-tools | `BrowserFeedPayload` | Consumer validates its fields |
+| `ENTRY_TYPES.splashLocalChanges` | `pi-topping-splash:local-changes` | splash | `unknown` | Name only; payload and strict validator stay local to splash |
+
+`PI_VIRTUAL_MODEL_API` is pi's `VIRTUAL_MODEL_API` string (`pi-virtual`), and `WORKING_STATUS_SLIDE_MS` is the shared 300 ms slide interval. `ChannelPayloads` describes strict emit-side channel payloads; `ParsedChannelPayloads` describes the smaller subscriber shapes. `EntryPayloads` maps entry names to their payload types. The module also exports `Channel`, `EntryType`, `RouteReason`, `RoutedModelAnnouncementV1`, `ParsedRoutedModel`, `EmbeddedAnnouncement`, `SavingsEntry`, `CompactionOutcomeEntry`, `BrowserFeedPayload`, and the structural `EventBusLike` type.
+
+Publish a routed-model announcement without copying or runtime validation:
+
+```ts
+emit(pi.events, CHANNELS.routedModel, announcement);
+```
+
+Subscribe through the parser; malformed messages are dropped, the returned function unsubscribes, and unknown fields do not escape the parsed shape:
+
+```ts
+const unsubscribe = subscribe(pi.events, CHANNELS.routedModel, (routed) => {
+	showRoutedModel(routed.provider, routed.modelId, routed.reason);
+});
+```
+
+The parsers require a non-array object. Routed-model messages must have `version: 1`, non-empty sanitized `provider` and `modelId`, and one of `user`, `continuation`, `retry`, or `direct`; a sanitized empty `thinkingLevel` is omitted. Embed messages require a boolean `embedded` and ignore every other field, including `version`.
+
+The retired names `pi-topping-statusline:compaction-progress-embedded`, `pi-topping-compact:compaction-progress`, and `pi-prompt-cache/savings` are intentionally absent. They are not aliases and must not be reintroduced.
 
 ## Releases
 
@@ -77,7 +111,7 @@ Tested against pi 1.3.0; `peerDependencies` are `*`.
 
 - No module-level mutable state, and export tables are deep-frozen. Two copies of the package in one pi process must be harmless, and mutable module state is the only way that breaks.
 - No `instanceof` across a package boundary. A class from a second copy is a different class, so the check would silently fail.
-- `./contracts` is additive-only forever: names are immutable, payloads append-only, parsers ignore unknown fields. A rename there would break every topping at once.
+- `./contracts` is additive-only forever: names are immutable, payloads append-only, parsers ignore unknown fields. An incompatible change to an unversioned payload takes a new name. A rename there would break every topping at once.
 - Tabs in source, matching `.editorconfig` and `biome.json`, so a module moved out of a topping keeps producing the same diff.
 - Relative imports inside `src/` carry the `.js` suffix, which jiti maps onto the `.ts` file and which does not raise TS5097 in consumers that lack `allowImportingTsExtensions`.
 - Zero runtime dependencies. The pi packages are `peerDependencies` at `*`, so the host's copy is the only copy.
