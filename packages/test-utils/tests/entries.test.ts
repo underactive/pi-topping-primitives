@@ -1,0 +1,45 @@
+// Source-condition test. No build required. The resolve hook in tools/ts-resolve.ts is
+// active and no `compiled` condition is set, so the `default` condition must hand back the
+// TypeScript source. This is the shape pi's jiti loader imports.
+import assert from "node:assert/strict";
+import { realpathSync } from "node:fs";
+import { join } from "node:path";
+import { test } from "node:test";
+import { fileURLToPath } from "node:url";
+
+const PACKAGE = "@underactive/pi-topping-test-utils";
+
+/** Every subpath the package exports, in `exports` order. */
+const SUBPATHS = [
+	"./theme",
+	"./keys",
+	"./ansi",
+	"./fake-pi",
+	"./fake-ctx",
+	"./fake-tui",
+	"./sandbox",
+	"./fixtures/messages",
+	"./fixtures/models",
+	"./git",
+	"./wait",
+	"./ship-manifest",
+] as const;
+
+// Node's resolver realpaths the workspace symlink out of node_modules, which is also why
+// type stripping works here. Compare against the real directory, not the symlinked one.
+const packageRoot = realpathSync(fileURLToPath(new URL("..", import.meta.url)));
+
+for (const subpath of SUBPATHS) {
+	test(`${subpath} resolves to its TypeScript source`, async () => {
+		const specifier = `${PACKAGE}/${subpath.slice(2)}`;
+
+		assert.equal(
+			realpathSync(fileURLToPath(import.meta.resolve(specifier))),
+			join(packageRoot, "src", ...subpath.slice(2).split("/"), "index.ts"),
+		);
+
+		const mod: unknown = await import(specifier);
+		assert.equal(typeof mod, "object");
+		assert.notEqual(mod, null);
+	});
+}

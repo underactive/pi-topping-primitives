@@ -1,0 +1,111 @@
+{
+	"name": "@underactive/pi-topping-primitives",
+	"version": "0.1.0",
+	"description": "Shared runtime primitives for pi-topping extensions. A library, not a Pi extension.",
+	"keywords": [
+		"pi-topping",
+		"library"
+	],
+	"author": "Eric Sison",
+	"license": "MIT",
+	"type": "module",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/underactive/pi-topping-primitives.git",
+		"directory": "packages/primitives"
+	},
+	"bugs": {
+		"url": "https://github.com/underactive/pi-topping-primitives/issues"
+	},
+	"homepage": "https://github.com/underactive/pi-topping-primitives/tree/main/packages/primitives#readme",
+	"files": [
+		"src/**/*.ts",
+		"!src/**/*.test.ts",
+		"dist/**",
+		"README.md",
+		"LICENSE",
+		"CHANGELOG.md",
+		"THIRD_PARTY_NOTICES.md"
+	],
+	"exports": {
+		"./contracts": {
+			"types": "./dist/contracts/index.d.ts",
+			"compiled": "./dist/contracts/index.js",
+			"default": "./src/contracts/index.ts"
+		},
+		"./settings": {
+			"types": "./dist/settings/index.d.ts",
+			"compiled": "./dist/settings/index.js",
+			"default": "./src/settings/index.ts"
+		},
+		"./activity": {
+			"types": "./dist/activity/index.d.ts",
+			"compiled": "./dist/activity/index.js",
+			"default": "./src/activity/index.ts"
+		},
+		"./activity-tui": {
+			"types": "./dist/activity-tui/index.d.ts",
+			"compiled": "./dist/activity-tui/index.js",
+			"default": "./src/activity-tui/index.ts"
+		},
+		"./menu": {
+			"types": "./dist/menu/index.d.ts",
+			"compiled": "./dist/menu/index.js",
+			"default": "./src/menu/index.ts"
+		},
+		"./models": {
+			"types": "./dist/models/index.d.ts",
+			"compiled": "./dist/models/index.js",
+			"default": "./src/models/index.ts"
+		},
+		"./color": {
+			"types": "./dist/color/index.d.ts",
+			"compiled": "./dist/color/index.js",
+			"default": "./src/color/index.ts"
+		},
+		"./text": {
+			"types": "./dist/text/index.d.ts",
+			"compiled": "./dist/text/index.js",
+			"default": "./src/text/index.ts"
+		},
+		"./glyphs": {
+			"types": "./dist/glyphs/index.d.ts",
+			"compiled": "./dist/glyphs/index.js",
+			"default": "./src/glyphs/index.ts"
+		},
+		"./process": {
+			"types": "./dist/process/index.d.ts",
+			"compiled": "./dist/process/index.js",
+			"default": "./src/process/index.ts"
+		}
+	},
+	"peerDependencies": {
+		"@earendil-works/pi-ai": "*",
+		"@earendil-works/pi-coding-agent": "*",
+		"@earendil-works/pi-tui": "*"
+	},
+	"devDependencies": {
+		"@earendil-works/pi-ai": "1.3.0",
+		"@earendil-works/pi-coding-agent": "1.3.0",
+		"@earendil-works/pi-tui": "1.3.0",
+		"@types/node": "^24.0.0",
+		"typescript": "^5.9.3"
+	},
+	"engines": {
+		"node": ">=22.19.0"
+	},
+	"publishConfig": {
+		"access": "public"
+	},
+	"scripts": {
+		"build": "node --input-type=module -e \"import { rmSync } from 'node:fs'; rmSync('dist', { recursive: true, force: true })\" && tsc -p tsconfig.build.json",
+		"build:watch": "tsc -p tsconfig.build.json --watch",
+		"typecheck": "tsc -p tsconfig.json",
+		"typecheck:exports": "tsc -p tests/exports/tsconfig.json",
+		"test:src": "node --import ../../tools/ts-resolve.ts --test tests/*.test.ts",
+		"test:exports": "node -C compiled --test tests/exports/*.test.ts",
+		"test": "npm run test:src && npm run build && npm run typecheck:exports && npm run test:exports",
+		"prepack": "npm run build",
+		"prepublishOnly": "npm test && node ../../scripts/check-release.ts ."
+	}
+}

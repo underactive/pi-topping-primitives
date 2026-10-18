@@ -1,0 +1,33 @@
+{
+	"name": "pi-topping-primitives-workspace",
+	"private": true,
+	"type": "module",
+	"description": "Workspace root for the pi-topping shared libraries.",
+	"license": "MIT",
+	"author": "Eric Sison",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/underactive/pi-topping-primitives.git"
+	},
+	"workspaces": [
+		"packages/primitives",
+		"packages/test-utils"
+	],
+	"engines": {
+		"node": ">=22.19.0"
+	},
+	"scripts": {
+		"lint": "biome check",
+		"typecheck": "tsc -p tsconfig.json && npm run typecheck --workspaces",
+		"test:repo": "node --import ./tools/ts-resolve.ts --test tests/*.test.ts",
+		"test": "npm run test:repo && npm test --workspaces",
+		"build": "npm run build --workspaces",
+		"check:pack": "node scripts/check-pack.ts",
+		"check": "npm run lint && npm run typecheck && npm test && npm run check:pack"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "2.2.0",
+		"@types/node": "^24.0.0",
+		"typescript": "^5.9.3"
+	}
+}

@@ -1,0 +1,122 @@
+{
+	"name": "@underactive/pi-topping-test-utils",
+	"version": "0.1.0",
+	"description": "Test doubles and fixtures for pi-topping extensions. A devDependency only; a library, not a Pi extension.",
+	"keywords": [
+		"pi-topping",
+		"testing",
+		"library"
+	],
+	"author": "Eric Sison",
+	"license": "MIT",
+	"type": "module",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/underactive/pi-topping-primitives.git",
+		"directory": "packages/test-utils"
+	},
+	"bugs": {
+		"url": "https://github.com/underactive/pi-topping-primitives/issues"
+	},
+	"homepage": "https://github.com/underactive/pi-topping-primitives/tree/main/packages/test-utils#readme",
+	"files": [
+		"src/**/*.ts",
+		"!src/**/*.test.ts",
+		"dist/**",
+		"README.md",
+		"LICENSE",
+		"CHANGELOG.md",
+		"THIRD_PARTY_NOTICES.md"
+	],
+	"exports": {
+		"./theme": {
+			"types": "./dist/theme/index.d.ts",
+			"compiled": "./dist/theme/index.js",
+			"default": "./src/theme/index.ts"
+		},
+		"./keys": {
+			"types": "./dist/keys/index.d.ts",
+			"compiled": "./dist/keys/index.js",
+			"default": "./src/keys/index.ts"
+		},
+		"./ansi": {
+			"types": "./dist/ansi/index.d.ts",
+			"compiled": "./dist/ansi/index.js",
+			"default": "./src/ansi/index.ts"
+		},
+		"./fake-pi": {
+			"types": "./dist/fake-pi/index.d.ts",
+			"compiled": "./dist/fake-pi/index.js",
+			"default": "./src/fake-pi/index.ts"
+		},
+		"./fake-ctx": {
+			"types": "./dist/fake-ctx/index.d.ts",
+			"compiled": "./dist/fake-ctx/index.js",
+			"default": "./src/fake-ctx/index.ts"
+		},
+		"./fake-tui": {
+			"types": "./dist/fake-tui/index.d.ts",
+			"compiled": "./dist/fake-tui/index.js",
+			"default": "./src/fake-tui/index.ts"
+		},
+		"./sandbox": {
+			"types": "./dist/sandbox/index.d.ts",
+			"compiled": "./dist/sandbox/index.js",
+			"default": "./src/sandbox/index.ts"
+		},
+		"./fixtures/messages": {
+			"types": "./dist/fixtures/messages/index.d.ts",
+			"compiled": "./dist/fixtures/messages/index.js",
+			"default": "./src/fixtures/messages/index.ts"
+		},
+		"./fixtures/models": {
+			"types": "./dist/fixtures/models/index.d.ts",
+			"compiled": "./dist/fixtures/models/index.js",
+			"default": "./src/fixtures/models/index.ts"
+		},
+		"./git": {
+			"types": "./dist/git/index.d.ts",
+			"compiled": "./dist/git/index.js",
+			"default": "./src/git/index.ts"
+		},
+		"./wait": {
+			"types": "./dist/wait/index.d.ts",
+			"compiled": "./dist/wait/index.js",
+			"default": "./src/wait/index.ts"
+		},
+		"./ship-manifest": {
+			"types": "./dist/ship-manifest/index.d.ts",
+			"compiled": "./dist/ship-manifest/index.js",
+			"default": "./src/ship-manifest/index.ts"
+		}
+	},
+	"peerDependencies": {
+		"@earendil-works/pi-ai": "*",
+		"@earendil-works/pi-coding-agent": "*",
+		"@earendil-works/pi-tui": "*"
+	},
+	"devDependencies": {
+		"@earendil-works/pi-ai": "1.3.0",
+		"@earendil-works/pi-coding-agent": "1.3.0",
+		"@earendil-works/pi-tui": "1.3.0",
+		"@types/node": "^24.0.0",
+		"typescript": "^5.9.3"
+	},
+	"engines": {
+		"node": ">=22.19.0"
+	},
+	"publishConfig": {
+		"access": "public"
+	},
+	"scripts": {
+		"build": "node --input-type=module -e \"import { rmSync } from 'node:fs'; rmSync('dist', { recursive: true, force: true })\" && tsc -p tsconfig.build.json",
+		"build:watch": "tsc -p tsconfig.build.json --watch",
+		"typecheck": "tsc -p tsconfig.json",
+		"typecheck:exports": "tsc -p tests/exports/tsconfig.json",
+		"test:src": "node --import ../../tools/ts-resolve.ts --test tests/*.test.ts",
+		"test:exports": "node -C compiled --test tests/exports/*.test.ts",
+		"test": "npm run test:src && npm run build && npm run typecheck:exports && npm run test:exports",
+		"prepack": "npm run build",
+		"prepublishOnly": "npm test && node ../../scripts/check-release.ts ."
+	}
+}
