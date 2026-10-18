@@ -8,4 +8,4 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
-- Package scaffold: subpath exports whose default target is the TypeScript source and whose compiled target is the dist output. Every subpath is an empty stub until its phase lands. Tested against Pi 1.3.0.
+- Package scaffold: subpath exports whose default target is the TypeScript source and whose compiled target is the dist output. Every subpath is an empty stub until its phase lands.

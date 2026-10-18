@@ -30,18 +30,26 @@ Provisional: names may be renamed before the first publish. No module is ported 
 | Module | Seed source | Status |
 | --- | --- | --- |
 | `./theme` | splash `test/helpers/theme`; bash-gate and routesense `fakeTheme` | not ported yet; lands in the phase that first needs it |
-| `./keys` | splash `test/helpers/keys` | not ported yet; lands in the phase that first needs it |
+| `./keys` | splash `test/helpers/keys`; the bash-gate and routesense `KEY` tables | not ported yet; lands in the phase that first needs it |
 | `./ansi` | `stripAnsi` and SGR assertions from bash-gate and routesense helpers | not ported yet; lands in the phase that first needs it |
 | `./fake-pi` | splash `fake-api`; pi-topping `tests/lifecycle.test.ts` `MockExtension` | not ported yet; lands in the phase that first needs it |
 | `./fake-ctx` | splash `test/helpers/fake-ctx` | not ported yet; lands in the phase that first needs it |
 | `./fake-tui` | splash `test/helpers/fake-tui`, width helper | not ported yet; lands in the phase that first needs it |
-| `./sandbox` | `withAgentDir` from bash-gate and routesense helpers | not ported yet; lands in the phase that first needs it |
+| `./sandbox` | `withAgentDir` from bash-gate and routesense helpers; splash `test/helpers/env` | not ported yet; lands in the phase that first needs it |
 | `./fixtures/messages` | pi-topping `tests/lifecycle.test.ts`, routesense | not ported yet; lands in the phase that first needs it |
 | `./fixtures/models` | bash-gate and routesense model fixtures | not ported yet; lands in the phase that first needs it |
 | `./git` | splash `test/helpers/git` | not ported yet; lands in the phase that first needs it |
 | `./wait` | splash `test/helpers/wait` and `deferred` | not ported yet; lands in the phase that first needs it |
 | `./ship-manifest` | sensei `test/sensei-test-utils/ship-manifest.mts` | not ported yet; lands in the phase that first needs it |
 
-## Tests run with `-C compiled`
+Handoff section 4.8 seeds `env` from splash's helpers, but there is no `./env` subpath here and none should be added: splash's `env` helper redirects the agent dir into temp directories and restores it, which is exactly what `./sandbox` promises — "agent-dir sandbox and env isolation" — so the sandbox row above carries it as a seed. Twelve subpaths is the whole list.
 
-Exactly like the primitives package, a test file imports this package under `node -C compiled --test`. The reason is the same and has nothing to do with jiti: `compiled` is a Node resolution condition, so a runner that does not pass it falls back to the `default` target, which is TypeScript source under `node_modules`, and Node refuses that with `ERR_UNSUPPORTED_NODE_MODULES_TYPE_STRIPPING`. jiti is not in the picture on the test side.
+## Tests
+
+Two globs, both single-level, so where a test file lives decides whether it runs at all.
+
+- `tests/*.test.ts` runs under `test:src`, with the resolve hook: `node --import ../../tools/ts-resolve.ts --test tests/*.test.ts`. The glob is not recursive, so a file at `tests/fake-pi/foo.test.ts` would be typechecked, because the package `tsconfig.json` includes `tests/**/*.ts`, and never executed. New source tests go directly in `tests/`.
+- `tests/exports/entries.test.ts` runs under `test:exports` with `-C compiled`, imports every subpath statically, and must be extended by hand when a subpath is added or removed: the static import, the `SUBPATHS` list and the `NAMESPACES` record. The test asserts that list equals `Object.keys(exports)` exactly.
+- `test:exports` and `typecheck:exports` read `dist/` and do not build it. The package `test` script builds first, so a standalone `npm run test:exports` certifies whatever is already in `dist/`; run `npm run build` before it.
+
+`-C compiled` is load-bearing here for the same reason it is in the primitives package, and it has nothing to do with jiti: `compiled` is a Node resolution condition, so a runner that does not pass it falls back to the `default` target, which is TypeScript source under `node_modules`, and Node refuses that with `ERR_UNSUPPORTED_NODE_MODULES_TYPE_STRIPPING`. jiti is not in the picture on the test side.

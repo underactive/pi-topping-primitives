@@ -15,6 +15,8 @@ npm install -D @underactive/pi-topping-test-utils@^0.N.0
 
 `npm install` may reformat `package.json` (indent, key order); restore the formatting so the diff shows the dependency and nothing else.
 
+That range only resolves once 0.1.0 is on the registry: hand a consumer `^0.1.0` before the first publish and its `npm install` or `npm ci` fails with a 404 for the package. Until the package is published, the `--no-save` link and the tarball below are the pre-publish path.
+
 After pulling a change that adds or bumps a dependency, run `npm install` in every symlinked checkout before starting pi. Without it the checkout has no copy to resolve and the extension fails on its first import.
 
 Never commit a `file:` or `link:` spec. Consumer CI runs on a machine where that path does not exist, and `pi install npm:<topping>` installs the published tarball, whose spec points at nothing.
@@ -22,15 +24,24 @@ Never commit a `file:` or `link:` spec. Consumer CI runs on a machine where that
 ## 2. Linked: iterating on unpublished changes
 
 ```sh
+# in the consumer checkout
 npm install --no-save ../pi-topping-primitives/packages/primitives
-npm run build:watch   # in the primitives checkout
 ```
 
-`--no-save` puts a symlink in `node_modules` and leaves `package.json` and `package-lock.json` untouched, so nothing can leak into a commit. `build:watch` exists because the `compiled` condition points at `dist/`; pi itself needs no build, since jiti reads the TypeScript source through `default`.
+`--no-save` puts a symlink in `node_modules` and leaves `package.json` and `package-lock.json` untouched, so nothing can leak into a commit. A watch build exists because the `compiled` condition points at `dist/`; pi itself needs no build, since jiti reads the TypeScript source through `default`.
+
+So leave the compiler watching the primitives build, either from the repository root or from the package:
+
+```sh
+npm run build:watch -w @underactive/pi-topping-primitives   # from the repository root
+cd packages/primitives && npm run build:watch               # equivalently, from the package
+```
+
+The script exists only in the package manifests, not at the repository root, where a bare `npm run build:watch` fails with `Missing script`; `-w` from the root is what reaches it.
 
 Two caveats:
 
-- The linked `dist` resolves `@earendil-works/*` from the primitives checkout, so a consumer test can end up with a second copy of pi-tui next to the one the consumer installed. `--preserve-symlinks` is worth trying when identity assertions fail.
+- The linked `dist` resolves `@earendil-works/*` from the primitives checkout, so a consumer test can end up with a second copy of pi-tui next to the one the consumer installed. A second copy is a different class, so identity assertions and `instanceof` across that boundary fail. `--preserve-symlinks` is not a fix on its own: preserved symlinks keep the module URL under `node_modules`, which is exactly what re-triggers `ERR_UNSUPPORTED_NODE_MODULES_TYPE_STRIPPING` when the target is TypeScript source. The flag is only safe together with `-C compiled`, where the target is JavaScript and needs no type stripping.
 - The link survives only until the next `npm install` or `npm ci`, which drops it. Re-run the `--no-save` install after either.
 
 ## 3. Tarball: the pre-publish gate
@@ -41,7 +52,7 @@ npm pack -w <pkg> --pack-destination "$TMPDIR/pt-prim"
 npm install --no-save <tgz>
 ```
 
-Pack from the repository root so the workspace layout and `prepack` behave as they do for a real publish; install the tarball in every consumer migrated in that phase. Then run typecheck, tests, and the live smoke test (`pi -ne -e ./index.ts --model <id>`, the command handoff section 5 specifies). Publish only after all of them pass. This is the only mode that exercises the packed `files` list and `prepack` together.
+Pack from the repository root so the workspace layout and `prepack` behave as they do for a real publish; install the tarball in every consumer migrated in that phase. Then run typecheck, tests, and the live smoke test (`pi -ne -e ./index.ts --model <id>`, the command handoff section 5 specifies). Publish only after all of them pass. This is the only mode that installs a packed artifact into a consumer. It is not the only one that exercises `prepack` and the `files` list: `npm run check:pack` runs `npm pack --dry-run --json --workspaces`, which runs every `prepack` and asserts the file list without installing anything, and it is part of `npm run check` and of CI.
 
 ## Runner notes
 

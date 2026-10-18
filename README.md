@@ -32,16 +32,42 @@ Two libraries, not extensions. TypeScript source is the runtime entry and compil
 
 Each rule has a reason attached in the [primitives README](packages/primitives/README.md): two copies in one pi process must be harmless, and a contracts rename would break every topping at once.
 
+## Guards
+
+`npm run check` is `lint`, `typecheck`, `test`, `check:pack`, and it runs three of the four guards below. The fourth is wired to publishing.
+
+| Guard | Run by | Enforces |
+| --- | --- | --- |
+| `tools/hygiene.ts` | `tests/hygiene.test.ts`, under `test:repo` | The four source rules below |
+| `tests/package-shape.test.ts` | `test:repo` | Manifest shape, export key order, the lockstep version and pins, the README's first content line |
+| `scripts/check-pack.ts` | `check:pack`, and so `check` and CI | The tarball contents and the no-committed-`dist/` rule |
+| `scripts/check-release.ts` | each package's `prepublishOnly` | The empty-subpath publish guard |
+
+The hygiene scanner lexes each file first, blanking comments, string bodies and regex bodies into a same-length code view, so a rule hit always maps back to the source line that caused it. Its four rules:
+
+- `module-state`: a top-level `let` or `var`; a top-level `const` bound to `new Map(`, `new Set(`, `new WeakMap(` or `new WeakSet(`; and a top-level `const` bound to an object or array literal that the file later assigns into or mutates. Two copies of a package in one pi process share nothing but what the module exports, and mutable module state is the only way that becomes observable.
+- `instanceof`: only against a fixed allow-list of built-ins, because a class from a second copy of the package is a different class and the check would silently fail.
+- `console`: banned. Console output corrupts the TUI pi is drawing.
+- `pi-runtime-import`: in `contracts/` and `activity/` only, any non-type import or dynamic import from `@earendil-works/*`. `activity-tui` is exempt because it renders against pi-tui by design.
+
+Each rule has an escape hatch: `// hygiene-allow: <rule> <reason>` on the same line or the line above. The reason is required, and a directive without one is ignored so the rule still fires. It is reserved for deliberate, documented cases.
+
+The strict compiler flags are enforced everywhere, not per package: `strict`, `erasableSyntaxOnly`, `verbatimModuleSyntax` and `noUncheckedIndexedAccess`, all in `tsconfig.base.json`.
+
 ## Releases
 
-The two packages always carry the same version. A release is four steps:
+The two packages always carry the same version: a minor for a phase that changes consumer-visible surface, a patch for a fix.
+
+Publishing is not tied to a phase. Publish when at least one consumer has to take a package from the registry, either because a topping is installed with `pi install npm:<topping>` or because a consumer's CI installs it. Until then the `--no-save` link or a packed tarball is the development path, and [docs/consumers.md](docs/consumers.md) documents both.
+
+At the moment you publish, every subpath still listed in `exports` must export something. Either fill it in that change, or remove it from `exports` first and add it back in the phase that owns it. Removal is allowed by the package-shape guard, which checks that the export keys are a subsequence of the planned list rather than equal to it, deliberately; re-adding is additive, so no consumer breaks. `contracts` is additive-only forever, so dropping and re-adding a subpath must never remove or rename a name that already shipped.
+
+What enforces the export condition is `scripts/check-release.ts`, from each package's `prepublishOnly`: it imports every subpath's `compiled` target and fails on any that exports zero keys, which is why `npm publish --workspaces` aborts on the Phase 0 stubs instead of shipping them as dead weight. A release is four steps:
 
 1. `npm version <minor|patch> --workspaces --no-git-tag-version`
 2. Move each package's `## [Unreleased]` section under the new version heading.
 3. Tag the commit `v<x.y.z>`.
 4. `npm publish --workspaces`
-
-Publishing runs each package's `prepublishOnly`, which runs its tests and the empty-subpath guard, so an unfilled subpath blocks the release instead of shipping as dead weight. On 0.x, each phase takes a minor and fixes take a patch. `contracts` never removes a name, so no release can need a major for it.
 
 ## Consumers
 
