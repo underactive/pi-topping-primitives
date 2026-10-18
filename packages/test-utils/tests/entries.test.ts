@@ -1,6 +1,10 @@
 // Source-condition test. No build required. The resolve hook in tools/ts-resolve.ts is
 // active and no `compiled` condition is set, so the `default` condition must hand back the
 // TypeScript source. This is the shape pi's jiti loader imports.
+//
+// Every subpath specifier here is a runtime string on purpose. A static import would make
+// tsc resolve `types`, which points at an unbuilt `dist/`, and the pre-build typecheck leg
+// in CI would fail with TS2307 before anything has been compiled.
 import assert from "node:assert/strict";
 import { realpathSync } from "node:fs";
 import { join } from "node:path";

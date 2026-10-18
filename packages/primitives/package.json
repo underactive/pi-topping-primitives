@@ -106,6 +106,6 @@
 		"test:exports": "node -C compiled --test tests/exports/*.test.ts",
 		"test": "npm run test:src && npm run build && npm run typecheck:exports && npm run test:exports",
 		"prepack": "npm run build",
-		"prepublishOnly": "npm test && node ../../scripts/check-release.ts ."
+		"prepublishOnly": "npm test && npm --prefix ../.. run test:repo && node ../../scripts/check-release.ts ."
 	}
 }

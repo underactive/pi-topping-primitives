@@ -26,8 +26,11 @@ const REQUIRED_METADATA = [
 	"THIRD_PARTY_NOTICES.md",
 ] as const;
 
-/** Path segments that must never reach a tarball. */
-const FORBIDDEN_SEGMENTS = new Set(["tests", "scripts", "node_modules"]);
+/** Path segments that must never reach a tarball, at any depth. */
+const FORBIDDEN_SEGMENTS = new Set(["tests", "node_modules"]);
+
+/** A leading segment only: the repo's own tooling, which never sits inside a package. */
+const FORBIDDEN_LEADING = "scripts";
 
 /** Basenames that must never reach a tarball. Tested against the basename, hence the anchors. */
 const FORBIDDEN_BASENAME = /(?:^tsconfig.*\.json$|\.test\.ts$|\.tsbuildinfo$)/;
@@ -154,6 +157,10 @@ async function expectedFiles(pkg: WorkspacePackage): Promise<string[]> {
 	const expected = new Set<string>(REQUIRED_METADATA);
 	for (const subpath of pkg.exportSubpaths) {
 		const sub = subpath.slice(2);
+		// Derived from the export *key*, not from the manifest's targets. The `dist/<sub>/index.*`
+		// pattern is pinned by packages/*/tests/package-shape.test.ts, which asserts each entry's
+		// exact `types`/`compiled`/`default` strings. Keep the two in step: a retargeted export
+		// passes here and only fails there.
 		expected.add(`dist/${sub}/index.js`);
 		expected.add(`dist/${sub}/index.d.ts`);
 		expected.add(`src/${sub}/index.ts`);
@@ -171,6 +178,9 @@ async function expectedFiles(pkg: WorkspacePackage): Promise<string[]> {
 
 function forbiddenReason(path: string): string | undefined {
 	const segments = path.split("/");
+	if (segments[0] === FORBIDDEN_LEADING) {
+		return `leading \`${FORBIDDEN_LEADING}/\` path segment`;
+	}
 	for (const segment of segments) {
 		if (FORBIDDEN_SEGMENTS.has(segment)) return `\`${segment}/\` path segment`;
 	}
@@ -250,8 +260,14 @@ async function main(): Promise<void> {
 		(total, entry) => total + entry.files.length,
 		0,
 	);
+	// The npm version is printed because `npm pack --json` shape is npm's to change, and a
+	// green run on one npm minor is not evidence about another.
+	const npmVersion = execFileSync("npm", ["--version"], {
+		cwd: root,
+		encoding: "utf8",
+	}).trim();
 	console.log(
-		`check-pack: ${workspacePackages.length} packages OK, ${fileCount} files packed, every expected file present, nothing forbidden, no dist/ committed.`,
+		`check-pack: ${workspacePackages.length} packages OK, ${fileCount} files packed, every expected file present, nothing forbidden, no dist/ committed (npm ${npmVersion}).`,
 	);
 }
 

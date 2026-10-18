@@ -63,7 +63,19 @@ const ALLOWED_INSTANCEOF: ReadonlySet<string> = new Set([
 	"WeakSet",
 	"Array",
 	"ArrayBuffer",
+	"SharedArrayBuffer",
+	"DataView",
+	"Int8Array",
 	"Uint8Array",
+	"Uint8ClampedArray",
+	"Int16Array",
+	"Uint16Array",
+	"Int32Array",
+	"Uint32Array",
+	"Float32Array",
+	"Float64Array",
+	"BigInt64Array",
+	"BigUint64Array",
 	"Promise",
 	"URL",
 	"AbortSignal",
@@ -581,13 +593,35 @@ export function scanSource(
 			if (!isModuleScope(at)) continue;
 			push(at, "module-state");
 		}
+
+		// `const cache = {}` / `= []` is the commonest form of module state, and it is a
+		// literal, so the collection pattern above does not see it. Flag it only when the
+		// same file later assigns into it or calls a mutating method on it: a constant
+		// table nobody touches is not state, and `Object.freeze({…})` never matches here.
+		const LITERAL_CONST =
+			/\bconst\s+([A-Za-z_$][\w$]*)\s*(?::[^=;\n]*)?=\s*(?:\{|\[)/g;
+		for (const match of code.matchAll(LITERAL_CONST)) {
+			const at = match.index ?? 0;
+			if (!isModuleScope(at)) continue;
+			const name = (match[1] ?? "").replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+			const mutated = new RegExp(
+				`\\b${name}\\s*(?:\\.[A-Za-z_$][\\w$]*\\s*=(?!=)|\\[[^\\]]*\\]\\s*=(?!=)|\\.(?:push|pop|shift|unshift|splice|sort|reverse|fill|copyWithin|set|add|delete)\\s*\\()`,
+			);
+			if (mutated.test(code)) push(at, "module-state");
+		}
 	}
 
 	if (enabled.has("instanceof")) {
-		for (const match of code.matchAll(/\binstanceof\s+([A-Za-z_$][\w$]*)/g)) {
-			const name = match[1] ?? "";
+		// Match the operator itself, then judge whatever follows, so a form that is not a
+		// bare identifier cannot slip past by failing to match. `instanceof (Foo)` is the
+		// same check as `instanceof Foo`; `instanceof ns.Foo` and `instanceof list[i]` are
+		// both rejected, and the latter is the case a bare-identifier pattern would miss.
+		for (const match of code.matchAll(/\binstanceof\b/g)) {
+			const at = match.index ?? 0;
+			const rhs = code.slice(at + match[0].length).replace(/^\s*\(?\s*/, "");
+			const name = /^[A-Za-z_$][\w$]*/.exec(rhs)?.[0] ?? "";
 			if (ALLOWED_INSTANCEOF.has(name)) continue;
-			push(match.index ?? 0, "instanceof");
+			push(at, "instanceof");
 		}
 	}
 

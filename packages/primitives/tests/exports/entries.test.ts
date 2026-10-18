@@ -6,7 +6,7 @@
 //   - under `npm run typecheck:exports` they make tsc read every dist/*.d.ts through the
 //     `types` condition, so a declaration that disagrees with its neighbour fails.
 import assert from "node:assert/strict";
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { test } from "node:test";
 import { fileURLToPath, pathToFileURL } from "node:url";
@@ -58,7 +58,15 @@ const manifest = JSON.parse(
 	exports: Record<string, unknown>;
 };
 
-/** Throws unless `value` and everything reachable from it is frozen. Functions are skipped. */
+/**
+ * Throws unless `value` and everything reachable from it is frozen.
+ *
+ * Functions are skipped on purpose: a frozen function is not the idiom, and requiring
+ * it would reject every exported helper. Module-level state attached to a function is
+ * the hygiene scanner's `module-state` rule to catch, not this one.
+ * `Reflect.ownKeys` is used rather than `Object.entries` so a non-enumerable or
+ * symbol-keyed property cannot hide mutable state.
+ */
 function assertDeepFrozen(
 	value: unknown,
 	path: string,
@@ -71,8 +79,12 @@ function assertDeepFrozen(
 		Object.isFrozen(value),
 		`${path} is exported but not frozen: two copies of this package in one pi process must be harmless`,
 	);
-	for (const [key, child] of Object.entries(value)) {
-		assertDeepFrozen(child, `${path}.${key}`, seen);
+	for (const key of Reflect.ownKeys(value)) {
+		assertDeepFrozen(
+			(value as Record<PropertyKey, unknown>)[key],
+			`${path}.${String(key)}`,
+			seen,
+		);
 	}
 }
 
@@ -82,6 +94,40 @@ test("the static import list matches the exports map exactly", () => {
 		Object.keys(manifest.exports).sort(),
 		"update the static imports, SUBPATHS and NAMESPACES together with package.json exports",
 	);
+});
+
+/** Newest mtime of any `.ts` file under `dir`. */
+function newestSourceMtime(dir: string): number {
+	let newest = 0;
+	for (const entry of readdirSync(dir, { withFileTypes: true })) {
+		const path = join(dir, entry.name);
+		if (entry.isDirectory()) {
+			newest = Math.max(newest, newestSourceMtime(path));
+		} else if (entry.isFile() && entry.name.endsWith(".ts")) {
+			newest = Math.max(newest, statSync(path).mtimeMs);
+		}
+	}
+	return newest;
+}
+
+// This file reads `dist/`, and nothing in it builds. Without this guard a source change
+// that was never compiled makes every other assertion here certify stale output, which is
+// a silent pass rather than a failure. `npm test` builds first; a bare `npm run test:exports`
+// does not, and this is what catches that.
+test("dist is newer than every source file", () => {
+	const sourceMtime = newestSourceMtime(join(packageRoot, "src"));
+	for (const subpath of SUBPATHS) {
+		const distFile = join(
+			packageRoot,
+			"dist",
+			...subpath.slice(2).split("/"),
+			"index.js",
+		);
+		assert.ok(
+			statSync(distFile).mtimeMs >= sourceMtime,
+			`${subpath}: dist is older than src, so this run would certify stale output; run \`npm run build\` first`,
+		);
+	}
 });
 
 for (const subpath of SUBPATHS) {
@@ -106,6 +152,14 @@ for (const subpath of SUBPATHS) {
 		const second = (await import(
 			`${pathToFileURL(join(distDir, "index.js")).href}?copy=2`
 		)) as Record<string, unknown>;
+		// The query string is what forces a second module record. Without this assertion a
+		// runtime that collapsed both specifiers onto one instance would satisfy the key
+		// comparison and prove nothing, which is the whole failure mode this test exists for.
+		assert.notStrictEqual(
+			second,
+			namespace,
+			"?copy=2 must yield a distinct module instance, not the cached one",
+		);
 		assert.deepEqual(Object.keys(second).sort(), Object.keys(namespace).sort());
 	});
 

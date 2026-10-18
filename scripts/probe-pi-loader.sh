@@ -10,13 +10,22 @@
 # The compiled-only rows are `same:false` in BOTH loader branches whenever @earendil-works is
 # resolvable on disk next to the extension: `tryNative:false` governs only the module jiti was
 # asked for, not that module's own bare specifiers, so the dependency's pi-tui import still resolves
-# through the extension's node_modules rather than the host's alias. With no @earendil-works on disk
-# all four rows report `same:true`, because both sides then resolve to the one copy the host loaded.
+# through the extension's node_modules rather than the host's alias.
+#
+# PEERS=absent skips the symlink, so the extension directory resolves no pi packages at all. That is
+# the `pi install npm:` shape, and it is the run that produced all four rows `same:true`. Without
+# that control the claim would rest on an observation no script in this repo could reproduce.
 PT=${PT:-$HOME/Development/projects/pi/pi-topping}
 ST=${ST:-$HOME/Development/projects/pi/pi-topping-statusline}
+PEERS=${PEERS:-present}
 T=$(mktemp -d); P="$T/ext/node_modules/@underactive/fake-prim"
 mkdir -p "$P/src" "$P/dist" "$T/agent" "$T/cwd"
-ln -s "$ST/node_modules/@earendil-works" "$T/ext/node_modules/@earendil-works"
+if [ "$PEERS" = absent ]; then
+	echo "peers: absent (no @earendil-works on the extension's resolution path)"
+else
+	ln -s "$ST/node_modules/@earendil-works" "$T/ext/node_modules/@earendil-works"
+	echo "peers: present (a second physical @earendil-works, from $ST)"
+fi
 printf 'import * as tui from "@earendil-works/pi-tui";\nexport const form = "ts-source"; export const depTui = tui;\n' > "$P/src/inner.ts"
 printf 'export { form, depTui } from "./inner.js";\n' > "$P/src/index.ts"
 printf 'import * as tui from "@earendil-works/pi-tui";\nexport const form = "compiled-js"; export const depTui = tui;\n' > "$P/dist/index.js"
@@ -63,7 +72,9 @@ echo "pi-coding-agent version: $pca_version"
 echo "node: $(node --version)"
 
 # Which of the two loader entry points this release actually has. A missing entry is a property of
-# the pi release, not a failure of the recipe, so its rows are skipped with a note.
+# the pi release, not a failure of the recipe, so its rows are skipped with a note. Note that these
+# are both SDK entries: `bin.pi` is dist/bundle/cli.js, which this probe never loads. The loader
+# lives in a chunk both entries reach, so the branch selection is the same one the CLI takes.
 bundled_entry="$PCA/dist/bundle/index.js"
 unbundled_entry="$PCA/dist/index.js"
 have_bundled=1
@@ -78,13 +89,13 @@ const r = await discoverAndLoadExtensions(['$T/ext/index.ts'], '$T/cwd', '$T/age
 console.log('$2 ->', JSON.stringify(globalThis.__fakePrim), r.errors.map((e) => e.error).join('; '));" )
 }
 printf '{ "name": "@underactive/fake-prim", "type": "module", "exports": { ".": { "compiled": "./dist/index.js", "default": "./src/index.ts" } } }\n' > "$P/package.json"
-# Expect: bundled (pi CLI), dual form -> {"form":"ts-source","same":true}
-[ "$have_bundled" = 1 ] && probe bundle/index.js "bundled (pi CLI), dual form"
-# Expect: unbundled (SDK), dual form -> {"form":"ts-source","same":true}
-[ "$have_unbundled" = 1 ] && probe index.js "unbundled (SDK), dual form"
+# Expect: bundled chunk, dual form -> {"form":"ts-source","same":true}
+[ "$have_bundled" = 1 ] && probe bundle/index.js "bundled chunk (bundle/index.js), dual form"
+# Expect: unbundled SDK, dual form -> {"form":"ts-source","same":true}
+[ "$have_unbundled" = 1 ] && probe index.js "unbundled SDK (dist/index.js), dual form"
 printf '{ "name": "@underactive/fake-prim", "type": "module", "exports": { ".": "./dist/index.js" } }\n' > "$P/package.json"
-# Expect: bundled, compiled only -> {"form":"compiled-js","same":false}
-[ "$have_bundled" = 1 ] && probe bundle/index.js "bundled, compiled only"
-# Expect: unbundled, compiled only -> {"form":"compiled-js","same":false}
-[ "$have_unbundled" = 1 ] && probe index.js "unbundled, compiled only"
+# Expect: bundled chunk, compiled only -> {"form":"compiled-js","same":false} with peers present
+[ "$have_bundled" = 1 ] && probe bundle/index.js "bundled chunk, compiled only"
+# Expect: unbundled SDK, compiled only -> {"form":"compiled-js","same":false} with peers present
+[ "$have_unbundled" = 1 ] && probe index.js "unbundled SDK, compiled only"
 rm -rf "$T"

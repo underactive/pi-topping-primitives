@@ -4,9 +4,14 @@
 // in what it deliberately leaves alone.
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { test } from "node:test";
+import { fileURLToPath } from "node:url";
 import type { Finding, HygieneRule } from "../tools/hygiene.js";
 import { scanSource, scanTree } from "../tools/hygiene.js";
+
+/** Repo root, resolved from this module so the tree scans do not depend on the cwd. */
+const REPO_ROOT = fileURLToPath(new URL("..", import.meta.url));
 
 /** A path outside `contracts/` and `activity/`, where pi imports are allowed. */
 const MENU = "packages/primitives/src/menu/index.ts";
@@ -69,6 +74,31 @@ test("module-state fires on a top-level collection literal", () => {
 		),
 		["module-state"],
 	);
+});
+
+test("module-state fires on a module-level object or array that the file mutates", () => {
+	assert.deepEqual(
+		scan("const cache = {};\ncache.hits = 0;\n").map((f) => f.rule),
+		["module-state"],
+	);
+	assert.deepEqual(
+		scan('const seen: string[] = [];\nseen.push("a");\n').map((f) => f.rule),
+		["module-state"],
+	);
+	assert.deepEqual(
+		scan("const table = {};\ntable[key] = 1;\n").map((f) => f.rule),
+		["module-state"],
+	);
+});
+
+test("module-state ignores a constant table that is never written", () => {
+	const text = [
+		"const DEFAULTS = { width: 8 };",
+		"const LEVELS = [1, 2, 3];",
+		'export const CHANNELS = Object.freeze({ routed: "x" });',
+		"",
+	].join("\n");
+	assert.deepEqual(scan(text), []);
 });
 
 test("module-state ignores a factory call whose type mentions Map", () => {
@@ -194,6 +224,23 @@ test("instanceof ignores the host built-ins", () => {
 		"",
 	].join("\n");
 	assert.deepEqual(scan(text), []);
+});
+
+test("instanceof judges a parenthesised or computed right-hand side", () => {
+	// The operator is matched first and the right-hand side judged after, so a form that
+	// is not a bare identifier cannot slip past by simply not matching a pattern.
+	assert.deepEqual(
+		scan("if (value instanceof (Error)) return;\n").map((f) => f.rule),
+		[],
+	);
+	assert.deepEqual(
+		scan("if (value instanceof (ToppingError)) return;\n").map((f) => f.rule),
+		["instanceof"],
+	);
+	assert.deepEqual(
+		scan("if (value instanceof classes[i]) return;\n").map((f) => f.rule),
+		["instanceof"],
+	);
 });
 
 test("instanceof ignores comments and strings that contain the operator", () => {
@@ -424,15 +471,15 @@ test("findings report a 1-based line and the trimmed source line", () => {
 
 test("scanTree reports nothing in the shipped source trees", () => {
 	const findings = [
-		...scanTree("packages/primitives/src"),
-		...scanTree("packages/test-utils/src"),
+		...scanTree(join(REPO_ROOT, "packages/primitives/src")),
+		...scanTree(join(REPO_ROOT, "packages/test-utils/src")),
 	];
 	assert.deepEqual(findings, [], describe(findings));
 });
 
 test("the tree scan is live: an injected violation in a real file is reported", () => {
 	const file = CONTRACTS;
-	const source = readFileSync(file, "utf8");
+	const source = readFileSync(join(REPO_ROOT, file), "utf8");
 	const injected = `${source}\nimport { visibleWidth } from "@earendil-works/pi-tui";\nlet twice = 0;\n`;
 	assert.deepEqual(
 		scanSource(file, injected).map((finding) => finding.rule),

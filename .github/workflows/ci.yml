@@ -29,6 +29,10 @@ jobs:
       # Steps 2-9 map one-to-one onto Phase 0 step 3 of HANDOFF_PRIMITIVES.md: typecheck, source
       # tests, build, exports tests under `-C compiled`, and `npm pack --dry-run` to prove `files`,
       # plus the repo-level lint and root tests that guard the shared tooling.
+      #
+      # They are enumerated rather than being one `npm run check` call because the phase requires
+      # each observable to fail under its own name. The cost is that this list must be kept in step
+      # with the root `check` script by hand: a guard added there does not reach CI by itself.
       - run: npm run lint
       - run: npm run typecheck
       - run: npm run test:repo
