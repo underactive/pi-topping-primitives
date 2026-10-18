@@ -146,7 +146,7 @@ sh scripts/probe-pi-loader.sh
 PEERS=absent sh scripts/probe-pi-loader.sh
 ```
 
-`verify-loader.sh` links the pi packages out of `$PT/node_modules/@earendil-works` and imports jiti, so `$PT` has to point at a checkout that has pi installed. jiti can be hoisted or nested, so the script looks for it in three places — the nested `@earendil-works/pi-coding-agent/node_modules/jiti`, then `$PT/node_modules/jiti`, then the release root — and prints the location it used.
+`verify-loader.sh` links the pi packages out of `$PT/node_modules/@earendil-works` and imports jiti, so `$PT` has to point at a checkout that has pi installed. jiti can be hoisted or nested, so the script looks for it in four places — the nested `@earendil-works/pi-coding-agent/node_modules/jiti`, then `$PT/node_modules/jiti`, then the managed release root, then `$(npm root -g)/jiti` — and prints the location it used.
 
 `probe-pi-loader.sh` resolves pi-coding-agent from `$PCA`, then the managed install under `$PI_ROOT`, then the global npm prefix, and prints the one it used. Run both after any pi or Node upgrade.
 
