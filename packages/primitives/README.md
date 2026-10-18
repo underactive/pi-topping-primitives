@@ -53,7 +53,7 @@ The same map is read three ways:
 | `node -C compiled` | `compiled` | `dist/*/index.js` |
 | the typechecker | `types` | `dist/*/index.d.ts` |
 
-jiti resolves with the ordinary `node`, `import` and `default` conditions, so it takes the TypeScript source and the host's aliases for `@earendil-works/*` apply to this package's own imports as well. Tests set an extra condition with `node -C compiled`, which is listed first and wins over `default`. Nothing in the package or the loader depends on a custom `jiti` condition; the split lives on the test side.
+jiti resolves with the ordinary `node`, `import` and `default` conditions, so it takes the TypeScript source and the host's aliases for `@earendil-works/*` apply to this package's own imports as well. Tests set an extra condition with `node -C compiled`, which is listed ahead of `default` and wins over it. (`types` precedes `compiled` in the manifest, but it is not a condition Node matches at runtime, so it never competes with it.) Nothing in the package or the loader depends on a custom `jiti` condition; the split lives on the test side.
 
 Consequences for consumers:
 
