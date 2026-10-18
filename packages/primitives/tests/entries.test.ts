@@ -14,18 +14,7 @@ import { fileURLToPath } from "node:url";
 const PACKAGE = "@underactive/pi-topping-primitives";
 
 /** Every subpath the package exports, in `exports` order. */
-const SUBPATHS = [
-	"./contracts",
-	"./settings",
-	"./activity",
-	"./activity-tui",
-	"./menu",
-	"./models",
-	"./color",
-	"./text",
-	"./glyphs",
-	"./process",
-] as const;
+const SUBPATHS = ["./contracts"] as const;
 
 // Node's resolver realpaths the workspace symlink out of node_modules, which is also why
 // type stripping works here. Compare against the real directory, not the symlinked one.

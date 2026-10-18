@@ -32,51 +32,6 @@
 			"types": "./dist/contracts/index.d.ts",
 			"compiled": "./dist/contracts/index.js",
 			"default": "./src/contracts/index.ts"
-		},
-		"./settings": {
-			"types": "./dist/settings/index.d.ts",
-			"compiled": "./dist/settings/index.js",
-			"default": "./src/settings/index.ts"
-		},
-		"./activity": {
-			"types": "./dist/activity/index.d.ts",
-			"compiled": "./dist/activity/index.js",
-			"default": "./src/activity/index.ts"
-		},
-		"./activity-tui": {
-			"types": "./dist/activity-tui/index.d.ts",
-			"compiled": "./dist/activity-tui/index.js",
-			"default": "./src/activity-tui/index.ts"
-		},
-		"./menu": {
-			"types": "./dist/menu/index.d.ts",
-			"compiled": "./dist/menu/index.js",
-			"default": "./src/menu/index.ts"
-		},
-		"./models": {
-			"types": "./dist/models/index.d.ts",
-			"compiled": "./dist/models/index.js",
-			"default": "./src/models/index.ts"
-		},
-		"./color": {
-			"types": "./dist/color/index.d.ts",
-			"compiled": "./dist/color/index.js",
-			"default": "./src/color/index.ts"
-		},
-		"./text": {
-			"types": "./dist/text/index.d.ts",
-			"compiled": "./dist/text/index.js",
-			"default": "./src/text/index.ts"
-		},
-		"./glyphs": {
-			"types": "./dist/glyphs/index.d.ts",
-			"compiled": "./dist/glyphs/index.js",
-			"default": "./src/glyphs/index.ts"
-		},
-		"./process": {
-			"types": "./dist/process/index.d.ts",
-			"compiled": "./dist/process/index.js",
-			"default": "./src/process/index.ts"
 		}
 	},
 	"peerDependencies": {

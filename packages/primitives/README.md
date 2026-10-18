@@ -2,7 +2,7 @@
 
 A library, not an extension.
 
-Shared runtime primitives for the pi-topping family: cross-extension contract constants and parsers, an atomic settings store, activity meter maths and renderers, the settings menu, the model picker, colour, text and glyph helpers, and subprocess helpers.
+Shared runtime contracts for the pi-topping family: cross-extension names, typed payloads, parsers, and event-bus helpers.
 
 ## Install
 
@@ -14,24 +14,27 @@ npm install @underactive/pi-topping-primitives
 
 That writes a `dependencies` entry. The code is loaded by pi at runtime, so it does not belong in `devDependencies`.
 
-## Subpaths
+## Exported subpaths
 
-| Subpath | Planned contents | Phase | Status |
-| --- | --- | --- | --- |
-| `./contracts` | `CHANNELS`, `ENTRY_TYPES`, `PI_VIRTUAL_MODEL_API`, `WORKING_STATUS_SLIDE_MS`, `parseRoutedModel`, `parseEmbeddedAnnouncement`, `emit`, `subscribe` | 1 | implemented for 0.1.0 |
-| `./settings` | `createSettingsStore`, `memorySettingsStore`, `cached`, `atomicWriteFile`, the sanitisers, `toppingSettingsPath` | 2 | planned |
-| `./activity` | `ActivityMeter`, `StreamingWordCounter`, `OutputTokenAccount`, `RateHoldFade`, `RunClock`, `easeFade`, `fadeShade`, `slideOutTail`, the elapsed formatters | 3 | planned |
-| `./activity-tui` | `dimAttribute`, `colorizeMeterCell`, `renderMeter`, `renderIdleMeter`, `thinkingLevelThemeColor`, `shimmerString`, `ansiToRgb`, `formatToolActivity` | 3 | planned |
-| `./menu` | `MenuItem` union (toggle, cycle, number, text, action, pick, reorder), `flattenSections`, `rebuildMenu`, `moveCursor`, `DEFAULT_MENU_KEYBINDINGS`, the chrome helpers, `snapshot` | 4 | planned |
-| `./models` | `ModelRef`, `THINKING_LEVELS`, `parseRef`, `getModelCatalogue`, `validateSavedChoice`, `thinkingOptionsForModel`, `TwoPaneModelThinking` | 5 | planned |
-| `./color` | `Rgb`, `parseHex`, `mixRgb`, `rgbTo256`, `rgbToFgAnsi`, `ansiToRgb`, `hslToRgb`, the palette constants, `renderCometBar`, the fade helpers | 6 | planned |
-| `./text` | `padRight`, `padCenter`, `fitCell`, `truncateVisible`, `pickFitting`, `stripControlChars`, `stableStringify`, the cost and percent formatters | 6 | planned |
-| `./glyphs` | `BoxGlyphs`, `BOX_STYLES`, `SPINNER_FRAMES`, `SPINNER_FRAME_MS`, the braille and quadrant spinner sets | 6 | planned |
-| `./process` | `resolvePiInvocation`, `escalateKill`, `spawnCollect`, `mapWithConcurrencyLimit`, `parsePiVersion`, `versionAtLeast`, `loadAgentsFromDir`, `findNearestProjectAgentsDir` | 7 | planned |
+Version 0.1.0 exports only `./contracts`; there is deliberately no root `"."` export. Future helper subpaths are not part of the package API until their implementation lands and they are added to `exports`.
 
-Every planned subpath other than `./contracts` is an empty stub (`export {};`) until its phase lands. The guard described under [Releases](#releases) refuses to publish while any listed subpath is still empty.
+## Future subpaths
 
-There is deliberately no root `"."` export. Narrow subpaths keep a contracts-only consumer from transpiling menu code at session start.
+These entries are a roadmap, not current exports:
+
+| Planned subpath | Planned contents | Phase |
+| --- | --- | --- |
+| `./settings` | `createSettingsStore`, `memorySettingsStore`, `cached`, `atomicWriteFile`, the sanitisers, `toppingSettingsPath` | 2 |
+| `./activity` | `ActivityMeter`, `StreamingWordCounter`, `OutputTokenAccount`, `RateHoldFade`, `RunClock`, `easeFade`, `fadeShade`, `slideOutTail`, the elapsed formatters | 3 |
+| `./activity-tui` | `dimAttribute`, `colorizeMeterCell`, `renderMeter`, `renderIdleMeter`, `thinkingLevelThemeColor`, `shimmerString`, `ansiToRgb`, `formatToolActivity` | 3 |
+| `./menu` | `MenuItem` union (toggle, cycle, number, text, action, pick, reorder), `flattenSections`, `rebuildMenu`, `moveCursor`, `DEFAULT_MENU_KEYBINDINGS`, the chrome helpers, `snapshot` | 4 |
+| `./models` | `ModelRef`, `THINKING_LEVELS`, `parseRef`, `getModelCatalogue`, `validateSavedChoice`, `thinkingOptionsForModel`, `TwoPaneModelThinking` | 5 |
+| `./color` | `Rgb`, `parseHex`, `mixRgb`, `rgbTo256`, `rgbToFgAnsi`, `ansiToRgb`, `hslToRgb`, the palette constants, `renderCometBar`, the fade helpers | 6 |
+| `./text` | `padRight`, `padCenter`, `fitCell`, `truncateVisible`, `pickFitting`, `stripControlChars`, `stableStringify`, the cost and percent formatters | 6 |
+| `./glyphs` | `BoxGlyphs`, `BOX_STYLES`, `SPINNER_FRAMES`, `SPINNER_FRAME_MS`, the braille and quadrant spinner sets | 6 |
+| `./process` | `resolvePiInvocation`, `escalateKill`, `spawnCollect`, `mapWithConcurrencyLimit`, `parsePiVersion`, `versionAtLeast`, `loadAgentsFromDir`, `findNearestProjectAgentsDir` | 7 |
+
+The repository keeps empty source placeholders for these future phases, but they are not exported and therefore are not reachable through package specifiers in the 0.1.0 API. The release guard refuses to publish any subpath that is present in `exports` but still empty.
 
 ## Contracts
 
@@ -121,7 +124,7 @@ Tested against pi 1.3.0; `peerDependencies` are `*`.
 Two globs, both single-level, so where a test file lives decides whether it runs at all.
 
 - `tests/*.test.ts` runs under `test:src`, with the resolve hook: `node --import ../../tools/ts-resolve.ts --test tests/*.test.ts`. The glob is not recursive, so a file at `tests/contracts/foo.test.ts` would be typechecked, because the package `tsconfig.json` includes `tests/**/*.ts`, and never executed. New source tests go directly in `tests/`.
-- `tests/exports/entries.test.ts` runs under `test:exports` with `-C compiled`, imports every subpath statically, and must be extended by hand when a subpath is added or removed: the static import, the `SUBPATHS` list and the `NAMESPACES` record. The test asserts that list equals `Object.keys(exports)` exactly.
+- `tests/exports/entries.test.ts` runs under `test:exports` with `-C compiled`, imports every exported subpath statically, and must be extended by hand when an export is added or removed: the static import, the `SUBPATHS` list and the `NAMESPACES` record. The test asserts that list equals `Object.keys(exports)` exactly.
 - `test:exports` and `typecheck:exports` read `dist/` and do not build it. The package `test` script builds first, so a standalone `npm run test:exports` certifies whatever is already in `dist/`; run `npm run build` before it.
 
 The proof that the resolve hook works is `tests/ts-resolve.test.ts` at the repository root, run by `npm run test:repo`.

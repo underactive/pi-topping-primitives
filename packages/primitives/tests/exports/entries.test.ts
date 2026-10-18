@@ -10,45 +10,16 @@ import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { test } from "node:test";
 import { fileURLToPath, pathToFileURL } from "node:url";
-import * as activityNs from "@underactive/pi-topping-primitives/activity";
-import * as activityTuiNs from "@underactive/pi-topping-primitives/activity-tui";
-import * as colorNs from "@underactive/pi-topping-primitives/color";
 import * as contractsNs from "@underactive/pi-topping-primitives/contracts";
-import * as glyphsNs from "@underactive/pi-topping-primitives/glyphs";
-import * as menuNs from "@underactive/pi-topping-primitives/menu";
-import * as modelsNs from "@underactive/pi-topping-primitives/models";
-import * as processNs from "@underactive/pi-topping-primitives/process";
-import * as settingsNs from "@underactive/pi-topping-primitives/settings";
-import * as textNs from "@underactive/pi-topping-primitives/text";
 
 const packageRoot = fileURLToPath(new URL("../..", import.meta.url));
 
 /** Every subpath this file imports statically. Must equal `Object.keys(pkg.exports)`. */
-const SUBPATHS = [
-	"./contracts",
-	"./settings",
-	"./activity",
-	"./activity-tui",
-	"./menu",
-	"./models",
-	"./color",
-	"./text",
-	"./glyphs",
-	"./process",
-] as const;
+const SUBPATHS = ["./contracts"] as const;
 
 /** The statically imported namespaces, keyed by subpath. */
 const NAMESPACES: Record<string, Record<string, unknown>> = {
 	"./contracts": contractsNs as unknown as Record<string, unknown>,
-	"./settings": settingsNs as unknown as Record<string, unknown>,
-	"./activity": activityNs as unknown as Record<string, unknown>,
-	"./activity-tui": activityTuiNs as unknown as Record<string, unknown>,
-	"./menu": menuNs as unknown as Record<string, unknown>,
-	"./models": modelsNs as unknown as Record<string, unknown>,
-	"./color": colorNs as unknown as Record<string, unknown>,
-	"./text": textNs as unknown as Record<string, unknown>,
-	"./glyphs": glyphsNs as unknown as Record<string, unknown>,
-	"./process": processNs as unknown as Record<string, unknown>,
 };
 
 const manifest = JSON.parse(
