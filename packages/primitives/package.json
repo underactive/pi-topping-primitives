@@ -1,6 +1,6 @@
 {
 	"name": "@underactive/pi-topping-primitives",
-	"version": "0.1.0",
+	"version": "0.2.0",
 	"description": "Shared runtime primitives for pi-topping extensions. A library, not a Pi extension.",
 	"keywords": [
 		"pi-topping",
@@ -32,6 +32,11 @@
 			"types": "./dist/contracts/index.d.ts",
 			"compiled": "./dist/contracts/index.js",
 			"default": "./src/contracts/index.ts"
+		},
+		"./settings": {
+			"types": "./dist/settings/index.d.ts",
+			"compiled": "./dist/settings/index.js",
+			"default": "./src/settings/index.ts"
 		}
 	},
 	"peerDependencies": {

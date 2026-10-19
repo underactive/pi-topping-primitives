@@ -4,6 +4,12 @@ All notable changes to this package are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this package
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- `./settings`: `createSettingsStore`, `memorySettingsStore`, `atomicWriteFile`, `fileStamp`, `sanitize`, `toppingSettingsPath`, `acquireDirLock`, `releaseDirLock`, `dirLockStale`, `isProcessAlive`, and the store types. Generalised from routesense's store and lock; locked `update()`, refuse-on-corrupt, one-time version backups, stamp-validated `cached()`.
+
 ## [0.1.0] - 2026-10-19
 
 ### Added

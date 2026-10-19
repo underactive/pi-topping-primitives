@@ -2,21 +2,21 @@
 
 A library, not an extension.
 
-Shared runtime contracts for the pi-topping family: cross-extension names, typed payloads, parsers, and event-bus helpers.
+Shared runtime pieces for the pi-topping family: cross-extension contracts (names, typed payloads, parsers, event-bus helpers) and the atomic settings store.
 
 ## Install
 
-Version 0.1.0 is published. A topping takes it as a runtime dependency:
+Version 0.1.0 (contracts only) is published; 0.2.0 adds `./settings`. A topping takes it as a runtime dependency:
 
 ```sh
-npm install @underactive/pi-topping-primitives@^0.1.0
+npm install @underactive/pi-topping-primitives@^0.2.0
 ```
 
 That writes a `dependencies` entry. The code is loaded by pi at runtime, so it does not belong in `devDependencies`.
 
 ## Exported subpaths
 
-Version 0.1.0 exports only `./contracts`; there is deliberately no root `"."` export. Future helper subpaths are not part of the package API until their implementation lands and they are added to `exports`.
+Version 0.2.0 exports `./contracts` and `./settings`; there is deliberately no root `"."` export. Future helper subpaths are not part of the package API until their implementation lands and they are added to `exports`.
 
 ## Future subpaths
 
@@ -24,7 +24,6 @@ These entries are a roadmap, not current exports:
 
 | Planned subpath | Planned contents | Phase |
 | --- | --- | --- |
-| `./settings` | `createSettingsStore`, `memorySettingsStore`, `cached`, `atomicWriteFile`, the sanitisers, `toppingSettingsPath` | 2 |
 | `./activity` | `ActivityMeter`, `StreamingWordCounter`, `OutputTokenAccount`, `RateHoldFade`, `RunClock`, `easeFade`, `fadeShade`, `slideOutTail`, the elapsed formatters | 3 |
 | `./activity-tui` | `dimAttribute`, `colorizeMeterCell`, `renderMeter`, `renderIdleMeter`, `thinkingLevelThemeColor`, `shimmerString`, `ansiToRgb`, `formatToolActivity` | 3 |
 | `./menu` | `MenuItem` union (toggle, cycle, number, text, action, pick, reorder), `flattenSections`, `rebuildMenu`, `moveCursor`, `DEFAULT_MENU_KEYBINDINGS`, the chrome helpers, `snapshot` | 4 |
@@ -34,7 +33,51 @@ These entries are a roadmap, not current exports:
 | `./glyphs` | `BoxGlyphs`, `BOX_STYLES`, `SPINNER_FRAMES`, `SPINNER_FRAME_MS`, the braille and quadrant spinner sets | 6 |
 | `./process` | `resolvePiInvocation`, `escalateKill`, `spawnCollect`, `mapWithConcurrencyLimit`, `parsePiVersion`, `versionAtLeast`, `loadAgentsFromDir`, `findNearestProjectAgentsDir` | 7 |
 
-The repository keeps empty source placeholders for these future phases, but they are not exported and therefore are not reachable through package specifiers in the 0.1.0 API. The release guard refuses to publish any subpath that is present in `exports` but still empty.
+The repository keeps empty source placeholders for these future phases, but they are not exported and therefore are not reachable through package specifiers in the 0.2.0 API. The release guard refuses to publish any subpath that is present in `exports` but still empty.
+
+## Settings
+
+`./settings` is an atomic JSON settings file with a validating codec, generalised from routesense's store.
+
+```ts
+import { createSettingsStore, sanitize, toppingSettingsPath } from "@underactive/pi-topping-primitives/settings";
+
+const store = createSettingsStore<Settings>({
+	path: toppingSettingsPath("pi-topping-bash-gate"),
+	codec: {
+		sanitize: (raw) => {
+			const r = sanitize.isRecord(raw) ? raw : {};
+			return { enabled: r.enabled !== false, limit: sanitize.numberOr(r.limit, 50, { min: 1, integer: true }) };
+		},
+	},
+});
+
+store.read();                                  // never throws; defaults when missing or corrupt
+store.update((c) => ({ ...c, limit: 10 }));    // locked read-modify-write
+```
+
+| Export | Purpose |
+| --- | --- |
+| `createSettingsStore(options)` | `path()`, `read()`, `write(value)`, `update(change)`, `stamp()`, `cached()` |
+| `memorySettingsStore(initial)` | The same interface in memory, for tests |
+| `atomicWriteFile(path, text, mode?)` | Unique temp file plus rename; throws on failure; default modes 0600 file, 0700 directory (an existing directory is never chmodded) |
+| `fileStamp(path)` | `mtimeMs:size:ino` or `undefined` |
+| `sanitize` | `isRecord`, `booleanOr`, `numberOr(value, fallback, { min, max, exclusiveMin, integer })`, `enumOr`, `stringList`, `onOff`. Out-of-range values fall back; they are never clamped |
+| `toppingSettingsPath(pkg, file?)` | `() => <agent dir>/<pkg>/<file>`, resolved on every call |
+| `acquireDirLock`, `releaseDirLock`, `dirLockStale`, `isProcessAlive` | The directory lock behind `update()` |
+
+Options: `path`, `codec`, `pathEnv` (a non-empty environment value replaces `path()`), `maxBytes`, `mode`, `onDiagnostic` (nothing is ever printed), and `lock` (default on; an object tunes attempts and stale windows).
+
+Codec: `sanitize(raw, diagnose)` receives `undefined` for a missing file and must not throw; `serialize` defaults to two-space JSON with a trailing newline; `version: { key, current, backupBelow?, backupPath? }` writes the version key first and copies a file whose stored version is older to a backup exactly once (default `<stem>.v<stored>.<ext>`); `preserveUnknownKeys` keeps top-level keys the value does not mention, which needs a serializer that writes every own key of what it is given.
+
+Semantics:
+
+- `write()` replaces the file with no lock. `update()` takes `<path>.lock` (a directory holding `owner.json`), reads the file, runs your change and writes. It refuses, leaving the file byte-identical, when the file exists but is not valid JSON (`<path> is not valid JSON (…); fix or remove it before saving`), when the change throws, or when it returns `{ error }`. A settings type must not itself have the shape `{ error: string }`.
+- Results are values: `{ ok: true, value, stamp }` or `{ ok: false, reason: "busy" | "refused" | "write_failed", message }`.
+- A lock whose owner is a dead pid on this host is reclaimed at once; an unreadable owner, or one on another host, only after 10 s. Under contention `update()` waits synchronously, up to about 1 s, so it blocks the event loop for that long.
+- `cached()` re-reads when the file stamp moves or after `invalidate()`, and `onChange` fires for external edits and for the store's own writes.
+- There is no module state, so two copies of the package in one process interoperate through the filesystem.
+- `./settings` imports `getAgentDir` from the pi-coding-agent peer at runtime; it is the only subpath besides future UI ones that does.
 
 ## Contracts
 

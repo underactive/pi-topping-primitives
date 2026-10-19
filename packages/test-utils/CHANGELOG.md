@@ -6,6 +6,10 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Changed
+
+- Version moves to 0.2.0 in lockstep with `@underactive/pi-topping-primitives`; no API change.
+
 ### Added
 
 - Package scaffold: subpath exports whose default target is the TypeScript source and whose compiled target is the dist output. Every subpath is an empty stub until its phase lands.

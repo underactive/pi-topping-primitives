@@ -98,4 +98,25 @@ printf '{ "name": "@underactive/fake-prim", "type": "module", "exports": { ".": 
 [ "$have_bundled" = 1 ] && probe bundle/index.js "bundled chunk, compiled only"
 # Expect: unbundled SDK, compiled only -> {"form":"compiled-js","same":false} with peers present
 [ "$have_unbundled" = 1 ] && probe index.js "unbundled SDK, compiled only"
+# Real-package rows. With PRIM_TGZ set to a packed primitives tarball, load a multi-file subpath
+# (SUBPATH, default settings) from node_modules through both loader branches. Pass: no load errors
+# and the extension reads defaults from an empty store.
+if [ -n "$PRIM_TGZ" ]; then
+	SUBPATH=${SUBPATH:-settings}
+	RP="$T/ext/node_modules/@underactive/pi-topping-primitives"
+	mkdir -p "$RP" "$T/untar"
+	tar -xzf "$PRIM_TGZ" -C "$T/untar"
+	cp -R "$T/untar/package/." "$RP/"
+	cat > "$T/ext/index.ts" <<EOF2
+import { createSettingsStore, sanitize } from "@underactive/pi-topping-primitives/$SUBPATH";
+const store = createSettingsStore<{ n: number }>({
+	path: () => "$T/agent/probe.json",
+	codec: { sanitize: (raw) => ({ n: sanitize.numberOr(sanitize.isRecord(raw) ? raw.n : undefined, 7) }) },
+});
+(globalThis as { __fakePrim?: unknown }).__fakePrim = { read: store.read(), wrote: store.update((c) => ({ n: c.n + 1 })).ok };
+export default function () {}
+EOF2
+	[ "$have_bundled" = 1 ] && probe bundle/index.js "REAL $SUBPATH, bundled chunk"
+	[ "$have_unbundled" = 1 ] && probe index.js "REAL $SUBPATH, unbundled SDK"
+fi
 rm -rf "$T"
