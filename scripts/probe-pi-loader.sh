@@ -99,10 +99,13 @@ printf '{ "name": "@underactive/fake-prim", "type": "module", "exports": { ".": 
 # Expect: unbundled SDK, compiled only -> {"form":"compiled-js","same":false} with peers present
 [ "$have_unbundled" = 1 ] && probe index.js "unbundled SDK, compiled only"
 # Real-package rows. With PRIM_TGZ set to a packed primitives tarball, load a multi-file subpath
-# (SUBPATH, default settings; one of settings, activity, activity-tui) from node_modules through
-# both loader branches. Pass: no load errors and the extension's own calls return what the row
-# expects. activity-tui is the first subpath with a runtime pi-tui import of its own, so its rows
-# are the ones that show the dependency resolving pi-tui through the host's alias.
+# (SUBPATH, default settings; one of settings, activity, activity-tui, menu) from node_modules
+# through both loader branches. Pass: no load errors and the extension's own calls return what the
+# row expects. activity-tui is the first subpath with a runtime pi-tui import of its own, so its
+# rows are the ones that show the dependency resolving pi-tui through the host's alias. menu goes
+# further: it constructs a component whose keys go through pi-tui's KeybindingsManager, renders
+# it, and presses Enter.
+# Expect for menu: {"top":true,"rows":7,"result":{"applied":true,"values":{"on":true}}}
 if [ -n "$PRIM_TGZ" ]; then
 	SUBPATH=${SUBPATH:-settings}
 	RP="$T/ext/node_modules/@underactive/pi-topping-primitives"
@@ -147,8 +150,26 @@ meter.push(rateToLevel(80));
 export default function () {}
 EOF2
 		;;
+	menu)
+		cat > "$T/ext/index.ts" <<EOF2
+import { chrome, MenuComponent, menuKeybindings } from "@underactive/pi-topping-primitives/$SUBPATH";
+const theme = { fg: (_c: string, s: string) => s, bg: (_c: string, s: string) => s, bold: (s: string) => s, getBgAnsi: () => "" };
+let result: unknown;
+const menu = new MenuComponent(
+	{ title: "Probe", sections: [{ title: "S", items: [{ kind: "toggle", id: "on", label: "On", value: true }] }] },
+	theme,
+	(value) => { result = value; },
+	undefined,
+	menuKeybindings(),
+);
+const lines = menu.render(30);
+menu.handleInput("\r");
+(globalThis as { __fakePrim?: unknown }).__fakePrim = { top: lines[0] === chrome.topBorder(theme, 28, "Probe"), rows: lines.length, result };
+export default function () {}
+EOF2
+		;;
 	*)
-		echo "probe-pi-loader: unknown SUBPATH '$SUBPATH' (expected settings, activity or activity-tui)" >&2
+		echo "probe-pi-loader: unknown SUBPATH '$SUBPATH' (expected settings, activity, activity-tui or menu)" >&2
 		rm -rf "$T"
 		exit 1
 		;;

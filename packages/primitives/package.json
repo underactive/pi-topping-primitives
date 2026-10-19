@@ -47,6 +47,11 @@
 			"types": "./dist/activity-tui/index.d.ts",
 			"compiled": "./dist/activity-tui/index.js",
 			"default": "./src/activity-tui/index.ts"
+		},
+		"./menu": {
+			"types": "./dist/menu/index.d.ts",
+			"compiled": "./dist/menu/index.js",
+			"default": "./src/menu/index.ts"
 		}
 	},
 	"peerDependencies": {
