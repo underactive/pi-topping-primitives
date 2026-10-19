@@ -2,21 +2,21 @@
 
 A library, not an extension.
 
-Shared runtime pieces for the pi-topping family: cross-extension contracts (names, typed payloads, parsers, event-bus helpers), the atomic settings store, and the token-activity meter, rate readout and their renderers.
+Shared runtime pieces for the pi-topping family: cross-extension contracts (names, typed payloads, parsers, event-bus helpers), the atomic settings store, the token-activity meter, rate readout and their renderers, and the box-drawing settings menu.
 
 ## Install
 
-Version 0.1.0 (contracts only) is published; 0.2.0 adds `./settings`; 0.3.0 adds `./activity` and `./activity-tui`. A topping takes it as a runtime dependency:
+Version 0.1.0 (contracts only) is published; 0.2.0 adds `./settings`; 0.3.0 adds `./activity` and `./activity-tui`; 0.4.0 adds `./menu`. A topping takes it as a runtime dependency:
 
 ```sh
-npm install @underactive/pi-topping-primitives@^0.3.0
+npm install @underactive/pi-topping-primitives@^0.4.0
 ```
 
 That writes a `dependencies` entry. The code is loaded by pi at runtime, so it does not belong in `devDependencies`.
 
 ## Exported subpaths
 
-The package exports `./contracts`, `./settings`, `./activity` and `./activity-tui` (the last two from 0.3.0); there is deliberately no root `"."` export. Future helper subpaths are not part of the package API until their implementation lands and they are added to `exports`.
+The package exports `./contracts`, `./settings`, `./activity`, `./activity-tui` (the last two from 0.3.0) and `./menu` (from 0.4.0); there is deliberately no root `"."` export. Future helper subpaths are not part of the package API until their implementation lands and they are added to `exports`.
 
 ## Future subpaths
 
@@ -24,7 +24,6 @@ These entries are a roadmap, not current exports:
 
 | Planned subpath | Planned contents | Phase |
 | --- | --- | --- |
-| `./menu` | `MenuItem` union (toggle, cycle, number, text, action, pick, reorder), `flattenSections`, `rebuildMenu`, `moveCursor`, `DEFAULT_MENU_KEYBINDINGS`, the chrome helpers, `snapshot` | 4 |
 | `./models` | `ModelRef`, `THINKING_LEVELS`, `parseRef`, `getModelCatalogue`, `validateSavedChoice`, `thinkingOptionsForModel`, `TwoPaneModelThinking` | 5 |
 | `./color` | `Rgb`, `parseHex`, `mixRgb`, `rgbTo256`, `rgbToFgAnsi`, `ansiToRgb`, `hslToRgb`, the palette constants, `renderCometBar`, the fade helpers | 6 |
 | `./text` | `padRight`, `padCenter`, `fitCell`, `truncateVisible`, `pickFitting`, `stripControlChars`, `stableStringify`, the cost and percent formatters | 6 |
@@ -160,6 +159,72 @@ Semantics:
 - `formatToolActivity` treats tool arguments as untrusted. It strips terminal sequences with pi-tui's `stripTerminalSequences`, removes the control characters that leaves behind (a lone ESC, BEL, C1), collapses whitespace, and only then truncates, so the cap can never land inside an escape sequence.
 - `ThinkingLevel` is taken from pi's `Theme.getThinkingBorderColor`, so a level pi adds fails the typecheck instead of rendering as the fallback.
 - Pi is imported for types, plus one runtime function: `stripTerminalSequences` from the pi-tui peer. Only the TypeScript source shares the host's pi-tui instance, which is why the loader probe covers this subpath.
+
+## Menu
+
+`./menu` is the box-drawing settings menu that pi-topping, pi-topping-bash-gate, pi-topping-statusline, pi-topping-splash and pi-topping-routesense each carried a copy of. It is a pi-tui `Component` (`MenuComponent`) mounted as an overlay by `showMenu(ctx, config)`.
+
+```ts
+import { showMenu } from "@underactive/pi-topping-primitives/menu";
+
+const result = await showMenu(ctx, {
+	title: "Pi Topping: Settings",
+	sections: [
+		{
+			title: "Meter",
+			items: [
+				{ kind: "toggle", id: "enabled", label: "Show meter", value: true, hint: "Draws the meter." },
+				{ kind: "cycle", id: "direction", label: "Direction", value: "rtl", values: ["rtl", "ltr"], labels: { rtl: "Right to left" } },
+				{ kind: "number", id: "bound", label: "Upper bound", value: 80, min: 10, max: 1000, presets: [10, 80, 100, 200], unit: "tps" },
+			],
+		},
+	],
+	buttons: [
+		{ id: "apply", label: "Apply", applies: true, primary: true },
+		{ id: "cancel", label: "Cancel", closeOnAction: true },
+	],
+	validate: (values) => (values.bound < 10 ? "Bound too low" : undefined),
+});
+if (result.applied) save(result.values);
+```
+
+Row kinds: `toggle` (boolean), `cycle` (one of `values`, arrows wrap, optional `labels` keyed by value and an optional `gate` checkbox), `number` (a whole number in `[min, max]`; typed on Enter or Space, stepped through `presets` with the arrows, published as a number), `text` (inline editor), `action` (runs `onAction`, or closes with the draft when `closeOnAction`), `pick` (hands control to `onPick`, which returns the new value or `undefined`) and `reorder` (rows sharing a `group`; Space or Enter grabs a row, Up/Down drags it, and `values[group]` is the comma-joined order).
+
+### Defaults
+
+| Setting | Default |
+| --- | --- |
+| Overlay width / max height | `"90%"` / `"85%"` (`layout`) |
+| Enter on a toggle or cycle row | applies when there are no buttons (`enterApplies`) |
+| Escape or Ctrl+C | closes with `applied: false` and the current draft |
+| Up/Down | stop at the ends and skip `disabled` rows |
+| PgUp/PgDn | one visible screenful, landing on the nearest enabled row |
+| Cycle rows | wrap |
+| Starting row | first enabled row (`initialCursor`) |
+| Hint title / preview title | `"What this does"` / `"Preview"` |
+| Marker | `❯` |
+
+### Keys
+
+The menu matches keys through its own `KeybindingsManager`, built from `DEFAULT_MENU_KEYBINDINGS` plus the host's user bindings. The ids are `pi-topping.menu.up`, `down`, `pageUp`, `pageDown`, `left`, `right`, `toggle` (Space), `apply` (Enter), `cancel` (Escape, Ctrl+C), `focusButtons` (Tab, Shift+Tab), `clear` (Backspace, Delete), `editCommit`, `editCancel` and `editBackspace`. A user remaps them in pi's keybindings file like any other id; the menu's hint strings are the caller's and do not change with a remap. The host's own manager is never asked, because it only answers for the ids it was built with.
+
+### Preview
+
+`preview.render(values, { elapsedMs, activeItemId, width })` is called synchronously inside `render()` with the draft values. `width` is the box's full inner width and the menu adds no margin, so a line of exactly `width` cells reaches the right border. Return `nextRefreshInMs` to be sampled again after that delay; the timer is cleared when the menu closes or is disposed.
+
+### Two kinds of disabled
+
+`disabled` dims the row, shows `disabledReason` and takes it out of cursor navigation. `disabledUnlessAnyOf: [ids]` keeps the row reachable but inert until one of the listed values is `true`; a gated-off toggle shows a forced, muted `ON` without changing its stored value.
+
+### Rebuilds and reorder
+
+`onChange` and `onAction` may return fresh sections (or a `MenuRebuild` with `overwriteValues`) to rebuild the rows. Draft values survive by key, except the ids listed in `overwriteValues` and every reorder group, which takes the rebuilt sections' order: an in-progress drag is reset so the published order and the rows on screen agree.
+
+### Failures and picks
+
+A rejected `onAction` or `onPick`, or a synchronous throw, clears the busy marker and shows `✗ <message>` in the hint block until the next key. Nothing is re-thrown. While `onPick` is pending the menu ignores every key, so a picker opened over it owns the input; its resolved string is stored and fires `onChange`.
+
+`snapshot()` returns detached copies of `values`, `cursorId`, `rowCount`, `editing`, `focus` and `busy` for host tests.
 
 ## Contracts
 
