@@ -6,10 +6,10 @@ Shared runtime contracts for the pi-topping family: cross-extension names, typed
 
 ## Install
 
-Nothing is published yet. Once 0.1.0 is on the registry a topping takes it as a runtime dependency:
+Version 0.1.0 is published. A topping takes it as a runtime dependency:
 
 ```sh
-npm install @underactive/pi-topping-primitives
+npm install @underactive/pi-topping-primitives@^0.1.0
 ```
 
 That writes a `dependencies` entry. The code is loaded by pi at runtime, so it does not belong in `devDependencies`.

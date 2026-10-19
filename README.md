@@ -62,12 +62,14 @@ Publishing is not tied to a phase. Publish when at least one consumer has to tak
 
 At the moment you publish, every subpath still listed in `exports` must export something. Either fill it in that change, or remove it from `exports` first and add it back in the phase that owns it. Removal is allowed by the package-shape guard, which checks that the export keys are a subsequence of the planned list rather than equal to it, deliberately; re-adding is additive, so no consumer breaks. `contracts` is additive-only forever, so dropping and re-adding a subpath must never remove or rename a name that already shipped.
 
+The 0.1.0 release published only `@underactive/pi-topping-primitives`, using `npm publish -w @underactive/pi-topping-primitives`. `@underactive/pi-topping-test-utils` remains unpublished because its subpaths are still placeholders. Do not use `npm publish --workspaces` while any workspace package still has empty exported subpaths.
+
 What enforces the export condition is `scripts/check-release.ts`, from each package's `prepublishOnly`: it imports every subpath's `compiled` target and fails on any that exports zero keys, which is why `npm publish --workspaces` aborts on the Phase 0 stubs instead of shipping them as dead weight. A release is four steps:
 
 1. `npm version <minor|patch> --workspaces --no-git-tag-version`
 2. Move each package's `## [Unreleased]` section under the new version heading.
 3. Tag the commit `v<x.y.z>`.
-4. `npm publish --workspaces`
+4. `npm publish -w <workspace>` for each releasable package.
 
 ## Consumers
 
