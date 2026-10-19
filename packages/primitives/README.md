@@ -2,7 +2,7 @@
 
 A library, not an extension.
 
-Shared runtime pieces for the pi-topping family: cross-extension contracts (names, typed payloads, parsers, event-bus helpers) and the atomic settings store.
+Shared runtime pieces for the pi-topping family: cross-extension contracts (names, typed payloads, parsers, event-bus helpers), the atomic settings store, and the token-activity meter, rate readout and their renderers.
 
 ## Install
 
@@ -16,7 +16,7 @@ That writes a `dependencies` entry. The code is loaded by pi at runtime, so it d
 
 ## Exported subpaths
 
-Version 0.2.0 exports `./contracts` and `./settings`; there is deliberately no root `"."` export. Future helper subpaths are not part of the package API until their implementation lands and they are added to `exports`.
+The package exports `./contracts`, `./settings`, `./activity` and `./activity-tui` (the last two from 0.3.0); there is deliberately no root `"."` export. Future helper subpaths are not part of the package API until their implementation lands and they are added to `exports`.
 
 ## Future subpaths
 
@@ -24,8 +24,6 @@ These entries are a roadmap, not current exports:
 
 | Planned subpath | Planned contents | Phase |
 | --- | --- | --- |
-| `./activity` | `ActivityMeter`, `StreamingWordCounter`, `OutputTokenAccount`, `RateHoldFade`, `RunClock`, `easeFade`, `fadeShade`, `slideOutTail`, the elapsed formatters | 3 |
-| `./activity-tui` | `dimAttribute`, `colorizeMeterCell`, `renderMeter`, `renderIdleMeter`, `thinkingLevelThemeColor`, `shimmerString`, `ansiToRgb`, `formatToolActivity` | 3 |
 | `./menu` | `MenuItem` union (toggle, cycle, number, text, action, pick, reorder), `flattenSections`, `rebuildMenu`, `moveCursor`, `DEFAULT_MENU_KEYBINDINGS`, the chrome helpers, `snapshot` | 4 |
 | `./models` | `ModelRef`, `THINKING_LEVELS`, `parseRef`, `getModelCatalogue`, `validateSavedChoice`, `thinkingOptionsForModel`, `TwoPaneModelThinking` | 5 |
 | `./color` | `Rgb`, `parseHex`, `mixRgb`, `rgbTo256`, `rgbToFgAnsi`, `ansiToRgb`, `hslToRgb`, the palette constants, `renderCometBar`, the fade helpers | 6 |
@@ -33,7 +31,9 @@ These entries are a roadmap, not current exports:
 | `./glyphs` | `BoxGlyphs`, `BOX_STYLES`, `SPINNER_FRAMES`, `SPINNER_FRAME_MS`, the braille and quadrant spinner sets | 6 |
 | `./process` | `resolvePiInvocation`, `escalateKill`, `spawnCollect`, `mapWithConcurrencyLimit`, `parsePiVersion`, `versionAtLeast`, `loadAgentsFromDir`, `findNearestProjectAgentsDir` | 7 |
 
-The repository keeps empty source placeholders for these future phases, but they are not exported and therefore are not reachable through package specifiers in the 0.2.0 API. The release guard refuses to publish any subpath that is present in `exports` but still empty.
+`./color` will have its own `ansiToRgb` that covers 38/48 truecolor, 256-colour and `39`. It must not silently replace `./activity-tui`'s `ansiToRgb`, which reads truecolor foreground only and returns `null` for anything else; the shimmer and fade rely on `null` meaning "cannot blend". Phase 6 should re-export one from the other or rename one.
+
+The repository keeps empty source placeholders for these future phases, but they are not exported and therefore are not reachable through package specifiers in the current API. The release guard refuses to publish any subpath that is present in `exports` but still empty.
 
 ## Settings
 
@@ -90,7 +90,76 @@ Semantics:
 - A lock whose owner is a dead pid on this host is reclaimed at once; an unreadable owner, or one on another host, only after 10 s. Under contention `update()` waits synchronously, up to about 1 s, so it blocks the event loop for that long.
 - `cached()` re-reads when the file stamp moves or after `invalidate()`, and `onChange` fires for external edits and for the store's own writes.
 - There is no module state, so two copies of the package in one process interoperate through the filesystem.
-- `./settings` imports `getAgentDir` from the pi-coding-agent peer at runtime; it is the only subpath besides future UI ones that does.
+- `./settings` imports `getAgentDir` from the pi-coding-agent peer at runtime; it is the only subpath that imports pi-coding-agent at runtime. (`./activity-tui` imports one runtime function from pi-tui, below.)
+
+## Activity
+
+`./activity` is the token-activity maths behind pi-topping's working indicator and the MoA and audit progress tables: a scrolling meter, an EMA rate tracker with a hold-and-fade readout, token accounting from a message stream, and a run clock. It has no rendering; `./activity-tui` turns it into coloured strings. Pi is imported for types only.
+
+```ts
+import { ActivityMeter, RateHoldFade, rateToLevel } from "@underactive/pi-topping-primitives/activity";
+import { renderMeter } from "@underactive/pi-topping-primitives/activity-tui";
+
+const meter = new ActivityMeter({ direction: "rtl" });
+const rate = new RateHoldFade({ holdMs: 1_500, fadeMs: 250, shadeCount: 5, sampleIntervalMs: 100 });
+
+// from your own 100 ms timer, with `total` the cumulative output-token estimate:
+if (rate.sample(total, now)) meter.push(rateToLevel(rate.tracker.tokenRate));
+const shown = rate.display(now); // { rate, phase: "active" | "fading" | "idle", fadeShade }
+const cells = renderMeter(meter, theme, "accent");
+```
+
+| Export | Purpose |
+| --- | --- |
+| `ActivityMeter`, `ActivityMeterLevel`, `METER_GLYPHS` | An eight-cell braille meter. `push`, `render(colorize?)`, `setDirection`, `reset`, `levels()` and `setLevels()` for snapshots |
+| `rateToLevel(tps, upperBoundTps?, options?)` | Rate to level. Rates at or above the bound are full; the lower levels scale in proportion |
+| `DEFAULT_METER_UPPER_BOUND_TPS` (80), `LEGACY_METER_UPPER_BOUND_TPS` (40), `METER_UPPER_BOUND_TPS_MIN` (10), `METER_UPPER_BOUND_TPS_MAX` (1000), `ACTIVITY_METER_WIDTH` (8) | The constants. The min and max are the range a settings UI should offer; `rateToLevel` does not clamp |
+| `TokRateTracker` | EMA (alpha 0.4) of a cumulative token total: `sample(total, now)`, `tokenRate`, `reset()` |
+| `RateHoldFade` | Holds the last measured rate, fades it, then goes idle. `sample(total, now)` returns whether a sample was taken; `display(now)`, `resetSampling(total)`, `reset()`, and the `tracker` it owns |
+| `StreamingWordCounter` | Whitespace-boundary word count that survives a word split across deltas, per stream |
+| `OutputTokenAccount` | Confirmed plus in-flight tokens from `messageStart`, `messageUpdate(event, partial?)`, `messageEnd`; `snapshot()` is `{ tokens, revision }` |
+| `RunClock`, `bindUIPromptWaits`, `MIN_WAIT_DISPLAY_MS` | Active work time excluding spans spent waiting on the user; `bindUIPromptWaits(pi, () => clock)` brackets it around pi's UI prompts |
+| `easeFade`, `fadeShade`, `FADE_SHADE_COUNT`, `slideOutTail` | Raised-cosine ease, the discrete shade for an elapsed time, and the tail-first slide-in of a label |
+| `formatElapsedUnits`, `formatElapsedClock` | `4m 46s` and `4:46` |
+
+| Option | Default | Meaning |
+| --- | --- | --- |
+| `new ActivityMeter({ direction })` | `"ltr"` | `"rtl"` puts the newest cell on the right |
+| `new ActivityMeter({ width })` | `8` | Anything but a positive integer reads as 8 |
+| `rateToLevel(…, { nonFiniteRate: "idle" })` | off | NaN and both infinities read idle. Off, +Infinity reads full |
+| `new RateHoldFade({ holdMs, fadeMs, shadeCount, sampleIntervalMs })` | all four required | The hold, the fade, its discrete steps, and the minimum gap between samples |
+| `new RunClock({ nested })` | `false` | Count overlapping `pause()` calls; the wait span closes with the outermost `resume()` |
+| `formatElapsedUnits(ms, { includeDays })` | `true` | Off, hours keep counting: `25h`, not `1d 1h` |
+| `formatElapsedUnits(ms, { fillLowerUnits })` | `false` | On, every unit below the largest shown stays: `1h 0m 0s`, not `1h 0s` |
+
+Semantics:
+
+- Every time-dependent call takes `now` (or an injected `now()`), so nothing schedules anything and tests drive the clock directly.
+- The meter ceiling is **inclusive**. At the default 80 tps, exactly 80 reads full. Before 0.3.0 the MoA and audit widgets used a 40 tps ceiling; pass `LEGACY_METER_UPPER_BOUND_TPS` where that look must be kept.
+- `RateHoldFade` holds a rate only when the total grew since the last sample, so the EMA decaying while output is quiet never re-arms the hold. `resetSampling(total)` restarts the EMA at a message boundary without touching the held rate, so a correction to the total does not read as a burst.
+- `OutputTokenAccount` takes exact usage when it is a finite number `>= 0` on a finished message, or finite and `> 0` on an in-flight partial; anything else (negative, NaN, infinite) falls back to the word-count estimate. `revision` bumps when exact usage replaces a differing estimate, so a consumer can reset its tracker.
+- `levels()` is in display order for the meter's direction; restore it into a meter of the same direction and width. An entry that is not an integer from 0 to 7 restores as idle.
+- There is no module state, and every exported object is frozen. The one runtime import outside this directory is `WORKING_STATUS_SLIDE_MS` from `./contracts`.
+
+## Activity TUI
+
+`./activity-tui` renders `./activity` against a pi theme. Colour is always the host's: every function takes a theme, or a structural stub of the one or two methods it uses.
+
+| Export | Purpose |
+| --- | --- |
+| `colorizeMeterCell`, `renderMeter(meter, theme, colorize, dimmed?)`, `renderIdleMeter(theme, width?)` | Idle cells render dim; the rest use `colorize`, which is a `ThemeColor` or a function (such as pi's thinking-border colour). `dimmed` darkens the active cells with SGR 2 on top of their colour |
+| `dimAttribute(text)` | `ESC[2m … ESC[22m`; `theme.fg("dim", …)` sets a grey instead, so it cannot darken an existing colour |
+| `thinkingLevelThemeColor(level)` | `thinkingOff` to `thinkingMax` for a level; any other string or `undefined` gives `accent` |
+| `thinkingLevelColorizer(theme, color, level)` | A colorizer for a configured colour, including `"thinking-level"`, which follows pi's active thinking colour |
+| `shimmerString`, `fadeThemeColorString`, `ansiToRgb` | The light-sweep shimmer, a colour-to-dim fade shade, and the truecolor escape parser they share |
+| `formatToolActivity(tool, args, maxLength?)`, `highlightActivity(theme, label)` | A one-line `tool  argument` label from a tool call, and its bold-name, accent-argument rendering |
+
+Semantics:
+
+- `ansiToRgb` reads a truecolor foreground (`ESC[38;2;R;G;Bm`) anywhere in the string, including inside a compound SGR, and returns `null` for 256-colour, default-foreground and background escapes. The shimmer and the fade fall back to the plain colour when it returns `null`.
+- `formatToolActivity` treats tool arguments as untrusted. It strips terminal sequences with pi-tui's `stripTerminalSequences`, removes the control characters that leaves behind (a lone ESC, BEL, C1), collapses whitespace, and only then truncates, so the cap can never land inside an escape sequence.
+- `ThinkingLevel` is taken from pi's `Theme.getThinkingBorderColor`, so a level pi adds fails the typecheck instead of rendering as the fallback.
+- Pi is imported for types, plus one runtime function: `stripTerminalSequences` from the pi-tui peer. Only the TypeScript source shares the host's pi-tui instance, which is why the loader probe covers this subpath.
 
 ## Contracts
 

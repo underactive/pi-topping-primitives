@@ -10,18 +10,27 @@ import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { test } from "node:test";
 import { fileURLToPath, pathToFileURL } from "node:url";
+import * as activityNs from "@underactive/pi-topping-primitives/activity";
+import * as activityTuiNs from "@underactive/pi-topping-primitives/activity-tui";
 import * as contractsNs from "@underactive/pi-topping-primitives/contracts";
 import * as settingsNs from "@underactive/pi-topping-primitives/settings";
 
 const packageRoot = fileURLToPath(new URL("../..", import.meta.url));
 
 /** Every subpath this file imports statically. Must equal `Object.keys(pkg.exports)`. */
-const SUBPATHS = ["./contracts", "./settings"] as const;
+const SUBPATHS = [
+	"./contracts",
+	"./settings",
+	"./activity",
+	"./activity-tui",
+] as const;
 
 /** The statically imported namespaces, keyed by subpath. */
 const NAMESPACES: Record<string, Record<string, unknown>> = {
 	"./contracts": contractsNs as unknown as Record<string, unknown>,
 	"./settings": settingsNs as unknown as Record<string, unknown>,
+	"./activity": activityNs as unknown as Record<string, unknown>,
+	"./activity-tui": activityTuiNs as unknown as Record<string, unknown>,
 };
 
 const manifest = JSON.parse(

@@ -37,6 +37,16 @@
 			"types": "./dist/settings/index.d.ts",
 			"compiled": "./dist/settings/index.js",
 			"default": "./src/settings/index.ts"
+		},
+		"./activity": {
+			"types": "./dist/activity/index.d.ts",
+			"compiled": "./dist/activity/index.js",
+			"default": "./src/activity/index.ts"
+		},
+		"./activity-tui": {
+			"types": "./dist/activity-tui/index.d.ts",
+			"compiled": "./dist/activity-tui/index.js",
+			"default": "./src/activity-tui/index.ts"
 		}
 	},
 	"peerDependencies": {

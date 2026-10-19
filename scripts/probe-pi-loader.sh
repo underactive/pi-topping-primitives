@@ -99,15 +99,19 @@ printf '{ "name": "@underactive/fake-prim", "type": "module", "exports": { ".": 
 # Expect: unbundled SDK, compiled only -> {"form":"compiled-js","same":false} with peers present
 [ "$have_unbundled" = 1 ] && probe index.js "unbundled SDK, compiled only"
 # Real-package rows. With PRIM_TGZ set to a packed primitives tarball, load a multi-file subpath
-# (SUBPATH, default settings) from node_modules through both loader branches. Pass: no load errors
-# and the extension reads defaults from an empty store.
+# (SUBPATH, default settings; one of settings, activity, activity-tui) from node_modules through
+# both loader branches. Pass: no load errors and the extension's own calls return what the row
+# expects. activity-tui is the first subpath with a runtime pi-tui import of its own, so its rows
+# are the ones that show the dependency resolving pi-tui through the host's alias.
 if [ -n "$PRIM_TGZ" ]; then
 	SUBPATH=${SUBPATH:-settings}
 	RP="$T/ext/node_modules/@underactive/pi-topping-primitives"
 	mkdir -p "$RP" "$T/untar"
 	tar -xzf "$PRIM_TGZ" -C "$T/untar"
 	cp -R "$T/untar/package/." "$RP/"
-	cat > "$T/ext/index.ts" <<EOF2
+	case "$SUBPATH" in
+	settings)
+		cat > "$T/ext/index.ts" <<EOF2
 import { createSettingsStore, sanitize } from "@underactive/pi-topping-primitives/$SUBPATH";
 const store = createSettingsStore<{ n: number }>({
 	path: () => "$T/agent/probe.json",
@@ -116,6 +120,39 @@ const store = createSettingsStore<{ n: number }>({
 (globalThis as { __fakePrim?: unknown }).__fakePrim = { read: store.read(), wrote: store.update((c) => ({ n: c.n + 1 })).ok };
 export default function () {}
 EOF2
+		;;
+	activity)
+		cat > "$T/ext/index.ts" <<EOF2
+import { ActivityMeter, RateHoldFade, rateToLevel } from "@underactive/pi-topping-primitives/$SUBPATH";
+const meter = new ActivityMeter({ direction: "rtl" });
+meter.push(rateToLevel(80));
+const rate = new RateHoldFade({ holdMs: 1500, fadeMs: 250, shadeCount: 5, sampleIntervalMs: 100 });
+rate.sample(0, 1000);
+rate.sample(2, 1100);
+(globalThis as { __fakePrim?: unknown }).__fakePrim = { meter: meter.render(), held: rate.display(1100).rate, phase: rate.display(2600).phase };
+export default function () {}
+EOF2
+		;;
+	activity-tui)
+		cat > "$T/ext/index.ts" <<EOF2
+import { ActivityMeter, rateToLevel } from "@underactive/pi-topping-primitives/activity";
+import { formatToolActivity, renderMeter } from "@underactive/pi-topping-primitives/$SUBPATH";
+const theme = { fg: (color: string, text: string) => "<" + color + ">" + text + "</" + color + ">" };
+const meter = new ActivityMeter({ width: 2, direction: "rtl" });
+meter.push(rateToLevel(80));
+(globalThis as { __fakePrim?: unknown }).__fakePrim = {
+	meter: renderMeter(meter, theme, "accent"),
+	label: formatToolActivity("bash", { command: "\x1b[31mx" }),
+};
+export default function () {}
+EOF2
+		;;
+	*)
+		echo "probe-pi-loader: unknown SUBPATH '$SUBPATH' (expected settings, activity or activity-tui)" >&2
+		rm -rf "$T"
+		exit 1
+		;;
+	esac
 	[ "$have_bundled" = 1 ] && probe bundle/index.js "REAL $SUBPATH, bundled chunk"
 	[ "$have_unbundled" = 1 ] && probe index.js "REAL $SUBPATH, unbundled SDK"
 fi
