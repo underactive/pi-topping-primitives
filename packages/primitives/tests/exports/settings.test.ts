@@ -1,16 +1,11 @@
 import assert from "node:assert/strict";
 import { spawn } from "node:child_process";
-import {
-	mkdirSync,
-	mkdtempSync,
-	readFileSync,
-	rmSync,
-	writeFileSync,
-} from "node:fs";
-import { hostname, tmpdir } from "node:os";
-import { join } from "node:path";
+import { cpSync, mkdtempSync, readFileSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { dirname, join } from "node:path";
 import { test } from "node:test";
 import { fileURLToPath, pathToFileURL } from "node:url";
+import * as first from "@underactive/pi-topping-primitives/settings";
 import {
 	createSettingsStore,
 	sanitize,
@@ -48,33 +43,41 @@ test("compiled settings store round trips", () => {
 	}
 });
 
-test("a second module instance contends with the first on one lock path", async () => {
+test("an independent copy of the module contends with the first through the lock directory", async () => {
 	const dir = mkdtempSync(join(tmpdir(), "pt-exp-"));
+	// A full copy of dist/settings (not a ?copy query on the barrel, which would share the
+	// sibling modules) gives a second module graph with its own bindings.
+	const distDir = dirname(
+		fileURLToPath(
+			import.meta.resolve("@underactive/pi-topping-primitives/settings"),
+		),
+	);
+	const copyDir = join(dirname(distDir), `settings-copy-${process.pid}`);
 	try {
-		const file = join(dir, "a.json");
-		const distIndex = pathToFileURL(
-			fileURLToPath(
-				import.meta.resolve("@underactive/pi-topping-primitives/settings"),
-			),
-		).href;
+		cpSync(distDir, copyDir, { recursive: true });
 		const second = (await import(
-			`${distIndex}?copy=2`
-		)) as typeof import("@underactive/pi-topping-primitives/settings");
-		mkdirSync(`${file}.lock`);
-		writeFileSync(
-			join(`${file}.lock`, "owner.json"),
-			JSON.stringify({
-				pid: process.pid,
-				hostname: hostname(),
-				at: Date.now(),
-			}),
-		);
-		const result = second
+			pathToFileURL(join(copyDir, "index.js")).href
+		)) as typeof first;
+		assert.notStrictEqual(second.acquireDirLock, first.acquireDirLock);
+
+		const file = join(dir, "a.json");
+		assert.equal(first.acquireDirLock(`${file}.lock`), true);
+		const blocked = second
 			.createSettingsStore<Doc>(options(file, { attempts: 1 }))
 			.update((c) => c);
-		assert.equal(result.ok, false);
-		if (!result.ok) assert.equal(result.reason, "busy");
+		assert.equal(blocked.ok, false);
+		if (!blocked.ok) assert.equal(blocked.reason, "busy");
+		first.releaseDirLock(`${file}.lock`);
+
+		const freed = second
+			.createSettingsStore<Doc>(options(file))
+			.update((c) => ({ n: c.n + 1 }));
+		assert.equal(freed.ok, true);
+		assert.deepEqual(first.createSettingsStore<Doc>(options(file)).read(), {
+			n: 1,
+		});
 	} finally {
+		rmSync(copyDir, { recursive: true, force: true });
 		rmSync(dir, { recursive: true, force: true });
 	}
 });

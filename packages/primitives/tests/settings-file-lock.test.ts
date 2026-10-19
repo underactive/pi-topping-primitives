@@ -108,3 +108,29 @@ test("isProcessAlive knows this process and rejects nonsense pids", () => {
 	assert.equal(isProcessAlive(0), false);
 	assert.equal(isProcessAlive(-4), false);
 });
+
+test("an unreadable owner is not reclaimed inside the stale window, and is after it", () => {
+	const { dir, path } = lockPath();
+	try {
+		mkdirSync(path);
+		writeFileSync(join(path, "owner.json"), "{not json");
+		assert.equal(dirLockStale(path, { missingOwnerStaleMs: 60_000 }), false);
+		assert.equal(
+			acquireDirLock(path, { attempts: 1, missingOwnerStaleMs: 60_000 }),
+			false,
+		);
+		const old = new Date(Date.now() - 120_000);
+		utimesSync(path, old, old);
+		assert.equal(dirLockStale(path, { missingOwnerStaleMs: 60_000 }), true);
+		assert.equal(
+			acquireDirLock(path, {
+				attempts: 2,
+				retryMs: 0,
+				missingOwnerStaleMs: 60_000,
+			}),
+			true,
+		);
+	} finally {
+		rmSync(dir, { recursive: true, force: true });
+	}
+});

@@ -5,6 +5,10 @@
  * Contract:
  * - `store.read()` never throws; a missing, oversized or corrupt file reads as the codec's defaults.
  * - `store.update()` is the only locked path and refuses a file that is not valid JSON.
+ * - A settings type must not itself have the shape `{ error: string }`: `update()` reads a returned
+ *   object with that single own key as a refusal.
+ * - A codec's `sanitize(undefined)` must return the defaults and must not throw; it is the one
+ *   call `read()` cannot guard.
  * - Failures are result values. `atomicWriteFile` is the one exception: it throws.
  * - Nothing is printed; diagnostics go to `onDiagnostic`.
  * - No module state: two copies of this package in one process interoperate through the filesystem.

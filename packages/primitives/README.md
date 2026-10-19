@@ -66,9 +66,22 @@ store.update((c) => ({ ...c, limit: 10 }));    // locked read-modify-write
 | `toppingSettingsPath(pkg, file?)` | `() => <agent dir>/<pkg>/<file>`, resolved on every call |
 | `acquireDirLock`, `releaseDirLock`, `dirLockStale`, `isProcessAlive` | The directory lock behind `update()` |
 
-Options: `path`, `codec`, `pathEnv` (a non-empty environment value replaces `path()`), `maxBytes`, `mode`, `onDiagnostic` (nothing is ever printed), and `lock` (default on; an object tunes attempts and stale windows).
+| Option | Default | Meaning |
+| --- | --- | --- |
+| `path` | required | `() => string`, resolved on every operation |
+| `codec` | required | `sanitize(raw, diagnose)`, optional `serialize`, `preserveUnknownKeys`, `version` (below) |
+| `pathEnv` | none | A non-empty value of this environment variable replaces `path()` |
+| `maxBytes` | none | Larger files read as missing and make `update()` refuse |
+| `mode` | `{ file: 0o600, dir: 0o700 }` | Applied to files and to directories this call creates; an existing directory is never chmodded |
+| `onDiagnostic` | dropped | Receives every non-fatal problem; a throwing sink is ignored. Nothing is ever printed |
+| `lock` | `true` | Lock `update()` with `<path>.lock`; `false` skips it; an object tunes `attempts`, `retryMs`, `missingOwnerStaleMs` and the like |
 
-Codec: `sanitize(raw, diagnose)` receives `undefined` for a missing file and must not throw; `serialize` defaults to two-space JSON with a trailing newline; `version: { key, current, backupBelow?, backupPath? }` writes the version key first and copies a file whose stored version is older to a backup exactly once (default `<stem>.v<stored>.<ext>`); `preserveUnknownKeys` keeps top-level keys the value does not mention, which needs a serializer that writes every own key of what it is given.
+| Codec field | Default | Meaning |
+| --- | --- | --- |
+| `sanitize(raw, diagnose)` | required | `raw === undefined` means missing or unreadable. It returns the defaults for `undefined` and must not throw |
+| `serialize(value)` | two-space JSON plus a trailing newline | Custom text, for example tab-indented |
+| `version` | none | `{ key, current, backupBelow?, backupPath? }`: the version key is written first; a file whose stored version is not a number `>= backupBelow` is copied once (default `<stem>.v<stored>.<ext>`) before it is replaced, and an existing backup is kept |
+| `preserveUnknownKeys` | `false` | Keep top-level keys the value does not mention. Needs a serializer that writes every own key of what it is given |
 
 Semantics:
 

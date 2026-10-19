@@ -1,21 +1,10 @@
 import { createSettingsCache } from "./cache.js";
+import { isRefusal } from "./refusal.js";
 import type {
 	SettingsChange,
 	SettingsStore,
 	SettingsWriteResult,
 } from "./types.js";
-
-function isRefusal(value: unknown): value is { error: string } {
-	if (typeof value !== "object" || value === null || Array.isArray(value)) {
-		return false;
-	}
-	const keys = Object.keys(value);
-	return (
-		keys.length === 1 &&
-		keys[0] === "error" &&
-		typeof (value as { error: unknown }).error === "string"
-	);
-}
 
 /** An in-memory `SettingsStore` for tests. Values are cloned on the way in and out. */
 export function memorySettingsStore<T>(initial: T): SettingsStore<T> {

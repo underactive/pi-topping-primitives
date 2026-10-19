@@ -1,6 +1,8 @@
 import { randomUUID } from "node:crypto";
 import {
+	closeSync,
 	mkdirSync,
+	openSync,
 	renameSync,
 	rmSync,
 	statSync,
@@ -22,18 +24,25 @@ export function atomicWriteFile(
 ): void {
 	mkdirSync(dirname(path), { recursive: true, mode: mode.dir ?? 0o700 });
 	const tmp = `${path}.${process.pid}.${randomUUID()}.tmp`;
+	// Only a temp file this call created may be removed: if exclusive creation fails, the
+	// pathname belongs to someone else.
+	let created = false;
 	try {
-		writeFileSync(tmp, contents, {
-			encoding: "utf8",
-			flag: "wx",
-			mode: mode.file ?? 0o600,
-		});
+		const fd = openSync(tmp, "wx", mode.file ?? 0o600);
+		created = true;
+		try {
+			writeFileSync(fd, contents, "utf8");
+		} finally {
+			closeSync(fd);
+		}
 		renameSync(tmp, path);
 	} catch (error) {
-		try {
-			rmSync(tmp, { force: true });
-		} catch {
-			// Cleanup must not hide the original failure.
+		if (created) {
+			try {
+				rmSync(tmp, { force: true });
+			} catch {
+				// Cleanup must not hide the original failure.
+			}
 		}
 		throw error;
 	}

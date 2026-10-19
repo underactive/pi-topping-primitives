@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import {
+import fs, {
 	chmodSync,
 	mkdirSync,
 	mkdtempSync,
@@ -9,6 +9,7 @@ import {
 	statSync,
 	writeFileSync,
 } from "node:fs";
+import { syncBuiltinESMExports } from "node:module";
 import { hostname, tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, test } from "node:test";
@@ -469,4 +470,115 @@ test("memory store clones on the way in and out", () => {
 	store.read().n = 50;
 	assert.equal(store.read().n, 1);
 	assert.equal(store.path(), "<memory>");
+});
+
+// --- review-driven cases ---
+
+test("write: a rename failure leaves no temp file and reports write_failed", () => {
+	const dir = tmp();
+	const file = join(dir, "a.json");
+	const original = fs.renameSync;
+	fs.renameSync = () => {
+		throw new Error("rename blocked");
+	};
+	syncBuiltinESMExports();
+	try {
+		const result = fileStore(file).write(defaults);
+		assert.equal(result.ok, false);
+		if (!result.ok) assert.match(result.message, /rename blocked/);
+	} finally {
+		fs.renameSync = original;
+		syncBuiltinESMExports();
+	}
+	assert.deepEqual(readdirSync(dir), []);
+});
+
+test("backups: an existing backup is kept while an old-version source still needs backing up", () => {
+	const dir = tmp();
+	const file = join(dir, "config.json");
+	const store = createSettingsStore<Doc>({
+		path: () => file,
+		codec: {
+			...codec,
+			version: { key: "version", current: 2, backupBelow: 2 },
+		},
+	});
+	writeFileSync(file, '{"version":1,"n":4}');
+	writeFileSync(join(dir, "config.v1.json"), "earlier backup");
+	assert.equal(store.update((c) => ({ ...c, n: 6 })).ok, true);
+	assert.equal(
+		readFileSync(join(dir, "config.v1.json"), "utf8"),
+		"earlier backup",
+	);
+	assert.equal(JSON.parse(readFileSync(file, "utf8")).n, 6);
+});
+
+test("backups: a missing backup directory is a write_failed, and the file is untouched", () => {
+	const dir = tmp();
+	const file = join(dir, "config.json");
+	const store = createSettingsStore<Doc>({
+		path: () => file,
+		codec: {
+			...codec,
+			version: {
+				key: "version",
+				current: 2,
+				backupBelow: 2,
+				backupPath: () => join(dir, "nowhere", "b.json"),
+			},
+		},
+	});
+	writeFileSync(file, '{"version":1}');
+	const result = store.update((c) => c);
+	assert.equal(result.ok, false);
+	if (!result.ok) assert.equal(result.reason, "write_failed");
+	assert.equal(readFileSync(file, "utf8"), '{"version":1}');
+});
+
+test("update: a refusal-shaped object with a symbol or hidden key is a value", () => {
+	const file = join(tmp(), "a.json");
+	const store = createSettingsStore<Record<string, unknown>>({
+		path: () => file,
+		codec: { sanitize: () => ({}) },
+	});
+	const hidden: Record<string, unknown> = { error: "x" };
+	Object.defineProperty(hidden, "extra", { value: 1, enumerable: false });
+	assert.equal(store.update(() => hidden).ok, true);
+	const symbolic: Record<string, unknown> = { error: "x", [Symbol("s")]: 1 };
+	assert.equal(store.update(() => symbolic).ok, true);
+});
+
+test("read never throws when path() or onDiagnostic throws", () => {
+	const store = createSettingsStore<Doc>({
+		path: () => {
+			throw new Error("no path");
+		},
+		codec,
+		onDiagnostic: () => {
+			throw new Error("sink broke");
+		},
+	});
+	assert.deepEqual(store.read(), defaults);
+	const dir = tmp();
+	writeFileSync(join(dir, "bad.json"), "{nope");
+	assert.deepEqual(
+		fileStore(join(dir, "bad.json"), {
+			onDiagnostic: () => {
+				throw new Error("x");
+			},
+		}).read(),
+		defaults,
+	);
+});
+
+test("a throwing diagnostic sink cannot change a successful write", () => {
+	const store = fileStore(join(tmp(), "a.json"), {
+		onDiagnostic: () => {
+			throw new Error("sink broke");
+		},
+	});
+	store.cached().onChange(() => {
+		throw new Error("listener");
+	});
+	assert.equal(store.update((c) => ({ ...c, n: 3 })).ok, true);
 });

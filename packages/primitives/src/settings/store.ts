@@ -1,6 +1,7 @@
 import {
 	constants,
 	copyFileSync,
+	existsSync,
 	mkdirSync,
 	readFileSync,
 	statSync,
@@ -13,6 +14,7 @@ import {
 	type DirLockOptions,
 	releaseDirLock,
 } from "./file-lock.js";
+import { isRefusal } from "./refusal.js";
 import { sanitize } from "./sanitize.js";
 import type {
 	SettingsChange,
@@ -42,15 +44,6 @@ function failure(
 	return { ok: false, reason, message };
 }
 
-/** True for a returned `{ error: "…" }` and nothing wider, so a settings object is never mistaken for it. */
-function isRefusal(value: unknown): value is { error: string } {
-	if (!sanitize.isRecord(value)) return false;
-	const keys = Object.keys(value);
-	return (
-		keys.length === 1 && keys[0] === "error" && typeof value.error === "string"
-	);
-}
-
 /**
  * A JSON settings file with a validating codec.
  *
@@ -62,7 +55,14 @@ export function createSettingsStore<T>(
 	options: SettingsStoreOptions<T>,
 ): SettingsStore<T> {
 	const { codec } = options;
-	const onDiagnostic = options.onDiagnostic ?? (() => {});
+	// A throwing diagnostic callback must never change a result.
+	const onDiagnostic = (message: string): void => {
+		try {
+			options.onDiagnostic?.(message);
+		} catch {
+			// Diagnostics are advisory.
+		}
+	};
 
 	function path(): string {
 		const override = options.pathEnv ? process.env[options.pathEnv] : undefined;
@@ -103,11 +103,15 @@ export function createSettingsStore<T>(
 	}
 
 	function read(): T {
-		const file = path();
-		const result = readRaw(file);
-		if (result.kind === "ok") return fromRaw(result.raw);
-		if (result.kind === "failed") onDiagnostic(result.message);
-		return fromRaw(undefined);
+		try {
+			const result = readRaw(path());
+			if (result.kind === "ok") return fromRaw(result.raw);
+			if (result.kind === "failed") onDiagnostic(result.message);
+		} catch (error) {
+			onDiagnostic(`settings could not be read: ${errorMessage(error)}`);
+		}
+		// The codec contract: sanitize(undefined) returns the defaults and does not throw.
+		return codec.sanitize(undefined, onDiagnostic);
 	}
 
 	function backupIfOld(file: string, raw: unknown): string | undefined {
@@ -128,9 +132,10 @@ export function createSettingsStore<T>(
 			copyFileSync(file, target, constants.COPYFILE_EXCL);
 		} catch (error) {
 			// An existing backup is the earliest copy and stays; a missing source needs none.
-			if (errorCode(error) === "EEXIST" || errorCode(error) === "ENOENT") {
-				return undefined;
-			}
+			if (errorCode(error) === "EEXIST") return undefined;
+			// ENOENT with the source gone means there was nothing to back up; with the source
+			// present it is a missing backup directory, which must not be skipped silently.
+			if (errorCode(error) === "ENOENT" && !existsSync(file)) return undefined;
 			return errorMessage(error);
 		}
 		return undefined;

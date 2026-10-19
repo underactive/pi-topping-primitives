@@ -32,9 +32,13 @@ export function createSettingsCache<T>(
 			try {
 				listener(next, previous);
 			} catch (error) {
-				onDiagnostic(
-					`settings change listener failed: ${error instanceof Error ? error.message : String(error)}`,
-				);
+				try {
+					onDiagnostic(
+						`settings change listener failed: ${error instanceof Error ? error.message : String(error)}`,
+					);
+				} catch {
+					// A failing diagnostic sink must not turn a listener error into a result change.
+				}
 			}
 		}
 	}
