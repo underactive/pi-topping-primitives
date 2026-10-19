@@ -56,19 +56,21 @@ Pack from the repository root so the workspace layout and `prepack` behave as th
 
 ## Runner notes
 
+Verify runner behavior against the packed or registry package, not only a `--no-save` link: Node realpaths a symlink outside `node_modules`, which can hide a missing `-C compiled` or resolve package source instead of `dist`.
+
 | Runner | Change |
 | --- | --- |
 | `node:test` on `.ts` entries | add `-C compiled` |
-| moa-fusion's `.mjs` scripts | add `-C compiled` |
+| moa-fusion's `.mjs` tests | keep `-C compiled` and `--experimental-transform-types` on the parent command; tests relaunch child processes, which inherit those flags |
 | statusline | keeps `--import ./src/tests/ts-resolve.ts` and adds `-C compiled`; the hook only rewrites relative `.js` specifiers |
-| sensei (vitest) | **unverified**: try `resolve.conditions`, `ssr.resolve.conditions`, or `poolOptions.forks.execArgv: ["--conditions=compiled"]`, and record which one works |
+| sensei (vitest) | `resolve.conditions: ["compiled"]`; verified against the published package |
 
 ## Per-repo checklist
 
 Handoff section 7, with two corrections from this phase.
 
 1. `package.json`: add `"@underactive/pi-topping-primitives": "^0.1.0"` under `dependencies`, and `"@underactive/pi-topping-test-utils": "^0.1.0"` under `devDependencies`. Do not touch `peerDependencies` or `files`. **Correction (a):** a registry range is the only committable form. `file:` links exist for `--no-save` work only.
-2. Test script: `node -C compiled --test ...`. moa-fusion's `.mjs` scripts take the same flag. Sensei adds a condition through its vite config, and that path is unverified; see the runner notes.
+2. Test script: `node -C compiled --test ...`. moa-fusion's `.mjs` tests keep `-C compiled` and `--experimental-transform-types` on the parent command so relaunches inherit them. Sensei uses `resolve.conditions: ["compiled"]`, verified against the published package; see the runner notes.
 3. `npm install` in the checkout. With a `file:` link, run `npm run build` in the primitives checkout first.
 4. Replace the vendored module with imports from the package subpath. Delete the tests that moved; keep one host-level smoke assertion.
 5. Remove the "vendored from" header comment and the "mirror test as drift alarm" claim; both are obsolete once the code lives here.
