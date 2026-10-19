@@ -6,10 +6,10 @@ Shared runtime pieces for the pi-topping family: cross-extension contracts (name
 
 ## Install
 
-Version 0.1.0 (contracts only) is published; 0.2.0 adds `./settings`. A topping takes it as a runtime dependency:
+Version 0.1.0 (contracts only) is published; 0.2.0 adds `./settings`; 0.3.0 adds `./activity` and `./activity-tui`. A topping takes it as a runtime dependency:
 
 ```sh
-npm install @underactive/pi-topping-primitives@^0.2.0
+npm install @underactive/pi-topping-primitives@^0.3.0
 ```
 
 That writes a `dependencies` entry. The code is loaded by pi at runtime, so it does not belong in `devDependencies`.
