@@ -1,6 +1,6 @@
 {
 	"name": "@underactive/pi-topping-primitives",
-	"version": "0.8.0",
+	"version": "0.9.0",
 	"description": "Shared runtime primitives for pi-topping extensions. A library, not a Pi extension.",
 	"keywords": [
 		"pi-topping",
