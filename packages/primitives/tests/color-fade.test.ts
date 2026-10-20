@@ -34,7 +34,8 @@ interface ShimmerFixture {
 const BAR_BG: Rgb = [18, 18, 18];
 
 // Captured from statusline's StatusTheme.fadeAnsi (target #121212) under pi-tui's forced
-// truecolor and 256-colour capabilities, before it was edited.
+// truecolor and 256-colour capabilities. Rows reaching cube indices 17–231 were recomputed
+// for primitives 0.7.0's corrected xterm cube levels; all other rows remain the 0.6.0 capture.
 const fade = readFixture<FadeFixture>("fade-sgr");
 // Captured from splash's shimmerCell before it was edited.
 const shimmer = readFixture<ShimmerFixture>("shimmer-cell");
@@ -48,6 +49,60 @@ test("fadeRgbToward reproduces statusline's fadeAnsi over the captured inputs, o
 			output,
 			`${mode} opacity ${opacity} ${JSON.stringify(input)}`,
 		);
+	}
+});
+
+test("fadeRgbToward fades a cube index from xterm's levels", () => {
+	const input = "\x1b[38;5;196m256 fg\x1b[39m";
+	assert.equal(
+		fadeRgbToward(input, BAR_BG, 0.75, "truecolor"),
+		"\x1b[38;2;196;5;5m256 fg\x1b[38;2;158;158;158m", // 0.6.0: 237;5;5
+	);
+	assert.equal(
+		fadeRgbToward(input, BAR_BG, 0.75, "256color"),
+		"\x1b[38;5;160m256 fg\x1b[38;5;247m", // 0.6.0: 38;5;196
+	);
+	assert.equal(
+		fadeRgbToward("\x1b[48;5;70m", BAR_BG, 0.75, "truecolor"),
+		"\x1b[48;2;76;136;5m", // 0.6.0: 84;161;5
+	);
+});
+
+test("a faded level-5 component stays within 255 and keeps its index", () => {
+	const input = "\x1b[38;5;39mx";
+	// 0.6.0 wrote 2;189;281 in truecolor and index 46 in 256-colour mode.
+	assert.equal(
+		fadeRgbToward(input, BAR_BG, 0.9, "truecolor"),
+		"\x1b[38;2;2;159;231mx",
+	);
+	assert.equal(fadeRgbToward(input, BAR_BG, 0.9, "256color"), "\x1b[38;5;39mx");
+});
+
+test("fadeRgbToward never writes a channel above 255 for an indexed colour", () => {
+	for (let index = 0; index <= 255; index++) {
+		for (const plane of [38, 48] as const) {
+			for (const opacity of [0.1, 0.5, 0.81, 0.9, 0.99]) {
+				const label = `${plane};5;${index} opacity ${opacity}`;
+				const input = `\x1b[${plane};5;${index}m`;
+				const truecolor = fadeRgbToward(input, BAR_BG, opacity, "truecolor");
+				const channels = truecolor.slice(7, -1).split(";").map(Number);
+				assert.equal(channels.length, 3, label);
+				for (const channel of channels) {
+					assert.ok(
+						Number.isInteger(channel) && channel >= 0 && channel <= 255,
+						`${label}: ${truecolor}`,
+					);
+				}
+				const indexed = fadeRgbToward(input, BAR_BG, opacity, "256color");
+				const outputIndex = Number(indexed.slice(7, -1));
+				assert.ok(
+					Number.isInteger(outputIndex) &&
+						outputIndex >= 16 &&
+						outputIndex <= 255,
+					`${label}: ${indexed}`,
+				);
+			}
+		}
 	}
 });
 

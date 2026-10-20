@@ -47,7 +47,7 @@ export function cosineFalloff(distance: number, halfWidth: number): number {
  * (`ESC[1;38;2;...m`) is not recognised and passes through unchanged.
  *
  * Each channel becomes `round(c * opacity + target * (1 - opacity))`. Indexed colours resolve
- * through `xterm256ToRgb`, so indices 0 to 15 fade as black.
+ * through `xterm256ToRgb` at xterm's cube levels, so indices 0 to 15 still fade as black.
  */
 export function fadeRgbToward(
 	text: string,

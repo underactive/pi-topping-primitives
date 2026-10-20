@@ -23,7 +23,7 @@ export function parseHex(hex: string): [number, number, number] | undefined {
 }
 
 function cubeLevel(v: number): number {
-	return v === 0 ? 0 : 55 + v * 51;
+	return v === 0 ? 0 : 55 + v * 40;
 }
 
 /** Linear blend of `from` toward `to`; `amount` clamps to 0..1 (NaN reads as 0) and channels round. */
@@ -57,20 +57,14 @@ export function rgbTo256(r: number, g: number, b: number): number {
 }
 
 /**
- * Resolve an xterm-256 index to RGB: 16 to 231 are the cube, 232 to 255 the gray ramp.
- * Indices 0 to 15 are the terminal's own theme colours, which no escape can read back; they
- * go through the cube formula at index 0 and come out black, which is what the fade needs to
- * stay deterministic.
+ * Resolve an xterm-256 index to RGB: 16 to 231 are the 6x6x6 cube at levels 0, 95, 135, 175,
+ * 215 and 255, matching pi-tui's `colorToRgb(indexedColor(n))`; 232 to 255 are the gray ramp
+ * `8 + 10k`. Indices 0 to 15 are the terminal's own theme colours, which no escape can read
+ * back, so they go through the cube formula at index 0 and come out black to keep fades
+ * deterministic.
  *
- * Known defect, kept for byte parity with statusline's fade: the cube levels are
- * `55 + v * 51`, but xterm's are `55 + v * 40` (0, 95, 135, 175, 215, 255). A cube component
- * of 4 or 5 therefore comes out as 259 or 310, above the 255 a channel can hold, and every
- * other non-zero level is brighter than the terminal draws it. `fadeRgbToward` carries the
- * excess into its output: a faded index such as 39 (blue 310) writes a channel above 255 once
- * the opacity passes about 0.8, and in 256-colour mode `rgbTo256` then lands one cube step
- * too high. pi-tui's own indexed-colour table has the right values. Correcting this changes
- * every faded colour that started as a 256-colour escape, so it is a deliberate, separate
- * change; the tests pin the current values as a defect so that change is made on purpose.
+ * 0.6.0 and earlier used statusline's `55 + v * 51`; 0.7.0 corrects it, so a partial fade of
+ * indices 17–231 changes.
  */
 export function xterm256ToRgb(n: number): [number, number, number] {
 	if (n >= 232) {

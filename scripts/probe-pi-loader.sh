@@ -111,7 +111,7 @@ printf '{ "name": "@underactive/fake-prim", "type": "module", "exports": { ".": 
 # sliceByColumn, which is the row that proves the host alias reaches it; glyphs is data only.
 # Expect for menu: {"top":true,"rows":7,"result":{"applied":true,"values":{"on":true}}}
 # Expect for models: {"rows":2,"pick":{"ref":{"provider":"probe","id":"model"},"thinking":"off"}}
-# Expect for color: {"filled":10,"trough":10,"green":"\u001b[38;2;132;197;26m"}
+# Expect for color: {"filled":10,"trough":10,"green":"\u001b[38;2;132;197;26m","cube":[0,175,255]}
 # Expect for text: {"fit":"日\u001b[39m...","center":"  日本  "}
 # Expect for glyphs: {"corner":"╭","frames":10,"frozen":true}
 if [ -n "$PRIM_TGZ" ]; then
@@ -190,12 +190,13 @@ EOF2
 		;;
 	color)
 		cat > "$T/ext/index.ts" <<EOF2
-import { NVIDIA_GREEN_HEX, hexToFgAnsi, renderCometBar } from "@underactive/pi-topping-primitives/$SUBPATH";
+import { NVIDIA_GREEN_HEX, hexToFgAnsi, renderCometBar, xterm256ToRgb } from "@underactive/pi-topping-primitives/$SUBPATH";
 const bar = renderCometBar(50, { mode: "truecolor", elapsedMs: 500 });
 (globalThis as { __fakePrim?: unknown }).__fakePrim = {
 	filled: bar.split("\u258b").length - 1,
 	trough: bar.split("\u2591").length - 1,
 	green: hexToFgAnsi(NVIDIA_GREEN_HEX, "truecolor"),
+	cube: xterm256ToRgb(39),
 };
 export default function () {}
 EOF2

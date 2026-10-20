@@ -4,6 +4,12 @@ All notable changes to this package are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this package
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+
+- Correct `xterm256ToRgb`'s cube levels to `55 + v * 40`, matching xterm and pi-tui; indexed colours no longer produce a channel above 255. Partial fades of indices 17–231 and `parseSgrColor`'s indexed `rgb` now use the corrected values. For example, fading index 39 at 0.9 toward `#121212` previously wrote `2;189;281` and became index 46 in 256-colour mode; it now writes `2;159;231` and stays at index 39. Truecolor sources, `ESC[39m`, the gray ramp, indices 0–16, opacity at or below 0 or at or above 1, `rgbTo256`, and the comet bar remain byte-identical. The 24 recomputed Phase 6 fixture rows are a deliberate output change. This fixes the 0.6.0 Known issue.
+
 ## [0.6.0] - 2026-10-20
 
 ### Added

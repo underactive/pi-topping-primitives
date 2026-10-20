@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
+import { colorToRgb, indexedColor } from "@earendil-works/pi-tui";
 import { ansiToRgb } from "../src/activity-tui/index.js";
 import {
 	channelsToFgAnsi,
@@ -95,16 +96,32 @@ test("xterm256ToRgb reads the terminal's own colours, 0 to 15, as black, like th
 	}
 });
 
-// DEFECT PIN. The cube levels here are statusline's `55 + v * 51`; xterm's are 0, 95, 135, 175,
-// 215, 255 (`55 + v * 40`), so levels 4 and 5 come out above 255 and the others read bright.
-// The values are kept so a faded 256-colour escape matches statusline's old bytes. When the
-// cube is corrected on purpose, these expectations change with it, and so do the fade bytes.
-test("xterm256ToRgb keeps statusline's cube arithmetic, including levels above 255 (known defect)", () => {
-	assert.deepEqual(xterm256ToRgb(17), [0, 0, 106]); // xterm: 0, 0, 95
-	assert.deepEqual(xterm256ToRgb(21), [0, 0, 310]); // xterm: 0, 0, 255
-	assert.deepEqual(xterm256ToRgb(196), [310, 0, 0]); // xterm: 255, 0, 0
-	assert.deepEqual(xterm256ToRgb(178), [259, 208, 0]); // xterm: 215, 175, 0
-	assert.deepEqual(xterm256ToRgb(231), [310, 310, 310]); // xterm: 255, 255, 255
+test("xterm256ToRgb reads the cube at xterm's levels", () => {
+	assert.deepEqual(xterm256ToRgb(17), [0, 0, 95]); // 0.6.0: [0, 0, 106]
+	assert.deepEqual(xterm256ToRgb(21), [0, 0, 255]); // 0.6.0: [0, 0, 310]
+	assert.deepEqual(xterm256ToRgb(196), [255, 0, 0]); // 0.6.0: [310, 0, 0]
+	assert.deepEqual(xterm256ToRgb(178), [215, 175, 0]); // 0.6.0: [259, 208, 0]
+	assert.deepEqual(xterm256ToRgb(231), [255, 255, 255]); // 0.6.0: [310, 310, 310]
+	assert.deepEqual(xterm256ToRgb(39), [0, 175, 255]); // 0.6.0: [0, 208, 310]
+	assert.deepEqual(xterm256ToRgb(70), [95, 175, 0]); // 0.6.0: [106, 208, 0]
+});
+
+test("xterm256ToRgb agrees with pi-tui's indexed table from 16 to 255", () => {
+	for (let n = 16; n <= 255; n++) {
+		const { r, g, b } = colorToRgb(indexedColor(n));
+		assert.deepEqual(xterm256ToRgb(n), [r, g, b], String(n));
+	}
+});
+
+test("xterm256ToRgb keeps every channel an integer from 0 to 255", () => {
+	for (let n = 0; n <= 255; n++) {
+		for (const channel of xterm256ToRgb(n)) {
+			assert.ok(
+				Number.isInteger(channel) && channel >= 0 && channel <= 255,
+				`index ${n}: ${channel}`,
+			);
+		}
+	}
 });
 
 test("channelsToFgAnsi writes truecolor as given and 256-colour through rgbTo256", () => {
@@ -178,7 +195,7 @@ test("parseSgrColor is unanchored and takes the first colour it finds", () => {
 	});
 	assert.deepEqual(
 		parseSgrColor("lead \x1b[38;5;196mx\x1b[38;2;1;2;3my\x1b[39m"),
-		{ kind: "indexed", plane: "fg", index: 196, rgb: xterm256ToRgb(196) },
+		{ kind: "indexed", plane: "fg", index: 196, rgb: [255, 0, 0] },
 	);
 });
 

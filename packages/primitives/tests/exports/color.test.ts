@@ -13,6 +13,17 @@ test("compiled ./color renders the comet bar and reads a colour escape", () => {
 	);
 });
 
+test("compiled ./color resolves the cube at xterm's levels", () => {
+	assert.deepEqual(color.xterm256ToRgb(196), [255, 0, 0]);
+	assert.deepEqual(color.xterm256ToRgb(39), [0, 175, 255]);
+	assert.deepEqual(color.parseSgrColor("\x1b[38;5;196m"), {
+		kind: "indexed",
+		plane: "fg",
+		index: 196,
+		rgb: [255, 0, 0],
+	});
+});
+
 test("compiled ./color keeps its parser apart from ./activity-tui's", () => {
 	assert.equal(ansiToRgb("\x1b[38;5;196m"), null);
 	assert.deepEqual(color.parseSgrColor("\x1b[38;5;196m")?.kind, "indexed");
