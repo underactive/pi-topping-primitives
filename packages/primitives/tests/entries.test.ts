@@ -21,6 +21,9 @@ const SUBPATHS = [
 	"./activity-tui",
 	"./menu",
 	"./models",
+	"./color",
+	"./text",
+	"./glyphs",
 ] as const;
 
 // Node's resolver realpaths the workspace symlink out of node_modules, which is also why

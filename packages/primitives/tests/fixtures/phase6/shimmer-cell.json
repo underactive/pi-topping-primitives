@@ -1,0 +1,519 @@
+{
+	"source": "pi-topping-splash src/reveal.ts shimmerCell (66dea49a), REVEAL_BAND_HALF 5, REVEAL_PEAK_ALPHA 0.9",
+	"bandHalf": 5,
+	"peakAlpha": 0.9,
+	"cases": [
+		{
+			"palette": "dim-to-text",
+			"base": [100, 100, 110],
+			"highlight": [230, 230, 235],
+			"ch": "a",
+			"dist": 0,
+			"output": "\u001b[1m\u001b[38;2;217;217;223ma\u001b[22m"
+		},
+		{
+			"palette": "dim-to-text",
+			"base": [100, 100, 110],
+			"highlight": [230, 230, 235],
+			"ch": "a",
+			"dist": 0.25,
+			"output": "\u001b[1m\u001b[38;2;216;216;222ma\u001b[22m"
+		},
+		{
+			"palette": "dim-to-text",
+			"base": [100, 100, 110],
+			"highlight": [230, 230, 235],
+			"ch": "a",
+			"dist": 0.5,
+			"output": "\u001b[1m\u001b[38;2;214;214;220ma\u001b[22m"
+		},
+		{
+			"palette": "dim-to-text",
+			"base": [100, 100, 110],
+			"highlight": [230, 230, 235],
+			"ch": "a",
+			"dist": 1,
+			"output": "\u001b[1m\u001b[38;2;206;206;212ma\u001b[22m"
+		},
+		{
+			"palette": "dim-to-text",
+			"base": [100, 100, 110],
+			"highlight": [230, 230, 235],
+			"ch": "a",
+			"dist": 1.5,
+			"output": "\u001b[1m\u001b[38;2;193;193;199ma\u001b[22m"
+		},
+		{
+			"palette": "dim-to-text",
+			"base": [100, 100, 110],
+			"highlight": [230, 230, 235],
+			"ch": "a",
+			"dist": 2,
+			"output": "\u001b[1m\u001b[38;2;177;177;184ma\u001b[22m"
+		},
+		{
+			"palette": "dim-to-text",
+			"base": [100, 100, 110],
+			"highlight": [230, 230, 235],
+			"ch": "a",
+			"dist": 2.5,
+			"output": "\u001b[1m\u001b[38;2;159;159;166ma\u001b[22m"
+		},
+		{
+			"palette": "dim-to-text",
+			"base": [100, 100, 110],
+			"highlight": [230, 230, 235],
+			"ch": "a",
+			"dist": 3,
+			"output": "\u001b[1m\u001b[38;2;140;140;149ma\u001b[22m"
+		},
+		{
+			"palette": "dim-to-text",
+			"base": [100, 100, 110],
+			"highlight": [230, 230, 235],
+			"ch": "a",
+			"dist": 3.5,
+			"output": "\u001b[1m\u001b[38;2;124;124;133ma\u001b[22m"
+		},
+		{
+			"palette": "dim-to-text",
+			"base": [100, 100, 110],
+			"highlight": [230, 230, 235],
+			"ch": "a",
+			"dist": 4,
+			"output": "\u001b[38;2;111;111;121ma"
+		},
+		{
+			"palette": "dim-to-text",
+			"base": [100, 100, 110],
+			"highlight": [230, 230, 235],
+			"ch": "a",
+			"dist": 4.5,
+			"output": "\u001b[38;2;103;103;113ma"
+		},
+		{
+			"palette": "dim-to-text",
+			"base": [100, 100, 110],
+			"highlight": [230, 230, 235],
+			"ch": "a",
+			"dist": 4.99,
+			"output": "\u001b[38;2;100;100;110ma"
+		},
+		{
+			"palette": "dim-to-text",
+			"base": [100, 100, 110],
+			"highlight": [230, 230, 235],
+			"ch": "a",
+			"dist": 5,
+			"output": "\u001b[38;2;100;100;110ma"
+		},
+		{
+			"palette": "dim-to-text",
+			"base": [100, 100, 110],
+			"highlight": [230, 230, 235],
+			"ch": "a",
+			"dist": 5.01,
+			"output": "\u001b[38;2;100;100;110ma"
+		},
+		{
+			"palette": "dim-to-text",
+			"base": [100, 100, 110],
+			"highlight": [230, 230, 235],
+			"ch": "a",
+			"dist": 6,
+			"output": "\u001b[38;2;100;100;110ma"
+		},
+		{
+			"palette": "dim-to-text",
+			"base": [100, 100, 110],
+			"highlight": [230, 230, 235],
+			"ch": "a",
+			"dist": 100,
+			"output": "\u001b[38;2;100;100;110ma"
+		},
+		{
+			"palette": "dim-to-text",
+			"base": [100, 100, 110],
+			"highlight": [230, 230, 235],
+			"ch": "日",
+			"dist": 0,
+			"output": "\u001b[1m\u001b[38;2;217;217;223m日\u001b[22m"
+		},
+		{
+			"palette": "dim-to-text",
+			"base": [100, 100, 110],
+			"highlight": [230, 230, 235],
+			"ch": "日",
+			"dist": 0.25,
+			"output": "\u001b[1m\u001b[38;2;216;216;222m日\u001b[22m"
+		},
+		{
+			"palette": "dim-to-text",
+			"base": [100, 100, 110],
+			"highlight": [230, 230, 235],
+			"ch": "日",
+			"dist": 0.5,
+			"output": "\u001b[1m\u001b[38;2;214;214;220m日\u001b[22m"
+		},
+		{
+			"palette": "dim-to-text",
+			"base": [100, 100, 110],
+			"highlight": [230, 230, 235],
+			"ch": "日",
+			"dist": 1,
+			"output": "\u001b[1m\u001b[38;2;206;206;212m日\u001b[22m"
+		},
+		{
+			"palette": "dim-to-text",
+			"base": [100, 100, 110],
+			"highlight": [230, 230, 235],
+			"ch": "日",
+			"dist": 1.5,
+			"output": "\u001b[1m\u001b[38;2;193;193;199m日\u001b[22m"
+		},
+		{
+			"palette": "dim-to-text",
+			"base": [100, 100, 110],
+			"highlight": [230, 230, 235],
+			"ch": "日",
+			"dist": 2,
+			"output": "\u001b[1m\u001b[38;2;177;177;184m日\u001b[22m"
+		},
+		{
+			"palette": "dim-to-text",
+			"base": [100, 100, 110],
+			"highlight": [230, 230, 235],
+			"ch": "日",
+			"dist": 2.5,
+			"output": "\u001b[1m\u001b[38;2;159;159;166m日\u001b[22m"
+		},
+		{
+			"palette": "dim-to-text",
+			"base": [100, 100, 110],
+			"highlight": [230, 230, 235],
+			"ch": "日",
+			"dist": 3,
+			"output": "\u001b[1m\u001b[38;2;140;140;149m日\u001b[22m"
+		},
+		{
+			"palette": "dim-to-text",
+			"base": [100, 100, 110],
+			"highlight": [230, 230, 235],
+			"ch": "日",
+			"dist": 3.5,
+			"output": "\u001b[1m\u001b[38;2;124;124;133m日\u001b[22m"
+		},
+		{
+			"palette": "dim-to-text",
+			"base": [100, 100, 110],
+			"highlight": [230, 230, 235],
+			"ch": "日",
+			"dist": 4,
+			"output": "\u001b[38;2;111;111;121m日"
+		},
+		{
+			"palette": "dim-to-text",
+			"base": [100, 100, 110],
+			"highlight": [230, 230, 235],
+			"ch": "日",
+			"dist": 4.5,
+			"output": "\u001b[38;2;103;103;113m日"
+		},
+		{
+			"palette": "dim-to-text",
+			"base": [100, 100, 110],
+			"highlight": [230, 230, 235],
+			"ch": "日",
+			"dist": 4.99,
+			"output": "\u001b[38;2;100;100;110m日"
+		},
+		{
+			"palette": "dim-to-text",
+			"base": [100, 100, 110],
+			"highlight": [230, 230, 235],
+			"ch": "日",
+			"dist": 5,
+			"output": "\u001b[38;2;100;100;110m日"
+		},
+		{
+			"palette": "dim-to-text",
+			"base": [100, 100, 110],
+			"highlight": [230, 230, 235],
+			"ch": "日",
+			"dist": 5.01,
+			"output": "\u001b[38;2;100;100;110m日"
+		},
+		{
+			"palette": "dim-to-text",
+			"base": [100, 100, 110],
+			"highlight": [230, 230, 235],
+			"ch": "日",
+			"dist": 6,
+			"output": "\u001b[38;2;100;100;110m日"
+		},
+		{
+			"palette": "dim-to-text",
+			"base": [100, 100, 110],
+			"highlight": [230, 230, 235],
+			"ch": "日",
+			"dist": 100,
+			"output": "\u001b[38;2;100;100;110m日"
+		},
+		{
+			"palette": "black-to-white",
+			"base": [0, 0, 0],
+			"highlight": [255, 255, 255],
+			"ch": "a",
+			"dist": 0,
+			"output": "\u001b[1m\u001b[38;2;230;230;230ma\u001b[22m"
+		},
+		{
+			"palette": "black-to-white",
+			"base": [0, 0, 0],
+			"highlight": [255, 255, 255],
+			"ch": "a",
+			"dist": 0.25,
+			"output": "\u001b[1m\u001b[38;2;228;228;228ma\u001b[22m"
+		},
+		{
+			"palette": "black-to-white",
+			"base": [0, 0, 0],
+			"highlight": [255, 255, 255],
+			"ch": "a",
+			"dist": 0.5,
+			"output": "\u001b[1m\u001b[38;2;224;224;224ma\u001b[22m"
+		},
+		{
+			"palette": "black-to-white",
+			"base": [0, 0, 0],
+			"highlight": [255, 255, 255],
+			"ch": "a",
+			"dist": 1,
+			"output": "\u001b[1m\u001b[38;2;208;208;208ma\u001b[22m"
+		},
+		{
+			"palette": "black-to-white",
+			"base": [0, 0, 0],
+			"highlight": [255, 255, 255],
+			"ch": "a",
+			"dist": 1.5,
+			"output": "\u001b[1m\u001b[38;2;182;182;182ma\u001b[22m"
+		},
+		{
+			"palette": "black-to-white",
+			"base": [0, 0, 0],
+			"highlight": [255, 255, 255],
+			"ch": "a",
+			"dist": 2,
+			"output": "\u001b[1m\u001b[38;2;150;150;150ma\u001b[22m"
+		},
+		{
+			"palette": "black-to-white",
+			"base": [0, 0, 0],
+			"highlight": [255, 255, 255],
+			"ch": "a",
+			"dist": 2.5,
+			"output": "\u001b[1m\u001b[38;2;115;115;115ma\u001b[22m"
+		},
+		{
+			"palette": "black-to-white",
+			"base": [0, 0, 0],
+			"highlight": [255, 255, 255],
+			"ch": "a",
+			"dist": 3,
+			"output": "\u001b[1m\u001b[38;2;79;79;79ma\u001b[22m"
+		},
+		{
+			"palette": "black-to-white",
+			"base": [0, 0, 0],
+			"highlight": [255, 255, 255],
+			"ch": "a",
+			"dist": 3.5,
+			"output": "\u001b[1m\u001b[38;2;47;47;47ma\u001b[22m"
+		},
+		{
+			"palette": "black-to-white",
+			"base": [0, 0, 0],
+			"highlight": [255, 255, 255],
+			"ch": "a",
+			"dist": 4,
+			"output": "\u001b[38;2;22;22;22ma"
+		},
+		{
+			"palette": "black-to-white",
+			"base": [0, 0, 0],
+			"highlight": [255, 255, 255],
+			"ch": "a",
+			"dist": 4.5,
+			"output": "\u001b[38;2;6;6;6ma"
+		},
+		{
+			"palette": "black-to-white",
+			"base": [0, 0, 0],
+			"highlight": [255, 255, 255],
+			"ch": "a",
+			"dist": 4.99,
+			"output": "\u001b[38;2;0;0;0ma"
+		},
+		{
+			"palette": "black-to-white",
+			"base": [0, 0, 0],
+			"highlight": [255, 255, 255],
+			"ch": "a",
+			"dist": 5,
+			"output": "\u001b[38;2;0;0;0ma"
+		},
+		{
+			"palette": "black-to-white",
+			"base": [0, 0, 0],
+			"highlight": [255, 255, 255],
+			"ch": "a",
+			"dist": 5.01,
+			"output": "\u001b[38;2;0;0;0ma"
+		},
+		{
+			"palette": "black-to-white",
+			"base": [0, 0, 0],
+			"highlight": [255, 255, 255],
+			"ch": "a",
+			"dist": 6,
+			"output": "\u001b[38;2;0;0;0ma"
+		},
+		{
+			"palette": "black-to-white",
+			"base": [0, 0, 0],
+			"highlight": [255, 255, 255],
+			"ch": "a",
+			"dist": 100,
+			"output": "\u001b[38;2;0;0;0ma"
+		},
+		{
+			"palette": "black-to-white",
+			"base": [0, 0, 0],
+			"highlight": [255, 255, 255],
+			"ch": "日",
+			"dist": 0,
+			"output": "\u001b[1m\u001b[38;2;230;230;230m日\u001b[22m"
+		},
+		{
+			"palette": "black-to-white",
+			"base": [0, 0, 0],
+			"highlight": [255, 255, 255],
+			"ch": "日",
+			"dist": 0.25,
+			"output": "\u001b[1m\u001b[38;2;228;228;228m日\u001b[22m"
+		},
+		{
+			"palette": "black-to-white",
+			"base": [0, 0, 0],
+			"highlight": [255, 255, 255],
+			"ch": "日",
+			"dist": 0.5,
+			"output": "\u001b[1m\u001b[38;2;224;224;224m日\u001b[22m"
+		},
+		{
+			"palette": "black-to-white",
+			"base": [0, 0, 0],
+			"highlight": [255, 255, 255],
+			"ch": "日",
+			"dist": 1,
+			"output": "\u001b[1m\u001b[38;2;208;208;208m日\u001b[22m"
+		},
+		{
+			"palette": "black-to-white",
+			"base": [0, 0, 0],
+			"highlight": [255, 255, 255],
+			"ch": "日",
+			"dist": 1.5,
+			"output": "\u001b[1m\u001b[38;2;182;182;182m日\u001b[22m"
+		},
+		{
+			"palette": "black-to-white",
+			"base": [0, 0, 0],
+			"highlight": [255, 255, 255],
+			"ch": "日",
+			"dist": 2,
+			"output": "\u001b[1m\u001b[38;2;150;150;150m日\u001b[22m"
+		},
+		{
+			"palette": "black-to-white",
+			"base": [0, 0, 0],
+			"highlight": [255, 255, 255],
+			"ch": "日",
+			"dist": 2.5,
+			"output": "\u001b[1m\u001b[38;2;115;115;115m日\u001b[22m"
+		},
+		{
+			"palette": "black-to-white",
+			"base": [0, 0, 0],
+			"highlight": [255, 255, 255],
+			"ch": "日",
+			"dist": 3,
+			"output": "\u001b[1m\u001b[38;2;79;79;79m日\u001b[22m"
+		},
+		{
+			"palette": "black-to-white",
+			"base": [0, 0, 0],
+			"highlight": [255, 255, 255],
+			"ch": "日",
+			"dist": 3.5,
+			"output": "\u001b[1m\u001b[38;2;47;47;47m日\u001b[22m"
+		},
+		{
+			"palette": "black-to-white",
+			"base": [0, 0, 0],
+			"highlight": [255, 255, 255],
+			"ch": "日",
+			"dist": 4,
+			"output": "\u001b[38;2;22;22;22m日"
+		},
+		{
+			"palette": "black-to-white",
+			"base": [0, 0, 0],
+			"highlight": [255, 255, 255],
+			"ch": "日",
+			"dist": 4.5,
+			"output": "\u001b[38;2;6;6;6m日"
+		},
+		{
+			"palette": "black-to-white",
+			"base": [0, 0, 0],
+			"highlight": [255, 255, 255],
+			"ch": "日",
+			"dist": 4.99,
+			"output": "\u001b[38;2;0;0;0m日"
+		},
+		{
+			"palette": "black-to-white",
+			"base": [0, 0, 0],
+			"highlight": [255, 255, 255],
+			"ch": "日",
+			"dist": 5,
+			"output": "\u001b[38;2;0;0;0m日"
+		},
+		{
+			"palette": "black-to-white",
+			"base": [0, 0, 0],
+			"highlight": [255, 255, 255],
+			"ch": "日",
+			"dist": 5.01,
+			"output": "\u001b[38;2;0;0;0m日"
+		},
+		{
+			"palette": "black-to-white",
+			"base": [0, 0, 0],
+			"highlight": [255, 255, 255],
+			"ch": "日",
+			"dist": 6,
+			"output": "\u001b[38;2;0;0;0m日"
+		},
+		{
+			"palette": "black-to-white",
+			"base": [0, 0, 0],
+			"highlight": [255, 255, 255],
+			"ch": "日",
+			"dist": 100,
+			"output": "\u001b[38;2;0;0;0m日"
+		}
+	]
+}

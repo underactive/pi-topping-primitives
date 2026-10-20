@@ -13,13 +13,17 @@ import { scanSource, scanTree } from "../tools/hygiene.js";
 /** Repo root, resolved from this module so the tree scans do not depend on the cwd. */
 const REPO_ROOT = fileURLToPath(new URL("..", import.meta.url));
 
-/** A path outside `contracts/` and `activity/`, where pi imports are allowed. */
+/** A path outside the pi-free subpaths, where pi imports are allowed. */
 const MENU = "packages/primitives/src/menu/index.ts";
 /** A path where pi must never be imported at runtime. */
 const CONTRACTS = "packages/primitives/src/contracts/index.ts";
-/** The other pi-free path. `activity-tui` is deliberately not covered. */
+/** The other pi-free paths. `activity-tui` and `text` are deliberately not covered. */
 const ACTIVITY = "packages/primitives/src/activity/index.ts";
 const ACTIVITY_TUI = "packages/primitives/src/activity-tui/index.ts";
+const COLOR = "packages/primitives/src/color/rgb.ts";
+const GLYPHS = "packages/primitives/src/glyphs/index.ts";
+/** Runs pi-tui at runtime by design: `layout.ts` measures with `visibleWidth`. */
+const TEXT = "packages/primitives/src/text/layout.ts";
 
 function scan(text: string, file = MENU, rules?: readonly HygieneRule[]) {
 	return scanSource(file, text, rules === undefined ? undefined : { rules });
@@ -390,6 +394,61 @@ test("pi-runtime-import is limited to the pi-free subpaths", () => {
 		),
 		["pi-runtime-import"],
 	);
+});
+
+test("pi-runtime-import covers the colour and glyph subpaths but not text", () => {
+	const value = 'import { visibleWidth } from "@earendil-works/pi-tui";\n';
+	for (const file of [COLOR, GLYPHS]) {
+		assert.deepEqual(
+			scan(value, file).map((finding) => finding.rule),
+			["pi-runtime-import"],
+			file,
+		);
+	}
+	// `text/layout.ts` is the one place those subpaths import pi-tui at runtime.
+	assert.deepEqual(scan(value, TEXT), []);
+
+	// The type-only forms `./color` actually uses stay clean.
+	for (const typeOnly of [
+		'import type { TerminalColorMode } from "@earendil-works/pi-tui";\n',
+		'export type { TerminalColorMode } from "@earendil-works/pi-tui";\n',
+	]) {
+		assert.deepEqual(scan(typeOnly, COLOR), [], typeOnly);
+	}
+
+	// An inline `type` marker inside a braced value import is still a runtime import.
+	assert.deepEqual(
+		scan(
+			'export { type TerminalColorMode } from "@earendil-works/pi-tui";\n',
+			COLOR,
+		).map((finding) => finding.rule),
+		["pi-runtime-import"],
+	);
+
+	// Only the directory straight under `src` names the subpath: a checkout under a directory
+	// that happens to be called `color`, or a nested folder with that name, does not count.
+	assert.deepEqual(
+		scan(
+			value,
+			"/work/color/pi-topping-primitives/packages/primitives/src/menu/index.ts",
+		),
+		[],
+	);
+	assert.deepEqual(
+		scan(value, "packages/primitives/src/models/color/picker.ts"),
+		[],
+	);
+	assert.deepEqual(
+		scan(
+			value,
+			"/work/glyphs/pi-topping-primitives/packages/primitives/src/color/rgb.ts",
+		).map((finding) => finding.rule),
+		["pi-runtime-import"],
+	);
+
+	// A file merely named `color.ts` in another subpath is not in a pi-free directory.
+	assert.deepEqual(scan(value, "packages/primitives/src/menu/color.ts"), []);
+	assert.deepEqual(scan(value, "packages/primitives/src/models/glyphs.ts"), []);
 });
 
 test("pi-runtime-import ignores non-pi specifiers and comments", () => {

@@ -1,0 +1,290 @@
+{
+	"source": "pi-topping-routesense src/format.ts formatDuration/formatCount/formatPercent (b0b48f2); pi-topping-persona-audit AuditProgress.ts formatCost (68048cd), identical to pi-topping-moa-fusion agentStatus.ts formatCost (275f43b) on every input. Numbers JSON cannot hold are \"NaN\", \"Infinity\" or \"-Infinity\"; an absent value is null.",
+	"duration": [
+		{
+			"ms": 0,
+			"output": "0ms"
+		},
+		{
+			"ms": 1,
+			"output": "1ms"
+		},
+		{
+			"ms": 0.4,
+			"output": "0ms"
+		},
+		{
+			"ms": 842.2,
+			"output": "842ms"
+		},
+		{
+			"ms": 999.4,
+			"output": "999ms"
+		},
+		{
+			"ms": 999.5,
+			"output": "1.0s"
+		},
+		{
+			"ms": 1000,
+			"output": "1.0s"
+		},
+		{
+			"ms": 3200,
+			"output": "3.2s"
+		},
+		{
+			"ms": 59949,
+			"output": "59.9s"
+		},
+		{
+			"ms": 59950,
+			"output": "1m00s"
+		},
+		{
+			"ms": 65000,
+			"output": "1m05s"
+		},
+		{
+			"ms": 3599000,
+			"output": "59m59s"
+		},
+		{
+			"ms": 3600000,
+			"output": "60m00s"
+		},
+		{
+			"ms": 86400000,
+			"output": "1440m00s"
+		},
+		{
+			"ms": -5,
+			"output": "-5ms"
+		}
+	],
+	"count": [
+		{
+			"n": 0,
+			"output": "0"
+		},
+		{
+			"n": 7,
+			"output": "7"
+		},
+		{
+			"n": 1234,
+			"output": "1,234"
+		},
+		{
+			"n": 1234567,
+			"output": "1,234,567"
+		},
+		{
+			"n": -1,
+			"output": "-1"
+		},
+		{
+			"n": 1.5,
+			"output": "1.5"
+		},
+		{
+			"n": 999.5,
+			"output": "999.5"
+		}
+	],
+	"percent": [
+		{
+			"fraction": 0,
+			"decimals": 0,
+			"output": "0%"
+		},
+		{
+			"fraction": 0,
+			"decimals": 1,
+			"output": "0.0%"
+		},
+		{
+			"fraction": 0,
+			"decimals": 2,
+			"output": "0.00%"
+		},
+		{
+			"fraction": 0.004,
+			"decimals": 0,
+			"output": "0%"
+		},
+		{
+			"fraction": 0.004,
+			"decimals": 1,
+			"output": "0.4%"
+		},
+		{
+			"fraction": 0.004,
+			"decimals": 2,
+			"output": "0.40%"
+		},
+		{
+			"fraction": 0.5,
+			"decimals": 0,
+			"output": "50%"
+		},
+		{
+			"fraction": 0.5,
+			"decimals": 1,
+			"output": "50.0%"
+		},
+		{
+			"fraction": 0.5,
+			"decimals": 2,
+			"output": "50.00%"
+		},
+		{
+			"fraction": 0.6789,
+			"decimals": 0,
+			"output": "68%"
+		},
+		{
+			"fraction": 0.6789,
+			"decimals": 1,
+			"output": "67.9%"
+		},
+		{
+			"fraction": 0.6789,
+			"decimals": 2,
+			"output": "67.89%"
+		},
+		{
+			"fraction": 1,
+			"decimals": 0,
+			"output": "100%"
+		},
+		{
+			"fraction": 1,
+			"decimals": 1,
+			"output": "100.0%"
+		},
+		{
+			"fraction": 1,
+			"decimals": 2,
+			"output": "100.00%"
+		},
+		{
+			"fraction": 1.5,
+			"decimals": 0,
+			"output": "150%"
+		},
+		{
+			"fraction": 1.5,
+			"decimals": 1,
+			"output": "150.0%"
+		},
+		{
+			"fraction": 1.5,
+			"decimals": 2,
+			"output": "150.00%"
+		},
+		{
+			"fraction": -0.1,
+			"decimals": 0,
+			"output": "-10%"
+		},
+		{
+			"fraction": -0.1,
+			"decimals": 1,
+			"output": "-10.0%"
+		},
+		{
+			"fraction": -0.1,
+			"decimals": 2,
+			"output": "-10.00%"
+		}
+	],
+	"percentDefault": [
+		{
+			"fraction": 0,
+			"output": "0%"
+		},
+		{
+			"fraction": 0.004,
+			"output": "0%"
+		},
+		{
+			"fraction": 0.5,
+			"output": "50%"
+		},
+		{
+			"fraction": 0.6789,
+			"output": "68%"
+		},
+		{
+			"fraction": 1,
+			"output": "100%"
+		},
+		{
+			"fraction": 1.5,
+			"output": "150%"
+		},
+		{
+			"fraction": -0.1,
+			"output": "-10%"
+		}
+	],
+	"cost": [
+		{
+			"costUsd": 0,
+			"output": "$0.000"
+		},
+		{
+			"costUsd": 0.004,
+			"output": "$0.004"
+		},
+		{
+			"costUsd": 0.0004,
+			"output": "$0.000"
+		},
+		{
+			"costUsd": 0.0005,
+			"output": "$0.001"
+		},
+		{
+			"costUsd": 0.1234,
+			"output": "$0.123"
+		},
+		{
+			"costUsd": 1,
+			"output": "$1.000"
+		},
+		{
+			"costUsd": 12.3456,
+			"output": "$12.346"
+		},
+		{
+			"costUsd": 999.4,
+			"output": "$999.400"
+		},
+		{
+			"costUsd": -0.5,
+			"output": "$0.000"
+		},
+		{
+			"costUsd": -1,
+			"output": "$0.000"
+		},
+		{
+			"costUsd": "NaN",
+			"output": "—"
+		},
+		{
+			"costUsd": "Infinity",
+			"output": "—"
+		},
+		{
+			"costUsd": "-Infinity",
+			"output": "—"
+		},
+		{
+			"costUsd": null,
+			"output": "—"
+		}
+	]
+}

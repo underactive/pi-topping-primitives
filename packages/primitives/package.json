@@ -57,6 +57,21 @@
 			"types": "./dist/models/index.d.ts",
 			"compiled": "./dist/models/index.js",
 			"default": "./src/models/index.ts"
+		},
+		"./color": {
+			"types": "./dist/color/index.d.ts",
+			"compiled": "./dist/color/index.js",
+			"default": "./src/color/index.ts"
+		},
+		"./text": {
+			"types": "./dist/text/index.d.ts",
+			"compiled": "./dist/text/index.js",
+			"default": "./src/text/index.ts"
+		},
+		"./glyphs": {
+			"types": "./dist/glyphs/index.d.ts",
+			"compiled": "./dist/glyphs/index.js",
+			"default": "./src/glyphs/index.ts"
 		}
 	},
 	"peerDependencies": {

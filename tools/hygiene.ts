@@ -89,6 +89,8 @@ const ALLOWED_INSTANCEOF: ReadonlySet<string> = new Set([
 const PI_FREE_PATH_SEGMENTS: ReadonlySet<string> = new Set([
 	"contracts",
 	"activity",
+	"color",
+	"glyphs",
 ]);
 
 const PI_SCOPE_PREFIX = "@earendil-works/";
@@ -446,13 +448,19 @@ function collectAllows(
 	return allows;
 }
 
-/** File-level gate for the import rule: the paths pi may load twice. */
+/**
+ * File-level gate for the import rule: the paths pi may load twice. The subpath is the
+ * directory straight under the last `src`, so a checkout that happens to live under a
+ * directory named `color` or `glyphs` does not make every file pi-free.
+ */
 function isPiFreePath(file: string): boolean {
 	const segments = file.split(/[\\/]/);
-	// Directory segments only; the trailing segment is the file name.
-	return segments
-		.slice(0, -1)
-		.some((segment) => PI_FREE_PATH_SEGMENTS.has(segment));
+	const src = segments.lastIndexOf("src");
+	if (src === -1) return false;
+	const subpath = segments[src + 1];
+	// A directory, not the file name.
+	if (subpath === undefined || segments.length <= src + 2) return false;
+	return PI_FREE_PATH_SEGMENTS.has(subpath);
 }
 
 /** Report `import`/`export` statements that reach pi at runtime, not only for types. */

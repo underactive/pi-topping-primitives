@@ -12,10 +12,13 @@ import { test } from "node:test";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import * as activityNs from "@underactive/pi-topping-primitives/activity";
 import * as activityTuiNs from "@underactive/pi-topping-primitives/activity-tui";
+import * as colorNs from "@underactive/pi-topping-primitives/color";
 import * as contractsNs from "@underactive/pi-topping-primitives/contracts";
+import * as glyphsNs from "@underactive/pi-topping-primitives/glyphs";
 import * as menuNs from "@underactive/pi-topping-primitives/menu";
 import * as modelsNs from "@underactive/pi-topping-primitives/models";
 import * as settingsNs from "@underactive/pi-topping-primitives/settings";
+import * as textNs from "@underactive/pi-topping-primitives/text";
 
 const packageRoot = fileURLToPath(new URL("../..", import.meta.url));
 
@@ -27,6 +30,9 @@ const SUBPATHS = [
 	"./activity-tui",
 	"./menu",
 	"./models",
+	"./color",
+	"./text",
+	"./glyphs",
 ] as const;
 
 /** The statically imported namespaces, keyed by subpath. */
@@ -37,6 +43,9 @@ const NAMESPACES: Record<string, Record<string, unknown>> = {
 	"./activity-tui": activityTuiNs as unknown as Record<string, unknown>,
 	"./menu": menuNs as unknown as Record<string, unknown>,
 	"./models": modelsNs as unknown as Record<string, unknown>,
+	"./color": colorNs as unknown as Record<string, unknown>,
+	"./text": textNs as unknown as Record<string, unknown>,
+	"./glyphs": glyphsNs as unknown as Record<string, unknown>,
 };
 
 const manifest = JSON.parse(

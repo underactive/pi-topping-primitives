@@ -99,15 +99,21 @@ printf '{ "name": "@underactive/fake-prim", "type": "module", "exports": { ".": 
 # Expect: unbundled SDK, compiled only -> {"form":"compiled-js","same":false} with peers present
 [ "$have_unbundled" = 1 ] && probe index.js "unbundled SDK, compiled only"
 # Real-package rows. With PRIM_TGZ set to a packed primitives tarball, load a multi-file subpath
-# (SUBPATH, default settings; one of settings, activity, activity-tui, menu, models) from node_modules
-# through both loader branches. Pass: no load errors and the extension's own calls return what the
-# row expects. activity-tui is the first subpath with a runtime pi-tui import of its own, so its
-# rows are the ones that show the dependency resolving pi-tui through the host's alias. menu goes
-# further: it constructs a component whose keys go through pi-tui's KeybindingsManager, renders
-# it, and presses Enter. models builds the picker from a one-model fake registry through
-# registryLevelOptions (pi-ai's getSupportedThinkingLevels), renders at width 60 and presses Enter.
+# (SUBPATH, default settings; one of settings, activity, activity-tui, menu, models, color, text,
+# glyphs) from node_modules through both loader branches. Pass: no load errors and the extension's
+# own calls return what the row expects. activity-tui is the first subpath with a runtime pi-tui
+# import of its own, so its rows are the ones that show the dependency resolving pi-tui through the
+# host's alias. menu goes further: it constructs a component whose keys go through pi-tui's
+# KeybindingsManager, renders it, and presses Enter. models builds the picker from a one-model
+# fake registry through registryLevelOptions (pi-ai's getSupportedThinkingLevels), renders at
+# width 60 and presses Enter. color has no runtime pi import at all (the rows show that it loads
+# and computes with peers absent); text measures a CJK string through pi-tui's visibleWidth and
+# sliceByColumn, which is the row that proves the host alias reaches it; glyphs is data only.
 # Expect for menu: {"top":true,"rows":7,"result":{"applied":true,"values":{"on":true}}}
 # Expect for models: {"rows":2,"pick":{"ref":{"provider":"probe","id":"model"},"thinking":"off"}}
+# Expect for color: {"filled":10,"trough":10,"green":"\u001b[38;2;132;197;26m"}
+# Expect for text: {"fit":"日\u001b[39m...","center":"  日本  "}
+# Expect for glyphs: {"corner":"╭","frames":10,"frozen":true}
 if [ -n "$PRIM_TGZ" ]; then
 	SUBPATH=${SUBPATH:-settings}
 	RP="$T/ext/node_modules/@underactive/pi-topping-primitives"
@@ -182,8 +188,38 @@ if (picker.handleInput("\\r") !== "confirm") throw new Error("models probe did n
 export default function () {}
 EOF2
 		;;
+	color)
+		cat > "$T/ext/index.ts" <<EOF2
+import { NVIDIA_GREEN_HEX, hexToFgAnsi, renderCometBar } from "@underactive/pi-topping-primitives/$SUBPATH";
+const bar = renderCometBar(50, { mode: "truecolor", elapsedMs: 500 });
+(globalThis as { __fakePrim?: unknown }).__fakePrim = {
+	filled: bar.split("\u258b").length - 1,
+	trough: bar.split("\u2591").length - 1,
+	green: hexToFgAnsi(NVIDIA_GREEN_HEX, "truecolor"),
+};
+export default function () {}
+EOF2
+		;;
+	text)
+		cat > "$T/ext/index.ts" <<EOF2
+import { fitCell, padCenter } from "@underactive/pi-topping-primitives/$SUBPATH";
+(globalThis as { __fakePrim?: unknown }).__fakePrim = { fit: fitCell("日本語テキスト", 5), center: padCenter("日本", 8) };
+export default function () {}
+EOF2
+		;;
+	glyphs)
+		cat > "$T/ext/index.ts" <<EOF2
+import { BOX_STYLES, SPINNER_FRAMES } from "@underactive/pi-topping-primitives/$SUBPATH";
+(globalThis as { __fakePrim?: unknown }).__fakePrim = {
+	corner: BOX_STYLES.rounded.topLeft,
+	frames: SPINNER_FRAMES.length,
+	frozen: Object.isFrozen(SPINNER_FRAMES) && Object.isFrozen(BOX_STYLES.heavy),
+};
+export default function () {}
+EOF2
+		;;
 	*)
-		echo "probe-pi-loader: unknown SUBPATH '$SUBPATH' (expected settings, activity, activity-tui, menu or models)" >&2
+		echo "probe-pi-loader: unknown SUBPATH '$SUBPATH' (expected settings, activity, activity-tui, menu, models, color, text or glyphs)" >&2
 		rm -rf "$T"
 		exit 1
 		;;

@@ -1,0 +1,1182 @@
+{
+	"source": "pi-topping-statusline src/theme.ts StatusTheme.fadeAnsi (0754903), target STATUS_LINE_BG #121212, mode set through pi-tui setCapabilities",
+	"target": [18, 18, 18],
+	"cases": [
+		{
+			"input": "plain text",
+			"opacity": 1,
+			"mode": "truecolor",
+			"output": "plain text"
+		},
+		{
+			"input": "plain text",
+			"opacity": 0.75,
+			"mode": "truecolor",
+			"output": "plain text"
+		},
+		{
+			"input": "plain text",
+			"opacity": 0.5,
+			"mode": "truecolor",
+			"output": "plain text"
+		},
+		{
+			"input": "plain text",
+			"opacity": 0.25,
+			"mode": "truecolor",
+			"output": "plain text"
+		},
+		{
+			"input": "plain text",
+			"opacity": 0,
+			"mode": "truecolor",
+			"output": "plain text"
+		},
+		{
+			"input": "plain text",
+			"opacity": -1,
+			"mode": "truecolor",
+			"output": "plain text"
+		},
+		{
+			"input": "plain text",
+			"opacity": 2,
+			"mode": "truecolor",
+			"output": "plain text"
+		},
+		{
+			"input": "\u001b[38;2;254;188;56mtruecolor fg\u001b[39m",
+			"opacity": 1,
+			"mode": "truecolor",
+			"output": "\u001b[38;2;254;188;56mtruecolor fg\u001b[39m"
+		},
+		{
+			"input": "\u001b[38;2;254;188;56mtruecolor fg\u001b[39m",
+			"opacity": 0.75,
+			"mode": "truecolor",
+			"output": "\u001b[38;2;195;146;47mtruecolor fg\u001b[38;2;158;158;158m"
+		},
+		{
+			"input": "\u001b[38;2;254;188;56mtruecolor fg\u001b[39m",
+			"opacity": 0.5,
+			"mode": "truecolor",
+			"output": "\u001b[38;2;136;103;37mtruecolor fg\u001b[38;2;111;111;111m"
+		},
+		{
+			"input": "\u001b[38;2;254;188;56mtruecolor fg\u001b[39m",
+			"opacity": 0.25,
+			"mode": "truecolor",
+			"output": "\u001b[38;2;77;61;28mtruecolor fg\u001b[38;2;65;65;65m"
+		},
+		{
+			"input": "\u001b[38;2;254;188;56mtruecolor fg\u001b[39m",
+			"opacity": 0,
+			"mode": "truecolor",
+			"output": "\u001b[38;2;18;18;18mtruecolor fg\u001b[38;2;18;18;18m"
+		},
+		{
+			"input": "\u001b[38;2;254;188;56mtruecolor fg\u001b[39m",
+			"opacity": -1,
+			"mode": "truecolor",
+			"output": "\u001b[38;2;18;18;18mtruecolor fg\u001b[38;2;18;18;18m"
+		},
+		{
+			"input": "\u001b[38;2;254;188;56mtruecolor fg\u001b[39m",
+			"opacity": 2,
+			"mode": "truecolor",
+			"output": "\u001b[38;2;254;188;56mtruecolor fg\u001b[39m"
+		},
+		{
+			"input": "\u001b[48;2;1;2;3mtruecolor bg\u001b[49m",
+			"opacity": 1,
+			"mode": "truecolor",
+			"output": "\u001b[48;2;1;2;3mtruecolor bg\u001b[49m"
+		},
+		{
+			"input": "\u001b[48;2;1;2;3mtruecolor bg\u001b[49m",
+			"opacity": 0.75,
+			"mode": "truecolor",
+			"output": "\u001b[48;2;5;6;7mtruecolor bg\u001b[49m"
+		},
+		{
+			"input": "\u001b[48;2;1;2;3mtruecolor bg\u001b[49m",
+			"opacity": 0.5,
+			"mode": "truecolor",
+			"output": "\u001b[48;2;10;10;11mtruecolor bg\u001b[49m"
+		},
+		{
+			"input": "\u001b[48;2;1;2;3mtruecolor bg\u001b[49m",
+			"opacity": 0.25,
+			"mode": "truecolor",
+			"output": "\u001b[48;2;14;14;14mtruecolor bg\u001b[49m"
+		},
+		{
+			"input": "\u001b[48;2;1;2;3mtruecolor bg\u001b[49m",
+			"opacity": 0,
+			"mode": "truecolor",
+			"output": "\u001b[48;2;18;18;18mtruecolor bg\u001b[49m"
+		},
+		{
+			"input": "\u001b[48;2;1;2;3mtruecolor bg\u001b[49m",
+			"opacity": -1,
+			"mode": "truecolor",
+			"output": "\u001b[48;2;18;18;18mtruecolor bg\u001b[49m"
+		},
+		{
+			"input": "\u001b[48;2;1;2;3mtruecolor bg\u001b[49m",
+			"opacity": 2,
+			"mode": "truecolor",
+			"output": "\u001b[48;2;1;2;3mtruecolor bg\u001b[49m"
+		},
+		{
+			"input": "\u001b[38;5;196m256 fg\u001b[39m",
+			"opacity": 1,
+			"mode": "truecolor",
+			"output": "\u001b[38;5;196m256 fg\u001b[39m"
+		},
+		{
+			"input": "\u001b[38;5;196m256 fg\u001b[39m",
+			"opacity": 0.75,
+			"mode": "truecolor",
+			"output": "\u001b[38;2;237;5;5m256 fg\u001b[38;2;158;158;158m"
+		},
+		{
+			"input": "\u001b[38;5;196m256 fg\u001b[39m",
+			"opacity": 0.5,
+			"mode": "truecolor",
+			"output": "\u001b[38;2;164;9;9m256 fg\u001b[38;2;111;111;111m"
+		},
+		{
+			"input": "\u001b[38;5;196m256 fg\u001b[39m",
+			"opacity": 0.25,
+			"mode": "truecolor",
+			"output": "\u001b[38;2;91;14;14m256 fg\u001b[38;2;65;65;65m"
+		},
+		{
+			"input": "\u001b[38;5;196m256 fg\u001b[39m",
+			"opacity": 0,
+			"mode": "truecolor",
+			"output": "\u001b[38;2;18;18;18m256 fg\u001b[38;2;18;18;18m"
+		},
+		{
+			"input": "\u001b[38;5;196m256 fg\u001b[39m",
+			"opacity": -1,
+			"mode": "truecolor",
+			"output": "\u001b[38;2;18;18;18m256 fg\u001b[38;2;18;18;18m"
+		},
+		{
+			"input": "\u001b[38;5;196m256 fg\u001b[39m",
+			"opacity": 2,
+			"mode": "truecolor",
+			"output": "\u001b[38;5;196m256 fg\u001b[39m"
+		},
+		{
+			"input": "\u001b[48;5;70m256 bg\u001b[49m",
+			"opacity": 1,
+			"mode": "truecolor",
+			"output": "\u001b[48;5;70m256 bg\u001b[49m"
+		},
+		{
+			"input": "\u001b[48;5;70m256 bg\u001b[49m",
+			"opacity": 0.75,
+			"mode": "truecolor",
+			"output": "\u001b[48;2;84;161;5m256 bg\u001b[49m"
+		},
+		{
+			"input": "\u001b[48;5;70m256 bg\u001b[49m",
+			"opacity": 0.5,
+			"mode": "truecolor",
+			"output": "\u001b[48;2;62;113;9m256 bg\u001b[49m"
+		},
+		{
+			"input": "\u001b[48;5;70m256 bg\u001b[49m",
+			"opacity": 0.25,
+			"mode": "truecolor",
+			"output": "\u001b[48;2;40;66;14m256 bg\u001b[49m"
+		},
+		{
+			"input": "\u001b[48;5;70m256 bg\u001b[49m",
+			"opacity": 0,
+			"mode": "truecolor",
+			"output": "\u001b[48;2;18;18;18m256 bg\u001b[49m"
+		},
+		{
+			"input": "\u001b[48;5;70m256 bg\u001b[49m",
+			"opacity": -1,
+			"mode": "truecolor",
+			"output": "\u001b[48;2;18;18;18m256 bg\u001b[49m"
+		},
+		{
+			"input": "\u001b[48;5;70m256 bg\u001b[49m",
+			"opacity": 2,
+			"mode": "truecolor",
+			"output": "\u001b[48;5;70m256 bg\u001b[49m"
+		},
+		{
+			"input": "before \u001b[39m default fg \u001b[39m after",
+			"opacity": 1,
+			"mode": "truecolor",
+			"output": "before \u001b[39m default fg \u001b[39m after"
+		},
+		{
+			"input": "before \u001b[39m default fg \u001b[39m after",
+			"opacity": 0.75,
+			"mode": "truecolor",
+			"output": "before \u001b[38;2;158;158;158m default fg \u001b[38;2;158;158;158m after"
+		},
+		{
+			"input": "before \u001b[39m default fg \u001b[39m after",
+			"opacity": 0.5,
+			"mode": "truecolor",
+			"output": "before \u001b[38;2;111;111;111m default fg \u001b[38;2;111;111;111m after"
+		},
+		{
+			"input": "before \u001b[39m default fg \u001b[39m after",
+			"opacity": 0.25,
+			"mode": "truecolor",
+			"output": "before \u001b[38;2;65;65;65m default fg \u001b[38;2;65;65;65m after"
+		},
+		{
+			"input": "before \u001b[39m default fg \u001b[39m after",
+			"opacity": 0,
+			"mode": "truecolor",
+			"output": "before \u001b[38;2;18;18;18m default fg \u001b[38;2;18;18;18m after"
+		},
+		{
+			"input": "before \u001b[39m default fg \u001b[39m after",
+			"opacity": -1,
+			"mode": "truecolor",
+			"output": "before \u001b[38;2;18;18;18m default fg \u001b[38;2;18;18;18m after"
+		},
+		{
+			"input": "before \u001b[39m default fg \u001b[39m after",
+			"opacity": 2,
+			"mode": "truecolor",
+			"output": "before \u001b[39m default fg \u001b[39m after"
+		},
+		{
+			"input": "\u001b[49m background reset only",
+			"opacity": 1,
+			"mode": "truecolor",
+			"output": "\u001b[49m background reset only"
+		},
+		{
+			"input": "\u001b[49m background reset only",
+			"opacity": 0.75,
+			"mode": "truecolor",
+			"output": "\u001b[49m background reset only"
+		},
+		{
+			"input": "\u001b[49m background reset only",
+			"opacity": 0.5,
+			"mode": "truecolor",
+			"output": "\u001b[49m background reset only"
+		},
+		{
+			"input": "\u001b[49m background reset only",
+			"opacity": 0.25,
+			"mode": "truecolor",
+			"output": "\u001b[49m background reset only"
+		},
+		{
+			"input": "\u001b[49m background reset only",
+			"opacity": 0,
+			"mode": "truecolor",
+			"output": "\u001b[49m background reset only"
+		},
+		{
+			"input": "\u001b[49m background reset only",
+			"opacity": -1,
+			"mode": "truecolor",
+			"output": "\u001b[49m background reset only"
+		},
+		{
+			"input": "\u001b[49m background reset only",
+			"opacity": 2,
+			"mode": "truecolor",
+			"output": "\u001b[49m background reset only"
+		},
+		{
+			"input": "\u001b[1;38;2;10;20;30mcompound sgr\u001b[22;39m",
+			"opacity": 1,
+			"mode": "truecolor",
+			"output": "\u001b[1;38;2;10;20;30mcompound sgr\u001b[22;39m"
+		},
+		{
+			"input": "\u001b[1;38;2;10;20;30mcompound sgr\u001b[22;39m",
+			"opacity": 0.75,
+			"mode": "truecolor",
+			"output": "\u001b[1;38;2;10;20;30mcompound sgr\u001b[22;39m"
+		},
+		{
+			"input": "\u001b[1;38;2;10;20;30mcompound sgr\u001b[22;39m",
+			"opacity": 0.5,
+			"mode": "truecolor",
+			"output": "\u001b[1;38;2;10;20;30mcompound sgr\u001b[22;39m"
+		},
+		{
+			"input": "\u001b[1;38;2;10;20;30mcompound sgr\u001b[22;39m",
+			"opacity": 0.25,
+			"mode": "truecolor",
+			"output": "\u001b[1;38;2;10;20;30mcompound sgr\u001b[22;39m"
+		},
+		{
+			"input": "\u001b[1;38;2;10;20;30mcompound sgr\u001b[22;39m",
+			"opacity": 0,
+			"mode": "truecolor",
+			"output": "\u001b[1;38;2;10;20;30mcompound sgr\u001b[22;39m"
+		},
+		{
+			"input": "\u001b[1;38;2;10;20;30mcompound sgr\u001b[22;39m",
+			"opacity": -1,
+			"mode": "truecolor",
+			"output": "\u001b[1;38;2;10;20;30mcompound sgr\u001b[22;39m"
+		},
+		{
+			"input": "\u001b[1;38;2;10;20;30mcompound sgr\u001b[22;39m",
+			"opacity": 2,
+			"mode": "truecolor",
+			"output": "\u001b[1;38;2;10;20;30mcompound sgr\u001b[22;39m"
+		},
+		{
+			"input": "\u001b[1m\u001b[38;2;10;20;30msequential sgr\u001b[22m\u001b[39m",
+			"opacity": 1,
+			"mode": "truecolor",
+			"output": "\u001b[1m\u001b[38;2;10;20;30msequential sgr\u001b[22m\u001b[39m"
+		},
+		{
+			"input": "\u001b[1m\u001b[38;2;10;20;30msequential sgr\u001b[22m\u001b[39m",
+			"opacity": 0.75,
+			"mode": "truecolor",
+			"output": "\u001b[1m\u001b[38;2;12;20;27msequential sgr\u001b[22m\u001b[38;2;158;158;158m"
+		},
+		{
+			"input": "\u001b[1m\u001b[38;2;10;20;30msequential sgr\u001b[22m\u001b[39m",
+			"opacity": 0.5,
+			"mode": "truecolor",
+			"output": "\u001b[1m\u001b[38;2;14;19;24msequential sgr\u001b[22m\u001b[38;2;111;111;111m"
+		},
+		{
+			"input": "\u001b[1m\u001b[38;2;10;20;30msequential sgr\u001b[22m\u001b[39m",
+			"opacity": 0.25,
+			"mode": "truecolor",
+			"output": "\u001b[1m\u001b[38;2;16;19;21msequential sgr\u001b[22m\u001b[38;2;65;65;65m"
+		},
+		{
+			"input": "\u001b[1m\u001b[38;2;10;20;30msequential sgr\u001b[22m\u001b[39m",
+			"opacity": 0,
+			"mode": "truecolor",
+			"output": "\u001b[1m\u001b[38;2;18;18;18msequential sgr\u001b[22m\u001b[38;2;18;18;18m"
+		},
+		{
+			"input": "\u001b[1m\u001b[38;2;10;20;30msequential sgr\u001b[22m\u001b[39m",
+			"opacity": -1,
+			"mode": "truecolor",
+			"output": "\u001b[1m\u001b[38;2;18;18;18msequential sgr\u001b[22m\u001b[38;2;18;18;18m"
+		},
+		{
+			"input": "\u001b[1m\u001b[38;2;10;20;30msequential sgr\u001b[22m\u001b[39m",
+			"opacity": 2,
+			"mode": "truecolor",
+			"output": "\u001b[1m\u001b[38;2;10;20;30msequential sgr\u001b[22m\u001b[39m"
+		},
+		{
+			"input": "\u001b]8;;https://example.com\u0007\u001b[38;2;200;100;50mosc8 bel\u001b[39m\u001b]8;;\u0007",
+			"opacity": 1,
+			"mode": "truecolor",
+			"output": "\u001b]8;;https://example.com\u0007\u001b[38;2;200;100;50mosc8 bel\u001b[39m\u001b]8;;\u0007"
+		},
+		{
+			"input": "\u001b]8;;https://example.com\u0007\u001b[38;2;200;100;50mosc8 bel\u001b[39m\u001b]8;;\u0007",
+			"opacity": 0.75,
+			"mode": "truecolor",
+			"output": "\u001b]8;;https://example.com\u0007\u001b[38;2;155;80;42mosc8 bel\u001b[38;2;158;158;158m\u001b]8;;\u0007"
+		},
+		{
+			"input": "\u001b]8;;https://example.com\u0007\u001b[38;2;200;100;50mosc8 bel\u001b[39m\u001b]8;;\u0007",
+			"opacity": 0.5,
+			"mode": "truecolor",
+			"output": "\u001b]8;;https://example.com\u0007\u001b[38;2;109;59;34mosc8 bel\u001b[38;2;111;111;111m\u001b]8;;\u0007"
+		},
+		{
+			"input": "\u001b]8;;https://example.com\u0007\u001b[38;2;200;100;50mosc8 bel\u001b[39m\u001b]8;;\u0007",
+			"opacity": 0.25,
+			"mode": "truecolor",
+			"output": "\u001b]8;;https://example.com\u0007\u001b[38;2;64;39;26mosc8 bel\u001b[38;2;65;65;65m\u001b]8;;\u0007"
+		},
+		{
+			"input": "\u001b]8;;https://example.com\u0007\u001b[38;2;200;100;50mosc8 bel\u001b[39m\u001b]8;;\u0007",
+			"opacity": 0,
+			"mode": "truecolor",
+			"output": "\u001b]8;;https://example.com\u0007\u001b[38;2;18;18;18mosc8 bel\u001b[38;2;18;18;18m\u001b]8;;\u0007"
+		},
+		{
+			"input": "\u001b]8;;https://example.com\u0007\u001b[38;2;200;100;50mosc8 bel\u001b[39m\u001b]8;;\u0007",
+			"opacity": -1,
+			"mode": "truecolor",
+			"output": "\u001b]8;;https://example.com\u0007\u001b[38;2;18;18;18mosc8 bel\u001b[38;2;18;18;18m\u001b]8;;\u0007"
+		},
+		{
+			"input": "\u001b]8;;https://example.com\u0007\u001b[38;2;200;100;50mosc8 bel\u001b[39m\u001b]8;;\u0007",
+			"opacity": 2,
+			"mode": "truecolor",
+			"output": "\u001b]8;;https://example.com\u0007\u001b[38;2;200;100;50mosc8 bel\u001b[39m\u001b]8;;\u0007"
+		},
+		{
+			"input": "\u001b]8;;https://example.com\u001b\\\u001b[38;5;33mosc8 st\u001b[39m\u001b]8;;\u001b\\",
+			"opacity": 1,
+			"mode": "truecolor",
+			"output": "\u001b]8;;https://example.com\u001b\\\u001b[38;5;33mosc8 st\u001b[39m\u001b]8;;\u001b\\"
+		},
+		{
+			"input": "\u001b]8;;https://example.com\u001b\\\u001b[38;5;33mosc8 st\u001b[39m\u001b]8;;\u001b\\",
+			"opacity": 0.75,
+			"mode": "truecolor",
+			"output": "\u001b]8;;https://example.com\u001b\\\u001b[38;2;5;122;237mosc8 st\u001b[38;2;158;158;158m\u001b]8;;\u001b\\"
+		},
+		{
+			"input": "\u001b]8;;https://example.com\u001b\\\u001b[38;5;33mosc8 st\u001b[39m\u001b]8;;\u001b\\",
+			"opacity": 0.5,
+			"mode": "truecolor",
+			"output": "\u001b]8;;https://example.com\u001b\\\u001b[38;2;9;88;164mosc8 st\u001b[38;2;111;111;111m\u001b]8;;\u001b\\"
+		},
+		{
+			"input": "\u001b]8;;https://example.com\u001b\\\u001b[38;5;33mosc8 st\u001b[39m\u001b]8;;\u001b\\",
+			"opacity": 0.25,
+			"mode": "truecolor",
+			"output": "\u001b]8;;https://example.com\u001b\\\u001b[38;2;14;53;91mosc8 st\u001b[38;2;65;65;65m\u001b]8;;\u001b\\"
+		},
+		{
+			"input": "\u001b]8;;https://example.com\u001b\\\u001b[38;5;33mosc8 st\u001b[39m\u001b]8;;\u001b\\",
+			"opacity": 0,
+			"mode": "truecolor",
+			"output": "\u001b]8;;https://example.com\u001b\\\u001b[38;2;18;18;18mosc8 st\u001b[38;2;18;18;18m\u001b]8;;\u001b\\"
+		},
+		{
+			"input": "\u001b]8;;https://example.com\u001b\\\u001b[38;5;33mosc8 st\u001b[39m\u001b]8;;\u001b\\",
+			"opacity": -1,
+			"mode": "truecolor",
+			"output": "\u001b]8;;https://example.com\u001b\\\u001b[38;2;18;18;18mosc8 st\u001b[38;2;18;18;18m\u001b]8;;\u001b\\"
+		},
+		{
+			"input": "\u001b]8;;https://example.com\u001b\\\u001b[38;5;33mosc8 st\u001b[39m\u001b]8;;\u001b\\",
+			"opacity": 2,
+			"mode": "truecolor",
+			"output": "\u001b]8;;https://example.com\u001b\\\u001b[38;5;33mosc8 st\u001b[39m\u001b]8;;\u001b\\"
+		},
+		{
+			"input": "\u001b[38;5;16mcube0 \u001b[38;5;231mcube231 \u001b[38;5;232mgray232 \u001b[38;5;244mgray244 \u001b[38;5;255mgray255",
+			"opacity": 1,
+			"mode": "truecolor",
+			"output": "\u001b[38;5;16mcube0 \u001b[38;5;231mcube231 \u001b[38;5;232mgray232 \u001b[38;5;244mgray244 \u001b[38;5;255mgray255"
+		},
+		{
+			"input": "\u001b[38;5;16mcube0 \u001b[38;5;231mcube231 \u001b[38;5;232mgray232 \u001b[38;5;244mgray244 \u001b[38;5;255mgray255",
+			"opacity": 0.75,
+			"mode": "truecolor",
+			"output": "\u001b[38;2;5;5;5mcube0 \u001b[38;2;237;237;237mcube231 \u001b[38;2;11;11;11mgray232 \u001b[38;2;101;101;101mgray244 \u001b[38;2;183;183;183mgray255"
+		},
+		{
+			"input": "\u001b[38;5;16mcube0 \u001b[38;5;231mcube231 \u001b[38;5;232mgray232 \u001b[38;5;244mgray244 \u001b[38;5;255mgray255",
+			"opacity": 0.5,
+			"mode": "truecolor",
+			"output": "\u001b[38;2;9;9;9mcube0 \u001b[38;2;164;164;164mcube231 \u001b[38;2;13;13;13mgray232 \u001b[38;2;73;73;73mgray244 \u001b[38;2;128;128;128mgray255"
+		},
+		{
+			"input": "\u001b[38;5;16mcube0 \u001b[38;5;231mcube231 \u001b[38;5;232mgray232 \u001b[38;5;244mgray244 \u001b[38;5;255mgray255",
+			"opacity": 0.25,
+			"mode": "truecolor",
+			"output": "\u001b[38;2;14;14;14mcube0 \u001b[38;2;91;91;91mcube231 \u001b[38;2;16;16;16mgray232 \u001b[38;2;46;46;46mgray244 \u001b[38;2;73;73;73mgray255"
+		},
+		{
+			"input": "\u001b[38;5;16mcube0 \u001b[38;5;231mcube231 \u001b[38;5;232mgray232 \u001b[38;5;244mgray244 \u001b[38;5;255mgray255",
+			"opacity": 0,
+			"mode": "truecolor",
+			"output": "\u001b[38;2;18;18;18mcube0 \u001b[38;2;18;18;18mcube231 \u001b[38;2;18;18;18mgray232 \u001b[38;2;18;18;18mgray244 \u001b[38;2;18;18;18mgray255"
+		},
+		{
+			"input": "\u001b[38;5;16mcube0 \u001b[38;5;231mcube231 \u001b[38;5;232mgray232 \u001b[38;5;244mgray244 \u001b[38;5;255mgray255",
+			"opacity": -1,
+			"mode": "truecolor",
+			"output": "\u001b[38;2;18;18;18mcube0 \u001b[38;2;18;18;18mcube231 \u001b[38;2;18;18;18mgray232 \u001b[38;2;18;18;18mgray244 \u001b[38;2;18;18;18mgray255"
+		},
+		{
+			"input": "\u001b[38;5;16mcube0 \u001b[38;5;231mcube231 \u001b[38;5;232mgray232 \u001b[38;5;244mgray244 \u001b[38;5;255mgray255",
+			"opacity": 2,
+			"mode": "truecolor",
+			"output": "\u001b[38;5;16mcube0 \u001b[38;5;231mcube231 \u001b[38;5;232mgray232 \u001b[38;5;244mgray244 \u001b[38;5;255mgray255"
+		},
+		{
+			"input": "\u001b[38;5;0mlow0 \u001b[38;5;7mlow7 \u001b[38;5;15mlow15",
+			"opacity": 1,
+			"mode": "truecolor",
+			"output": "\u001b[38;5;0mlow0 \u001b[38;5;7mlow7 \u001b[38;5;15mlow15"
+		},
+		{
+			"input": "\u001b[38;5;0mlow0 \u001b[38;5;7mlow7 \u001b[38;5;15mlow15",
+			"opacity": 0.75,
+			"mode": "truecolor",
+			"output": "\u001b[38;2;5;5;5mlow0 \u001b[38;2;5;5;5mlow7 \u001b[38;2;5;5;5mlow15"
+		},
+		{
+			"input": "\u001b[38;5;0mlow0 \u001b[38;5;7mlow7 \u001b[38;5;15mlow15",
+			"opacity": 0.5,
+			"mode": "truecolor",
+			"output": "\u001b[38;2;9;9;9mlow0 \u001b[38;2;9;9;9mlow7 \u001b[38;2;9;9;9mlow15"
+		},
+		{
+			"input": "\u001b[38;5;0mlow0 \u001b[38;5;7mlow7 \u001b[38;5;15mlow15",
+			"opacity": 0.25,
+			"mode": "truecolor",
+			"output": "\u001b[38;2;14;14;14mlow0 \u001b[38;2;14;14;14mlow7 \u001b[38;2;14;14;14mlow15"
+		},
+		{
+			"input": "\u001b[38;5;0mlow0 \u001b[38;5;7mlow7 \u001b[38;5;15mlow15",
+			"opacity": 0,
+			"mode": "truecolor",
+			"output": "\u001b[38;2;18;18;18mlow0 \u001b[38;2;18;18;18mlow7 \u001b[38;2;18;18;18mlow15"
+		},
+		{
+			"input": "\u001b[38;5;0mlow0 \u001b[38;5;7mlow7 \u001b[38;5;15mlow15",
+			"opacity": -1,
+			"mode": "truecolor",
+			"output": "\u001b[38;2;18;18;18mlow0 \u001b[38;2;18;18;18mlow7 \u001b[38;2;18;18;18mlow15"
+		},
+		{
+			"input": "\u001b[38;5;0mlow0 \u001b[38;5;7mlow7 \u001b[38;5;15mlow15",
+			"opacity": 2,
+			"mode": "truecolor",
+			"output": "\u001b[38;5;0mlow0 \u001b[38;5;7mlow7 \u001b[38;5;15mlow15"
+		},
+		{
+			"input": "\u001b[38;2;254;188;56mA\u001b[39m \u001b[48;5;236mB\u001b[49m\u001b[38;5;244m·\u001b[39m\u001b[48;2;18;18;18m",
+			"opacity": 1,
+			"mode": "truecolor",
+			"output": "\u001b[38;2;254;188;56mA\u001b[39m \u001b[48;5;236mB\u001b[49m\u001b[38;5;244m·\u001b[39m\u001b[48;2;18;18;18m"
+		},
+		{
+			"input": "\u001b[38;2;254;188;56mA\u001b[39m \u001b[48;5;236mB\u001b[49m\u001b[38;5;244m·\u001b[39m\u001b[48;2;18;18;18m",
+			"opacity": 0.75,
+			"mode": "truecolor",
+			"output": "\u001b[38;2;195;146;47mA\u001b[38;2;158;158;158m \u001b[48;2;41;41;41mB\u001b[49m\u001b[38;2;101;101;101m·\u001b[38;2;158;158;158m\u001b[48;2;18;18;18m"
+		},
+		{
+			"input": "\u001b[38;2;254;188;56mA\u001b[39m \u001b[48;5;236mB\u001b[49m\u001b[38;5;244m·\u001b[39m\u001b[48;2;18;18;18m",
+			"opacity": 0.5,
+			"mode": "truecolor",
+			"output": "\u001b[38;2;136;103;37mA\u001b[38;2;111;111;111m \u001b[48;2;33;33;33mB\u001b[49m\u001b[38;2;73;73;73m·\u001b[38;2;111;111;111m\u001b[48;2;18;18;18m"
+		},
+		{
+			"input": "\u001b[38;2;254;188;56mA\u001b[39m \u001b[48;5;236mB\u001b[49m\u001b[38;5;244m·\u001b[39m\u001b[48;2;18;18;18m",
+			"opacity": 0.25,
+			"mode": "truecolor",
+			"output": "\u001b[38;2;77;61;28mA\u001b[38;2;65;65;65m \u001b[48;2;26;26;26mB\u001b[49m\u001b[38;2;46;46;46m·\u001b[38;2;65;65;65m\u001b[48;2;18;18;18m"
+		},
+		{
+			"input": "\u001b[38;2;254;188;56mA\u001b[39m \u001b[48;5;236mB\u001b[49m\u001b[38;5;244m·\u001b[39m\u001b[48;2;18;18;18m",
+			"opacity": 0,
+			"mode": "truecolor",
+			"output": "\u001b[38;2;18;18;18mA\u001b[38;2;18;18;18m \u001b[48;2;18;18;18mB\u001b[49m\u001b[38;2;18;18;18m·\u001b[38;2;18;18;18m\u001b[48;2;18;18;18m"
+		},
+		{
+			"input": "\u001b[38;2;254;188;56mA\u001b[39m \u001b[48;5;236mB\u001b[49m\u001b[38;5;244m·\u001b[39m\u001b[48;2;18;18;18m",
+			"opacity": -1,
+			"mode": "truecolor",
+			"output": "\u001b[38;2;18;18;18mA\u001b[38;2;18;18;18m \u001b[48;2;18;18;18mB\u001b[49m\u001b[38;2;18;18;18m·\u001b[38;2;18;18;18m\u001b[48;2;18;18;18m"
+		},
+		{
+			"input": "\u001b[38;2;254;188;56mA\u001b[39m \u001b[48;5;236mB\u001b[49m\u001b[38;5;244m·\u001b[39m\u001b[48;2;18;18;18m",
+			"opacity": 2,
+			"mode": "truecolor",
+			"output": "\u001b[38;2;254;188;56mA\u001b[39m \u001b[48;5;236mB\u001b[49m\u001b[38;5;244m·\u001b[39m\u001b[48;2;18;18;18m"
+		},
+		{
+			"input": "plain text",
+			"opacity": 1,
+			"mode": "256color",
+			"output": "plain text"
+		},
+		{
+			"input": "plain text",
+			"opacity": 0.75,
+			"mode": "256color",
+			"output": "plain text"
+		},
+		{
+			"input": "plain text",
+			"opacity": 0.5,
+			"mode": "256color",
+			"output": "plain text"
+		},
+		{
+			"input": "plain text",
+			"opacity": 0.25,
+			"mode": "256color",
+			"output": "plain text"
+		},
+		{
+			"input": "plain text",
+			"opacity": 0,
+			"mode": "256color",
+			"output": "plain text"
+		},
+		{
+			"input": "plain text",
+			"opacity": -1,
+			"mode": "256color",
+			"output": "plain text"
+		},
+		{
+			"input": "plain text",
+			"opacity": 2,
+			"mode": "256color",
+			"output": "plain text"
+		},
+		{
+			"input": "\u001b[38;2;254;188;56mtruecolor fg\u001b[39m",
+			"opacity": 1,
+			"mode": "256color",
+			"output": "\u001b[38;2;254;188;56mtruecolor fg\u001b[39m"
+		},
+		{
+			"input": "\u001b[38;2;254;188;56mtruecolor fg\u001b[39m",
+			"opacity": 0.75,
+			"mode": "256color",
+			"output": "\u001b[38;5;179mtruecolor fg\u001b[38;5;247m"
+		},
+		{
+			"input": "\u001b[38;2;254;188;56mtruecolor fg\u001b[39m",
+			"opacity": 0.5,
+			"mode": "256color",
+			"output": "\u001b[38;5;137mtruecolor fg\u001b[38;5;242m"
+		},
+		{
+			"input": "\u001b[38;2;254;188;56mtruecolor fg\u001b[39m",
+			"opacity": 0.25,
+			"mode": "256color",
+			"output": "\u001b[38;5;95mtruecolor fg\u001b[38;5;238m"
+		},
+		{
+			"input": "\u001b[38;2;254;188;56mtruecolor fg\u001b[39m",
+			"opacity": 0,
+			"mode": "256color",
+			"output": "\u001b[38;5;233mtruecolor fg\u001b[38;5;233m"
+		},
+		{
+			"input": "\u001b[38;2;254;188;56mtruecolor fg\u001b[39m",
+			"opacity": -1,
+			"mode": "256color",
+			"output": "\u001b[38;5;233mtruecolor fg\u001b[38;5;233m"
+		},
+		{
+			"input": "\u001b[38;2;254;188;56mtruecolor fg\u001b[39m",
+			"opacity": 2,
+			"mode": "256color",
+			"output": "\u001b[38;2;254;188;56mtruecolor fg\u001b[39m"
+		},
+		{
+			"input": "\u001b[48;2;1;2;3mtruecolor bg\u001b[49m",
+			"opacity": 1,
+			"mode": "256color",
+			"output": "\u001b[48;2;1;2;3mtruecolor bg\u001b[49m"
+		},
+		{
+			"input": "\u001b[48;2;1;2;3mtruecolor bg\u001b[49m",
+			"opacity": 0.75,
+			"mode": "256color",
+			"output": "\u001b[48;5;16mtruecolor bg\u001b[49m"
+		},
+		{
+			"input": "\u001b[48;2;1;2;3mtruecolor bg\u001b[49m",
+			"opacity": 0.5,
+			"mode": "256color",
+			"output": "\u001b[48;5;16mtruecolor bg\u001b[49m"
+		},
+		{
+			"input": "\u001b[48;2;1;2;3mtruecolor bg\u001b[49m",
+			"opacity": 0.25,
+			"mode": "256color",
+			"output": "\u001b[48;5;233mtruecolor bg\u001b[49m"
+		},
+		{
+			"input": "\u001b[48;2;1;2;3mtruecolor bg\u001b[49m",
+			"opacity": 0,
+			"mode": "256color",
+			"output": "\u001b[48;5;233mtruecolor bg\u001b[49m"
+		},
+		{
+			"input": "\u001b[48;2;1;2;3mtruecolor bg\u001b[49m",
+			"opacity": -1,
+			"mode": "256color",
+			"output": "\u001b[48;5;233mtruecolor bg\u001b[49m"
+		},
+		{
+			"input": "\u001b[48;2;1;2;3mtruecolor bg\u001b[49m",
+			"opacity": 2,
+			"mode": "256color",
+			"output": "\u001b[48;2;1;2;3mtruecolor bg\u001b[49m"
+		},
+		{
+			"input": "\u001b[38;5;196m256 fg\u001b[39m",
+			"opacity": 1,
+			"mode": "256color",
+			"output": "\u001b[38;5;196m256 fg\u001b[39m"
+		},
+		{
+			"input": "\u001b[38;5;196m256 fg\u001b[39m",
+			"opacity": 0.75,
+			"mode": "256color",
+			"output": "\u001b[38;5;196m256 fg\u001b[38;5;247m"
+		},
+		{
+			"input": "\u001b[38;5;196m256 fg\u001b[39m",
+			"opacity": 0.5,
+			"mode": "256color",
+			"output": "\u001b[38;5;124m256 fg\u001b[38;5;242m"
+		},
+		{
+			"input": "\u001b[38;5;196m256 fg\u001b[39m",
+			"opacity": 0.25,
+			"mode": "256color",
+			"output": "\u001b[38;5;88m256 fg\u001b[38;5;238m"
+		},
+		{
+			"input": "\u001b[38;5;196m256 fg\u001b[39m",
+			"opacity": 0,
+			"mode": "256color",
+			"output": "\u001b[38;5;233m256 fg\u001b[38;5;233m"
+		},
+		{
+			"input": "\u001b[38;5;196m256 fg\u001b[39m",
+			"opacity": -1,
+			"mode": "256color",
+			"output": "\u001b[38;5;233m256 fg\u001b[38;5;233m"
+		},
+		{
+			"input": "\u001b[38;5;196m256 fg\u001b[39m",
+			"opacity": 2,
+			"mode": "256color",
+			"output": "\u001b[38;5;196m256 fg\u001b[39m"
+		},
+		{
+			"input": "\u001b[48;5;70m256 bg\u001b[49m",
+			"opacity": 1,
+			"mode": "256color",
+			"output": "\u001b[48;5;70m256 bg\u001b[49m"
+		},
+		{
+			"input": "\u001b[48;5;70m256 bg\u001b[49m",
+			"opacity": 0.75,
+			"mode": "256color",
+			"output": "\u001b[48;5;106m256 bg\u001b[49m"
+		},
+		{
+			"input": "\u001b[48;5;70m256 bg\u001b[49m",
+			"opacity": 0.5,
+			"mode": "256color",
+			"output": "\u001b[48;5;64m256 bg\u001b[49m"
+		},
+		{
+			"input": "\u001b[48;5;70m256 bg\u001b[49m",
+			"opacity": 0.25,
+			"mode": "256color",
+			"output": "\u001b[48;5;58m256 bg\u001b[49m"
+		},
+		{
+			"input": "\u001b[48;5;70m256 bg\u001b[49m",
+			"opacity": 0,
+			"mode": "256color",
+			"output": "\u001b[48;5;233m256 bg\u001b[49m"
+		},
+		{
+			"input": "\u001b[48;5;70m256 bg\u001b[49m",
+			"opacity": -1,
+			"mode": "256color",
+			"output": "\u001b[48;5;233m256 bg\u001b[49m"
+		},
+		{
+			"input": "\u001b[48;5;70m256 bg\u001b[49m",
+			"opacity": 2,
+			"mode": "256color",
+			"output": "\u001b[48;5;70m256 bg\u001b[49m"
+		},
+		{
+			"input": "before \u001b[39m default fg \u001b[39m after",
+			"opacity": 1,
+			"mode": "256color",
+			"output": "before \u001b[39m default fg \u001b[39m after"
+		},
+		{
+			"input": "before \u001b[39m default fg \u001b[39m after",
+			"opacity": 0.75,
+			"mode": "256color",
+			"output": "before \u001b[38;5;247m default fg \u001b[38;5;247m after"
+		},
+		{
+			"input": "before \u001b[39m default fg \u001b[39m after",
+			"opacity": 0.5,
+			"mode": "256color",
+			"output": "before \u001b[38;5;242m default fg \u001b[38;5;242m after"
+		},
+		{
+			"input": "before \u001b[39m default fg \u001b[39m after",
+			"opacity": 0.25,
+			"mode": "256color",
+			"output": "before \u001b[38;5;238m default fg \u001b[38;5;238m after"
+		},
+		{
+			"input": "before \u001b[39m default fg \u001b[39m after",
+			"opacity": 0,
+			"mode": "256color",
+			"output": "before \u001b[38;5;233m default fg \u001b[38;5;233m after"
+		},
+		{
+			"input": "before \u001b[39m default fg \u001b[39m after",
+			"opacity": -1,
+			"mode": "256color",
+			"output": "before \u001b[38;5;233m default fg \u001b[38;5;233m after"
+		},
+		{
+			"input": "before \u001b[39m default fg \u001b[39m after",
+			"opacity": 2,
+			"mode": "256color",
+			"output": "before \u001b[39m default fg \u001b[39m after"
+		},
+		{
+			"input": "\u001b[49m background reset only",
+			"opacity": 1,
+			"mode": "256color",
+			"output": "\u001b[49m background reset only"
+		},
+		{
+			"input": "\u001b[49m background reset only",
+			"opacity": 0.75,
+			"mode": "256color",
+			"output": "\u001b[49m background reset only"
+		},
+		{
+			"input": "\u001b[49m background reset only",
+			"opacity": 0.5,
+			"mode": "256color",
+			"output": "\u001b[49m background reset only"
+		},
+		{
+			"input": "\u001b[49m background reset only",
+			"opacity": 0.25,
+			"mode": "256color",
+			"output": "\u001b[49m background reset only"
+		},
+		{
+			"input": "\u001b[49m background reset only",
+			"opacity": 0,
+			"mode": "256color",
+			"output": "\u001b[49m background reset only"
+		},
+		{
+			"input": "\u001b[49m background reset only",
+			"opacity": -1,
+			"mode": "256color",
+			"output": "\u001b[49m background reset only"
+		},
+		{
+			"input": "\u001b[49m background reset only",
+			"opacity": 2,
+			"mode": "256color",
+			"output": "\u001b[49m background reset only"
+		},
+		{
+			"input": "\u001b[1;38;2;10;20;30mcompound sgr\u001b[22;39m",
+			"opacity": 1,
+			"mode": "256color",
+			"output": "\u001b[1;38;2;10;20;30mcompound sgr\u001b[22;39m"
+		},
+		{
+			"input": "\u001b[1;38;2;10;20;30mcompound sgr\u001b[22;39m",
+			"opacity": 0.75,
+			"mode": "256color",
+			"output": "\u001b[1;38;2;10;20;30mcompound sgr\u001b[22;39m"
+		},
+		{
+			"input": "\u001b[1;38;2;10;20;30mcompound sgr\u001b[22;39m",
+			"opacity": 0.5,
+			"mode": "256color",
+			"output": "\u001b[1;38;2;10;20;30mcompound sgr\u001b[22;39m"
+		},
+		{
+			"input": "\u001b[1;38;2;10;20;30mcompound sgr\u001b[22;39m",
+			"opacity": 0.25,
+			"mode": "256color",
+			"output": "\u001b[1;38;2;10;20;30mcompound sgr\u001b[22;39m"
+		},
+		{
+			"input": "\u001b[1;38;2;10;20;30mcompound sgr\u001b[22;39m",
+			"opacity": 0,
+			"mode": "256color",
+			"output": "\u001b[1;38;2;10;20;30mcompound sgr\u001b[22;39m"
+		},
+		{
+			"input": "\u001b[1;38;2;10;20;30mcompound sgr\u001b[22;39m",
+			"opacity": -1,
+			"mode": "256color",
+			"output": "\u001b[1;38;2;10;20;30mcompound sgr\u001b[22;39m"
+		},
+		{
+			"input": "\u001b[1;38;2;10;20;30mcompound sgr\u001b[22;39m",
+			"opacity": 2,
+			"mode": "256color",
+			"output": "\u001b[1;38;2;10;20;30mcompound sgr\u001b[22;39m"
+		},
+		{
+			"input": "\u001b[1m\u001b[38;2;10;20;30msequential sgr\u001b[22m\u001b[39m",
+			"opacity": 1,
+			"mode": "256color",
+			"output": "\u001b[1m\u001b[38;2;10;20;30msequential sgr\u001b[22m\u001b[39m"
+		},
+		{
+			"input": "\u001b[1m\u001b[38;2;10;20;30msequential sgr\u001b[22m\u001b[39m",
+			"opacity": 0.75,
+			"mode": "256color",
+			"output": "\u001b[1m\u001b[38;5;17msequential sgr\u001b[22m\u001b[38;5;247m"
+		},
+		{
+			"input": "\u001b[1m\u001b[38;2;10;20;30msequential sgr\u001b[22m\u001b[39m",
+			"opacity": 0.5,
+			"mode": "256color",
+			"output": "\u001b[1m\u001b[38;5;16msequential sgr\u001b[22m\u001b[38;5;242m"
+		},
+		{
+			"input": "\u001b[1m\u001b[38;2;10;20;30msequential sgr\u001b[22m\u001b[39m",
+			"opacity": 0.25,
+			"mode": "256color",
+			"output": "\u001b[1m\u001b[38;5;16msequential sgr\u001b[22m\u001b[38;5;238m"
+		},
+		{
+			"input": "\u001b[1m\u001b[38;2;10;20;30msequential sgr\u001b[22m\u001b[39m",
+			"opacity": 0,
+			"mode": "256color",
+			"output": "\u001b[1m\u001b[38;5;233msequential sgr\u001b[22m\u001b[38;5;233m"
+		},
+		{
+			"input": "\u001b[1m\u001b[38;2;10;20;30msequential sgr\u001b[22m\u001b[39m",
+			"opacity": -1,
+			"mode": "256color",
+			"output": "\u001b[1m\u001b[38;5;233msequential sgr\u001b[22m\u001b[38;5;233m"
+		},
+		{
+			"input": "\u001b[1m\u001b[38;2;10;20;30msequential sgr\u001b[22m\u001b[39m",
+			"opacity": 2,
+			"mode": "256color",
+			"output": "\u001b[1m\u001b[38;2;10;20;30msequential sgr\u001b[22m\u001b[39m"
+		},
+		{
+			"input": "\u001b]8;;https://example.com\u0007\u001b[38;2;200;100;50mosc8 bel\u001b[39m\u001b]8;;\u0007",
+			"opacity": 1,
+			"mode": "256color",
+			"output": "\u001b]8;;https://example.com\u0007\u001b[38;2;200;100;50mosc8 bel\u001b[39m\u001b]8;;\u0007"
+		},
+		{
+			"input": "\u001b]8;;https://example.com\u0007\u001b[38;2;200;100;50mosc8 bel\u001b[39m\u001b]8;;\u0007",
+			"opacity": 0.75,
+			"mode": "256color",
+			"output": "\u001b]8;;https://example.com\u0007\u001b[38;5;137mosc8 bel\u001b[38;5;247m\u001b]8;;\u0007"
+		},
+		{
+			"input": "\u001b]8;;https://example.com\u0007\u001b[38;2;200;100;50mosc8 bel\u001b[39m\u001b]8;;\u0007",
+			"opacity": 0.5,
+			"mode": "256color",
+			"output": "\u001b]8;;https://example.com\u0007\u001b[38;5;95mosc8 bel\u001b[38;5;242m\u001b]8;;\u0007"
+		},
+		{
+			"input": "\u001b]8;;https://example.com\u0007\u001b[38;2;200;100;50mosc8 bel\u001b[39m\u001b]8;;\u0007",
+			"opacity": 0.25,
+			"mode": "256color",
+			"output": "\u001b]8;;https://example.com\u0007\u001b[38;5;59mosc8 bel\u001b[38;5;238m\u001b]8;;\u0007"
+		},
+		{
+			"input": "\u001b]8;;https://example.com\u0007\u001b[38;2;200;100;50mosc8 bel\u001b[39m\u001b]8;;\u0007",
+			"opacity": 0,
+			"mode": "256color",
+			"output": "\u001b]8;;https://example.com\u0007\u001b[38;5;233mosc8 bel\u001b[38;5;233m\u001b]8;;\u0007"
+		},
+		{
+			"input": "\u001b]8;;https://example.com\u0007\u001b[38;2;200;100;50mosc8 bel\u001b[39m\u001b]8;;\u0007",
+			"opacity": -1,
+			"mode": "256color",
+			"output": "\u001b]8;;https://example.com\u0007\u001b[38;5;233mosc8 bel\u001b[38;5;233m\u001b]8;;\u0007"
+		},
+		{
+			"input": "\u001b]8;;https://example.com\u0007\u001b[38;2;200;100;50mosc8 bel\u001b[39m\u001b]8;;\u0007",
+			"opacity": 2,
+			"mode": "256color",
+			"output": "\u001b]8;;https://example.com\u0007\u001b[38;2;200;100;50mosc8 bel\u001b[39m\u001b]8;;\u0007"
+		},
+		{
+			"input": "\u001b]8;;https://example.com\u001b\\\u001b[38;5;33mosc8 st\u001b[39m\u001b]8;;\u001b\\",
+			"opacity": 1,
+			"mode": "256color",
+			"output": "\u001b]8;;https://example.com\u001b\\\u001b[38;5;33mosc8 st\u001b[39m\u001b]8;;\u001b\\"
+		},
+		{
+			"input": "\u001b]8;;https://example.com\u001b\\\u001b[38;5;33mosc8 st\u001b[39m\u001b]8;;\u001b\\",
+			"opacity": 0.75,
+			"mode": "256color",
+			"output": "\u001b]8;;https://example.com\u001b\\\u001b[38;5;33mosc8 st\u001b[38;5;247m\u001b]8;;\u001b\\"
+		},
+		{
+			"input": "\u001b]8;;https://example.com\u001b\\\u001b[38;5;33mosc8 st\u001b[39m\u001b]8;;\u001b\\",
+			"opacity": 0.5,
+			"mode": "256color",
+			"output": "\u001b]8;;https://example.com\u001b\\\u001b[38;5;31mosc8 st\u001b[38;5;242m\u001b]8;;\u001b\\"
+		},
+		{
+			"input": "\u001b]8;;https://example.com\u001b\\\u001b[38;5;33mosc8 st\u001b[39m\u001b]8;;\u001b\\",
+			"opacity": 0.25,
+			"mode": "256color",
+			"output": "\u001b]8;;https://example.com\u001b\\\u001b[38;5;24mosc8 st\u001b[38;5;238m\u001b]8;;\u001b\\"
+		},
+		{
+			"input": "\u001b]8;;https://example.com\u001b\\\u001b[38;5;33mosc8 st\u001b[39m\u001b]8;;\u001b\\",
+			"opacity": 0,
+			"mode": "256color",
+			"output": "\u001b]8;;https://example.com\u001b\\\u001b[38;5;233mosc8 st\u001b[38;5;233m\u001b]8;;\u001b\\"
+		},
+		{
+			"input": "\u001b]8;;https://example.com\u001b\\\u001b[38;5;33mosc8 st\u001b[39m\u001b]8;;\u001b\\",
+			"opacity": -1,
+			"mode": "256color",
+			"output": "\u001b]8;;https://example.com\u001b\\\u001b[38;5;233mosc8 st\u001b[38;5;233m\u001b]8;;\u001b\\"
+		},
+		{
+			"input": "\u001b]8;;https://example.com\u001b\\\u001b[38;5;33mosc8 st\u001b[39m\u001b]8;;\u001b\\",
+			"opacity": 2,
+			"mode": "256color",
+			"output": "\u001b]8;;https://example.com\u001b\\\u001b[38;5;33mosc8 st\u001b[39m\u001b]8;;\u001b\\"
+		},
+		{
+			"input": "\u001b[38;5;16mcube0 \u001b[38;5;231mcube231 \u001b[38;5;232mgray232 \u001b[38;5;244mgray244 \u001b[38;5;255mgray255",
+			"opacity": 1,
+			"mode": "256color",
+			"output": "\u001b[38;5;16mcube0 \u001b[38;5;231mcube231 \u001b[38;5;232mgray232 \u001b[38;5;244mgray244 \u001b[38;5;255mgray255"
+		},
+		{
+			"input": "\u001b[38;5;16mcube0 \u001b[38;5;231mcube231 \u001b[38;5;232mgray232 \u001b[38;5;244mgray244 \u001b[38;5;255mgray255",
+			"opacity": 0.75,
+			"mode": "256color",
+			"output": "\u001b[38;5;16mcube0 \u001b[38;5;254mcube231 \u001b[38;5;232mgray232 \u001b[38;5;241mgray244 \u001b[38;5;249mgray255"
+		},
+		{
+			"input": "\u001b[38;5;16mcube0 \u001b[38;5;231mcube231 \u001b[38;5;232mgray232 \u001b[38;5;244mgray244 \u001b[38;5;255mgray255",
+			"opacity": 0.5,
+			"mode": "256color",
+			"output": "\u001b[38;5;232mcube0 \u001b[38;5;247mcube231 \u001b[38;5;232mgray232 \u001b[38;5;238mgray244 \u001b[38;5;244mgray255"
+		},
+		{
+			"input": "\u001b[38;5;16mcube0 \u001b[38;5;231mcube231 \u001b[38;5;232mgray232 \u001b[38;5;244mgray244 \u001b[38;5;255mgray255",
+			"opacity": 0.25,
+			"mode": "256color",
+			"output": "\u001b[38;5;233mcube0 \u001b[38;5;240mcube231 \u001b[38;5;233mgray232 \u001b[38;5;236mgray244 \u001b[38;5;238mgray255"
+		},
+		{
+			"input": "\u001b[38;5;16mcube0 \u001b[38;5;231mcube231 \u001b[38;5;232mgray232 \u001b[38;5;244mgray244 \u001b[38;5;255mgray255",
+			"opacity": 0,
+			"mode": "256color",
+			"output": "\u001b[38;5;233mcube0 \u001b[38;5;233mcube231 \u001b[38;5;233mgray232 \u001b[38;5;233mgray244 \u001b[38;5;233mgray255"
+		},
+		{
+			"input": "\u001b[38;5;16mcube0 \u001b[38;5;231mcube231 \u001b[38;5;232mgray232 \u001b[38;5;244mgray244 \u001b[38;5;255mgray255",
+			"opacity": -1,
+			"mode": "256color",
+			"output": "\u001b[38;5;233mcube0 \u001b[38;5;233mcube231 \u001b[38;5;233mgray232 \u001b[38;5;233mgray244 \u001b[38;5;233mgray255"
+		},
+		{
+			"input": "\u001b[38;5;16mcube0 \u001b[38;5;231mcube231 \u001b[38;5;232mgray232 \u001b[38;5;244mgray244 \u001b[38;5;255mgray255",
+			"opacity": 2,
+			"mode": "256color",
+			"output": "\u001b[38;5;16mcube0 \u001b[38;5;231mcube231 \u001b[38;5;232mgray232 \u001b[38;5;244mgray244 \u001b[38;5;255mgray255"
+		},
+		{
+			"input": "\u001b[38;5;0mlow0 \u001b[38;5;7mlow7 \u001b[38;5;15mlow15",
+			"opacity": 1,
+			"mode": "256color",
+			"output": "\u001b[38;5;0mlow0 \u001b[38;5;7mlow7 \u001b[38;5;15mlow15"
+		},
+		{
+			"input": "\u001b[38;5;0mlow0 \u001b[38;5;7mlow7 \u001b[38;5;15mlow15",
+			"opacity": 0.75,
+			"mode": "256color",
+			"output": "\u001b[38;5;16mlow0 \u001b[38;5;16mlow7 \u001b[38;5;16mlow15"
+		},
+		{
+			"input": "\u001b[38;5;0mlow0 \u001b[38;5;7mlow7 \u001b[38;5;15mlow15",
+			"opacity": 0.5,
+			"mode": "256color",
+			"output": "\u001b[38;5;232mlow0 \u001b[38;5;232mlow7 \u001b[38;5;232mlow15"
+		},
+		{
+			"input": "\u001b[38;5;0mlow0 \u001b[38;5;7mlow7 \u001b[38;5;15mlow15",
+			"opacity": 0.25,
+			"mode": "256color",
+			"output": "\u001b[38;5;233mlow0 \u001b[38;5;233mlow7 \u001b[38;5;233mlow15"
+		},
+		{
+			"input": "\u001b[38;5;0mlow0 \u001b[38;5;7mlow7 \u001b[38;5;15mlow15",
+			"opacity": 0,
+			"mode": "256color",
+			"output": "\u001b[38;5;233mlow0 \u001b[38;5;233mlow7 \u001b[38;5;233mlow15"
+		},
+		{
+			"input": "\u001b[38;5;0mlow0 \u001b[38;5;7mlow7 \u001b[38;5;15mlow15",
+			"opacity": -1,
+			"mode": "256color",
+			"output": "\u001b[38;5;233mlow0 \u001b[38;5;233mlow7 \u001b[38;5;233mlow15"
+		},
+		{
+			"input": "\u001b[38;5;0mlow0 \u001b[38;5;7mlow7 \u001b[38;5;15mlow15",
+			"opacity": 2,
+			"mode": "256color",
+			"output": "\u001b[38;5;0mlow0 \u001b[38;5;7mlow7 \u001b[38;5;15mlow15"
+		},
+		{
+			"input": "\u001b[38;2;254;188;56mA\u001b[39m \u001b[48;5;236mB\u001b[49m\u001b[38;5;244m·\u001b[39m\u001b[48;2;18;18;18m",
+			"opacity": 1,
+			"mode": "256color",
+			"output": "\u001b[38;2;254;188;56mA\u001b[39m \u001b[48;5;236mB\u001b[49m\u001b[38;5;244m·\u001b[39m\u001b[48;2;18;18;18m"
+		},
+		{
+			"input": "\u001b[38;2;254;188;56mA\u001b[39m \u001b[48;5;236mB\u001b[49m\u001b[38;5;244m·\u001b[39m\u001b[48;2;18;18;18m",
+			"opacity": 0.75,
+			"mode": "256color",
+			"output": "\u001b[38;5;179mA\u001b[38;5;247m \u001b[48;5;235mB\u001b[49m\u001b[38;5;241m·\u001b[38;5;247m\u001b[48;5;233m"
+		},
+		{
+			"input": "\u001b[38;2;254;188;56mA\u001b[39m \u001b[48;5;236mB\u001b[49m\u001b[38;5;244m·\u001b[39m\u001b[48;2;18;18;18m",
+			"opacity": 0.5,
+			"mode": "256color",
+			"output": "\u001b[38;5;137mA\u001b[38;5;242m \u001b[48;5;234mB\u001b[49m\u001b[38;5;238m·\u001b[38;5;242m\u001b[48;5;233m"
+		},
+		{
+			"input": "\u001b[38;2;254;188;56mA\u001b[39m \u001b[48;5;236mB\u001b[49m\u001b[38;5;244m·\u001b[39m\u001b[48;2;18;18;18m",
+			"opacity": 0.25,
+			"mode": "256color",
+			"output": "\u001b[38;5;95mA\u001b[38;5;238m \u001b[48;5;234mB\u001b[49m\u001b[38;5;236m·\u001b[38;5;238m\u001b[48;5;233m"
+		},
+		{
+			"input": "\u001b[38;2;254;188;56mA\u001b[39m \u001b[48;5;236mB\u001b[49m\u001b[38;5;244m·\u001b[39m\u001b[48;2;18;18;18m",
+			"opacity": 0,
+			"mode": "256color",
+			"output": "\u001b[38;5;233mA\u001b[38;5;233m \u001b[48;5;233mB\u001b[49m\u001b[38;5;233m·\u001b[38;5;233m\u001b[48;5;233m"
+		},
+		{
+			"input": "\u001b[38;2;254;188;56mA\u001b[39m \u001b[48;5;236mB\u001b[49m\u001b[38;5;244m·\u001b[39m\u001b[48;2;18;18;18m",
+			"opacity": -1,
+			"mode": "256color",
+			"output": "\u001b[38;5;233mA\u001b[38;5;233m \u001b[48;5;233mB\u001b[49m\u001b[38;5;233m·\u001b[38;5;233m\u001b[48;5;233m"
+		},
+		{
+			"input": "\u001b[38;2;254;188;56mA\u001b[39m \u001b[48;5;236mB\u001b[49m\u001b[38;5;244m·\u001b[39m\u001b[48;2;18;18;18m",
+			"opacity": 2,
+			"mode": "256color",
+			"output": "\u001b[38;2;254;188;56mA\u001b[39m \u001b[48;5;236mB\u001b[49m\u001b[38;5;244m·\u001b[39m\u001b[48;2;18;18;18m"
+		}
+	]
+}
