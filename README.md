@@ -28,7 +28,7 @@ The package READMEs carry the detail: [primitives](packages/primitives/README.md
 
 ## Hard rules
 
-Two libraries, not extensions. TypeScript source is the runtime entry and compiled output exists for tests only. Zero runtime dependencies; the three `@earendil-works` packages are `peerDependencies` at `*`. No module-level mutable state, no `instanceof` across a package boundary, frozen export tables, and `contracts` is additive-only forever.
+Two libraries, not extensions. TypeScript source is the runtime entry and compiled output exists for tests only. Zero runtime dependencies; the three `@earendil-works` packages are `peerDependencies` at `*`. No module-level mutable state except the documented registry-keyed models catalogue WeakMap, no `instanceof` across a package boundary, frozen export tables, and `contracts` is additive-only forever.
 
 Each rule has a reason attached in the [primitives README](packages/primitives/README.md): two copies in one pi process must be harmless, and a contracts rename would break every topping at once.
 
@@ -61,6 +61,8 @@ The two packages always carry the same version: a minor for a phase that changes
 Publishing is not tied to a phase. Publish when at least one consumer has to take a package from the registry, either because a topping is installed with `pi install npm:<topping>` or because a consumer's CI installs it. Until then the `--no-save` link or a packed tarball is the development path, and [docs/consumers.md](docs/consumers.md) documents both.
 
 At the moment you publish, every subpath still listed in `exports` must export something. Either fill it in that change, or remove it from `exports` first and add it back in the phase that owns it. Removal is allowed by the package-shape guard, which checks that the export keys are a subsequence of the planned list rather than equal to it, deliberately; re-adding is additive, so no consumer breaks. `contracts` is additive-only forever, so dropping and re-adding a subpath must never remove or rename a name that already shipped.
+
+The 0.5.0 release (`./models`: model vocabulary, a cached registry catalogue, thinking policy and an unframed two-pane picker) and the 0.4.0 release (`./menu`) publish only `@underactive/pi-topping-primitives`, with `npm publish -w @underactive/pi-topping-primitives` after every consumer is green against the packed tarball; test-utils stays unpublished.
 
 The 0.3.0 release (`./activity`, `./activity-tui`) and the 0.2.0 release (`./settings`) published only `@underactive/pi-topping-primitives`, the same way as 0.1.0 (test-utils is still unpublished). The 0.1.0 release published only `@underactive/pi-topping-primitives`, using `npm publish -w @underactive/pi-topping-primitives`. `@underactive/pi-topping-test-utils` remains unpublished because its subpaths are still placeholders. Do not use `npm publish --workspaces` while any workspace package still has empty exported subpaths.
 

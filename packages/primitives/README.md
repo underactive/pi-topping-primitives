@@ -6,17 +6,17 @@ Shared runtime pieces for the pi-topping family: cross-extension contracts (name
 
 ## Install
 
-Version 0.1.0 (contracts only) is published; 0.2.0 adds `./settings`; 0.3.0 adds `./activity` and `./activity-tui`; 0.4.0 adds `./menu`. A topping takes it as a runtime dependency:
+Version 0.1.0 (contracts only) is published; 0.2.0 adds `./settings`; 0.3.0 adds `./activity` and `./activity-tui`; 0.4.0 adds `./menu`; 0.5.0 adds `./models`. A topping takes it as a runtime dependency:
 
 ```sh
-npm install @underactive/pi-topping-primitives@^0.4.0
+npm install @underactive/pi-topping-primitives@^0.5.0
 ```
 
 That writes a `dependencies` entry. The code is loaded by pi at runtime, so it does not belong in `devDependencies`.
 
 ## Exported subpaths
 
-The package exports `./contracts`, `./settings`, `./activity`, `./activity-tui` (the last two from 0.3.0) and `./menu` (from 0.4.0); there is deliberately no root `"."` export. Future helper subpaths are not part of the package API until their implementation lands and they are added to `exports`.
+The package exports `./contracts`, `./settings`, `./activity`, `./activity-tui` (the last two from 0.3.0), `./menu` (from 0.4.0) and `./models` (from 0.5.0); there is deliberately no root `"."` export. Future helper subpaths are not part of the package API until their implementation lands and they are added to `exports`.
 
 ## Future subpaths
 
@@ -24,7 +24,6 @@ These entries are a roadmap, not current exports:
 
 | Planned subpath | Planned contents | Phase |
 | --- | --- | --- |
-| `./models` | `ModelRef`, `THINKING_LEVELS`, `parseRef`, `getModelCatalogue`, `validateSavedChoice`, `thinkingOptionsForModel`, `TwoPaneModelThinking` | 5 |
 | `./color` | `Rgb`, `parseHex`, `mixRgb`, `rgbTo256`, `rgbToFgAnsi`, `ansiToRgb`, `hslToRgb`, the palette constants, `renderCometBar`, the fade helpers | 6 |
 | `./text` | `padRight`, `padCenter`, `fitCell`, `truncateVisible`, `pickFitting`, `stripControlChars`, `stableStringify`, the cost and percent formatters | 6 |
 | `./glyphs` | `BoxGlyphs`, `BOX_STYLES`, `SPINNER_FRAMES`, `SPINNER_FRAME_MS`, the braille and quadrant spinner sets | 6 |
@@ -226,6 +225,53 @@ A rejected `onAction` or `onPick`, or a synchronous throw, clears the busy marke
 
 `snapshot()` returns detached copies of `values`, `cursorId`, `rowCount`, `editing`, `focus` and `busy` for host tests.
 
+## Models
+
+`./models` provides model vocabulary, a registry catalogue and an unframed two-pane picker. Frames, overlays, warnings, persistence and model-specific selection policy stay in the host.
+
+```ts
+import { getModelCatalogue, registryLevelOptions, TwoPaneModelThinking } from "@underactive/pi-topping-primitives/models";
+
+const picker = new TwoPaneModelThinking({
+	theme,
+	refs: getModelCatalogue(ctx.modelRegistry).availableRefs(),
+	levelOptions: registryLevelOptions(ctx.modelRegistry),
+	requestRender: () => tui.requestRender(),
+});
+const rows = picker.render(bodyWidth);
+if (picker.handleInput(data) === "confirm") use(picker.getSelected());
+```
+
+| Exports | Purpose |
+| --- | --- |
+| `ModelRef`, `ThinkingLevel`, `THINKING_LEVELS`, `COMMON_THINKING_LEVELS` | Provider/id and canonical thinking vocabulary; both tables are frozen |
+| `isModelRef`, `isThinkingLevel`, `modelRefLabel`, `parseRef`, `shortModelName` | Strict non-empty persisted refs, level validation, labels, lenient first-slash decoding and compact display names |
+| `parseModelKey`, `composeModelKey` | Sensei's codec: prefer slash, else colon, require a provider; a trailing separator is accepted (unlike `isModelRef`) |
+| `getModelCatalogue`, `CatalogueRegistry`, `ModelCatalogue`, `validateSavedChoice`, `registryLevelOptions` | First-wins deduped/sorted registry snapshot, fresh ref objects and level arrays, exact saved-choice validation and picker policy bridge |
+| `thinkingOptionsForModel`, `defaultThinkingForModel` | Canonical offered levels; saved override, current, medium, first, then medium preference ladder |
+| `smartTruncateModelLabel`, `MODEL_LIST_LAYOUT`, `modelThinkingPaneWidths`, `fuzzyRanked` | Namespace-aware labels, frozen list layout, asymmetric pane allocation, substring-first fuzzy matching |
+| `TwoPaneModelThinking`, `TwoPaneModelThinkingOptions`, `ModelPickerTheme` | Generic level vocabulary, structural host theme, body and unframed footer |
+
+| Picker option | Default |
+| --- | --- |
+| `theme`, `refs`, `levelOptions(ref)` | required; the picker never reads a registry |
+| `preferredLevel(ref, options, previous)` | previous level if offered, otherwise first |
+| `filter`, `printable` | pi-tui `fuzzyFilter`; kitty decoding or printable paste (C0/DEL/C1 rejected) |
+| `backKeys` | `[Key.escape]`; pass Ctrl+C explicitly if wanted |
+| `maxVisibleRows` | 10, including header/filter/scroll rows |
+| `requestRender` | absent: render-pure, the owner schedules repaint |
+| `selectTheme` | selected text accent; descriptions, scroll info and no-match muted, derived from `theme` |
+| `highlightSelectedRow`, `marker` | `true`, `"> "` |
+| `itemLabel`, `modelPaneTitle`, `levelPaneTitle` | `modelRefLabel`, `"Models"`, `"Thinking"` |
+| `levelWidthLabels` | `THINKING_LEVELS`; pass a custom vocabulary to size its pane |
+| `defaultRef`, `defaultLevel` | first model, host preference or first offered level |
+
+`reset`, `setMaxVisibleRows`, `handleInput`, `selection` (non-throwing), `getSelected` (throws on empty), `snapshot` (detached), `render`, `renderFooter` and `invalidate` are public. Body rows and footer rows fit `bodyWidth`; pane sums include one divider for widths at least three. Footer output is `{ actionRow, hintRows }`, without rules. Tab cycles models/levels/buttons; arrows switch panes or buttons; Enter selects or cancels. Empty Select is inert. Typing or Backspace retargets the filter from any pane; filtering preserves the selected ref if it still matches.
+
+The row budget reserves scroll information when the item count equals the available list space as well as when it exceeds it. At equality this displays one fewer item plus scroll information; `maxVisibleRows` is a cap, not a promise to show every item that could fit without a scrollbar. A host needing ten item rows can budget twelve total rows plus one while filtering (header + ten items + a possible scroll row).
+
+`thinkingOptionsForModel(levels, { fallback })` uses a copied fallback on any empty filtered result, including `undefined` and `[]`; the default is empty. `registryLevelOptions` exposes the same policy. The only allowed module state is the catalogue WeakMap, keyed by the host registry so it dies with that object; each package copy owns an independent cache. The catalogue snapshots `getAvailable()` the first time it is asked and does not observe `registry.refresh()` (pi refreshes in place after a login or a models.json reload), so a host whose picker must reflect those reads `getAvailable()` and `find()` directly and passes `thinkingOptionsForModel` as `levelOptions`. No global theme or runtime pi-coding-agent import is used.
+
 ## Contracts
 
 `./contracts` is the permanent cross-extension wire registry. The names never change, payloads only gain fields, and parsers ignore unknown fields. The `V1` suffix appears only on versioned payloads; an incompatible change to an unversioned payload takes a new name.
@@ -302,7 +348,7 @@ Tested against pi 1.3.0; `peerDependencies` are `*`.
 
 ## House rules
 
-- No module-level mutable state, and export tables are deep-frozen. Two copies of the package in one pi process must be harmless, and mutable module state is the only way that breaks.
+- No module-level mutable state except the documented registry-keyed `./models` WeakMap, and export tables are deep-frozen. Two copies of the package in one pi process must be harmless, and mutable module state is the only way that breaks.
 - No `instanceof` across a package boundary. A class from a second copy is a different class, so the check would silently fail.
 - `./contracts` is additive-only forever: names are immutable, payloads append-only, parsers ignore unknown fields. An incompatible change to an unversioned payload takes a new name. A rename there would break every topping at once.
 - Tabs in source, matching `.editorconfig` and `biome.json`, so a module moved out of a topping keeps producing the same diff.

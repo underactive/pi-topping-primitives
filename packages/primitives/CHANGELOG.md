@@ -4,6 +4,24 @@ All notable changes to this package are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this package
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.0] - 2026-10-19
+
+### Added
+
+- `./models`: the model-reference and thinking vocabulary, label/codecs, cached registry catalogue, saved-choice validation, thinking-policy helpers, fuzzy ranking, namespace-aware label truncation, pane geometry and generic `TwoPaneModelThinking` body with host-owned framing and policy. `SUBPATH=models` exercises the picker and registry bridge through both real pi loader branches.
+
+### Differences from the vendored copies
+
+- Escape is the only default back key; `backKeys` permits explicit Ctrl+C. Keys are physical, not new keybinding ids.
+- `isModelRef` requires non-empty provider and id strings. `parseRef` stays lenient; sensei's separate slash/colon codec retains its trailing-separator acceptance.
+- Themes are structural and SelectList colours derive from the host, with an optional `selectTheme` override. Selected rows use a sentinel, so marker-like label text cannot create spurious background highlights. `highlightSelectedRow` defaults true and can be disabled.
+- A generic level vocabulary, `levelWidthLabels`, `itemLabel`, custom pane titles, filtering and printable-input hooks support host policy without subclassing. Frames, warnings, persistence and overlays remain local.
+- A single documented registry-keyed WeakMap caches a first-wins sorted snapshot. Catalogue arrays and ref objects are copied; unknown refs return no levels. A host fallback applies to any empty filtered level list, not only undefined input.
+- The asymmetric panes have one-column insets and smart namespace truncation. Every row fits the body width; the row cap includes filter/header/scroll chrome. Resizing and matching filters preserve selection. Default level policy retains the previous offered level, but hosts can override it.
+- Row budgeting reserves scroll information at equality as well as overflow. When items exactly fill the available list space this shows one fewer item plus a scroll row; it lets hosts preserve an exact item cap without cropping the selected row.
+- Empty Select is inert, never Cancel. Printable paste and kitty text filter from any pane, including buttons; Backspace removes one code point. C0, DEL, C1 and control sequences are rejected by the default decoder.
+- Footer hints wrap and remain unframed. Without `requestRender`, dispatch and rendering are render-pure for owners that schedule their own repaint. Public `selection` and detached `snapshot` replace private-field reads.
+
 ## [0.4.0] - 2026-10-19
 
 ### Added
