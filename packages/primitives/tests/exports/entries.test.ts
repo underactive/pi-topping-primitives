@@ -14,6 +14,7 @@ import * as activityNs from "@underactive/pi-topping-primitives/activity";
 import * as activityTuiNs from "@underactive/pi-topping-primitives/activity-tui";
 import * as contractsNs from "@underactive/pi-topping-primitives/contracts";
 import * as menuNs from "@underactive/pi-topping-primitives/menu";
+import * as modelsNs from "@underactive/pi-topping-primitives/models";
 import * as settingsNs from "@underactive/pi-topping-primitives/settings";
 
 const packageRoot = fileURLToPath(new URL("../..", import.meta.url));
@@ -25,6 +26,7 @@ const SUBPATHS = [
 	"./activity",
 	"./activity-tui",
 	"./menu",
+	"./models",
 ] as const;
 
 /** The statically imported namespaces, keyed by subpath. */
@@ -34,6 +36,7 @@ const NAMESPACES: Record<string, Record<string, unknown>> = {
 	"./activity": activityNs as unknown as Record<string, unknown>,
 	"./activity-tui": activityTuiNs as unknown as Record<string, unknown>,
 	"./menu": menuNs as unknown as Record<string, unknown>,
+	"./models": modelsNs as unknown as Record<string, unknown>,
 };
 
 const manifest = JSON.parse(

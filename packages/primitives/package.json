@@ -52,6 +52,11 @@
 			"types": "./dist/menu/index.d.ts",
 			"compiled": "./dist/menu/index.js",
 			"default": "./src/menu/index.ts"
+		},
+		"./models": {
+			"types": "./dist/models/index.d.ts",
+			"compiled": "./dist/models/index.js",
+			"default": "./src/models/index.ts"
 		}
 	},
 	"peerDependencies": {

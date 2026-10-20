@@ -99,13 +99,15 @@ printf '{ "name": "@underactive/fake-prim", "type": "module", "exports": { ".": 
 # Expect: unbundled SDK, compiled only -> {"form":"compiled-js","same":false} with peers present
 [ "$have_unbundled" = 1 ] && probe index.js "unbundled SDK, compiled only"
 # Real-package rows. With PRIM_TGZ set to a packed primitives tarball, load a multi-file subpath
-# (SUBPATH, default settings; one of settings, activity, activity-tui, menu) from node_modules
+# (SUBPATH, default settings; one of settings, activity, activity-tui, menu, models) from node_modules
 # through both loader branches. Pass: no load errors and the extension's own calls return what the
 # row expects. activity-tui is the first subpath with a runtime pi-tui import of its own, so its
 # rows are the ones that show the dependency resolving pi-tui through the host's alias. menu goes
 # further: it constructs a component whose keys go through pi-tui's KeybindingsManager, renders
-# it, and presses Enter.
+# it, and presses Enter. models builds the picker from a one-model fake registry through
+# registryLevelOptions (pi-ai's getSupportedThinkingLevels), renders at width 60 and presses Enter.
 # Expect for menu: {"top":true,"rows":7,"result":{"applied":true,"values":{"on":true}}}
+# Expect for models: {"rows":2,"pick":{"ref":{"provider":"probe","id":"model"},"thinking":"off"}}
 if [ -n "$PRIM_TGZ" ]; then
 	SUBPATH=${SUBPATH:-settings}
 	RP="$T/ext/node_modules/@underactive/pi-topping-primitives"
@@ -168,8 +170,20 @@ menu.handleInput("\r");
 export default function () {}
 EOF2
 		;;
+	models)
+		cat > "$T/ext/index.ts" <<EOF2
+import { TwoPaneModelThinking, registryLevelOptions } from "@underactive/pi-topping-primitives/$SUBPATH";
+const theme = { fg: (_c: string, s: string) => s, bg: (_c: string, s: string) => s, bold: (s: string) => s };
+const registry = { getAvailable: () => [{ provider: "probe", id: "model", reasoning: false }] };
+const picker = new TwoPaneModelThinking({ theme, refs: [{ provider: "probe", id: "model" }], levelOptions: registryLevelOptions(registry) });
+const rows = picker.render(60).length;
+if (picker.handleInput("\\r") !== "confirm") throw new Error("models probe did not confirm");
+(globalThis as { __fakePrim?: unknown }).__fakePrim = { rows, pick: picker.getSelected() };
+export default function () {}
+EOF2
+		;;
 	*)
-		echo "probe-pi-loader: unknown SUBPATH '$SUBPATH' (expected settings, activity, activity-tui or menu)" >&2
+		echo "probe-pi-loader: unknown SUBPATH '$SUBPATH' (expected settings, activity, activity-tui, menu or models)" >&2
 		rm -rf "$T"
 		exit 1
 		;;
