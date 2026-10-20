@@ -4,7 +4,7 @@ How a topping consumes the two libraries. The decision this document records: **
 
 The checkouts are symlinked into `~/.pi/agent/extensions`, so each one resolves its own `node_modules` at runtime. That is why every mode below ends with an install inside the consumer checkout.
 
-**Latest release: 0.7.0.** It is the 0.6.0 API with corrected xterm cube levels in `./color`. It exports `./contracts`, `./settings`, `./activity`, `./activity-tui`, `./menu`, `./models`, `./color`, `./text` and `./glyphs`; `./process` arrives in the upcoming 0.8.0 and is not on the registry yet. Statusline has moved to `^0.7.0`; the other consumers may stay on `^0.6.0` until their next adoption.
+**Latest release: 0.8.0.** It adds `./process` to the 0.7.0 API and is the last planned subpath. It exports `./contracts`, `./settings`, `./activity`, `./activity-tui`, `./menu`, `./models`, `./color`, `./text`, `./glyphs` and `./process`. A consumer commits `^0.8.0`. moa-fusion, persona-audit, pi-topping and splash have moved to it; statusline stays on `^0.7.0` and the rest may stay on `^0.6.0` until their next adoption.
 
 ## 1. Published: the committed state
 
@@ -71,7 +71,7 @@ Verify runner behavior against the packed or registry package, not only a `--no-
 
 Handoff section 7, with two corrections from this phase.
 
-1. `package.json`: add `"@underactive/pi-topping-primitives": "^0.7.0"` (the latest release) under `dependencies`, and `"@underactive/pi-topping-test-utils": "^0.1.0"` under `devDependencies`. Do not touch `peerDependencies` or `files`. **Correction (a):** a registry range is the only committable form. `file:` links exist for `--no-save` work only.
+1. `package.json`: add `"@underactive/pi-topping-primitives": "^0.8.0"` (the latest release) under `dependencies`, and `"@underactive/pi-topping-test-utils": "^0.1.0"` under `devDependencies`. Do not touch `peerDependencies` or `files`. **Correction (a):** a registry range is the only committable form. `file:` links exist for `--no-save` work only.
 2. Test script: `node -C compiled --test ...`. moa-fusion's `.mjs` tests keep `-C compiled` and `--experimental-transform-types` on the parent command so relaunches inherit them. Sensei uses `resolve.conditions: ["compiled"]`, verified against the published package; see the runner notes.
 3. `npm install` in the checkout. With a `file:` link, run `npm run build` in the primitives checkout first.
 4. Replace the vendored module with imports from the package subpath. Delete the tests that moved; keep one host-level smoke assertion.
