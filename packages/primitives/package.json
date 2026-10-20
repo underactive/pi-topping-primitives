@@ -72,6 +72,11 @@
 			"types": "./dist/glyphs/index.d.ts",
 			"compiled": "./dist/glyphs/index.js",
 			"default": "./src/glyphs/index.ts"
+		},
+		"./process": {
+			"types": "./dist/process/index.d.ts",
+			"compiled": "./dist/process/index.js",
+			"default": "./src/process/index.ts"
 		}
 	},
 	"peerDependencies": {

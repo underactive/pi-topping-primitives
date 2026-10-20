@@ -4,7 +4,7 @@ How a topping consumes the two libraries. The decision this document records: **
 
 The checkouts are symlinked into `~/.pi/agent/extensions`, so each one resolves its own `node_modules` at runtime. That is why every mode below ends with an install inside the consumer checkout.
 
-**Latest release: 0.7.0.** It is the 0.6.0 API with corrected xterm cube levels in `./color`. It exports `./contracts`, `./settings`, `./activity`, `./activity-tui`, `./menu`, `./models`, `./color`, `./text` and `./glyphs`; `./process` is planned for Phase 7 (0.8.0) and is not exported yet. Statusline has moved to `^0.7.0`; the other consumers may stay on `^0.6.0` until their next adoption.
+**Latest release: 0.7.0.** It is the 0.6.0 API with corrected xterm cube levels in `./color`. It exports `./contracts`, `./settings`, `./activity`, `./activity-tui`, `./menu`, `./models`, `./color`, `./text` and `./glyphs`; `./process` arrives in the upcoming 0.8.0 and is not on the registry yet. Statusline has moved to `^0.7.0`; the other consumers may stay on `^0.6.0` until their next adoption.
 
 ## 1. Published: the committed state
 

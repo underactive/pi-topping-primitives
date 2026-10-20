@@ -6,27 +6,17 @@ Shared runtime pieces for the pi-topping family: cross-extension contracts (name
 
 ## Install
 
-Version 0.1.0 (contracts only) is published; 0.2.0 adds `./settings`; 0.3.0 adds `./activity` and `./activity-tui`; 0.4.0 adds `./menu`; 0.5.0 adds `./models`; 0.6.0 adds `./color`, `./text` and `./glyphs`; 0.7.0 corrects `xterm256ToRgb`'s cube levels. A topping takes it as a runtime dependency:
+Version 0.1.0 (contracts only) is published; 0.2.0 adds `./settings`; 0.3.0 adds `./activity` and `./activity-tui`; 0.4.0 adds `./menu`; 0.5.0 adds `./models`; 0.6.0 adds `./color`, `./text` and `./glyphs`; 0.7.0 corrects `xterm256ToRgb`'s cube levels; 0.8.0 adds `./process`. A topping takes it as a runtime dependency:
 
 ```sh
-npm install @underactive/pi-topping-primitives@^0.7.0
+npm install @underactive/pi-topping-primitives@^0.8.0
 ```
 
 That writes a `dependencies` entry. The code is loaded by pi at runtime, so it does not belong in `devDependencies`.
 
 ## Exported subpaths
 
-The package exports `./contracts`, `./settings`, `./activity`, `./activity-tui` (the last two from 0.3.0), `./menu` (from 0.4.0), `./models` (from 0.5.0), and `./color`, `./text` and `./glyphs` (from 0.6.0); there is deliberately no root `"."` export. Future helper subpaths are not part of the package API until their implementation lands and they are added to `exports`.
-
-## Future subpaths
-
-This entry is a roadmap, not a current export:
-
-| Planned subpath | Planned contents | Phase |
-| --- | --- | --- |
-| `./process` | `resolvePiInvocation`, `escalateKill`, `spawnCollect`, `mapWithConcurrencyLimit`, `parsePiVersion`, `versionAtLeast`, `loadAgentsFromDir`, `findNearestProjectAgentsDir` | 7 |
-
-The repository keeps an empty source placeholder for it, but it is not exported and therefore is not reachable through package specifiers in the current API. The release guard refuses to publish any subpath that is present in `exports` but still empty.
+The package exports `./contracts`, `./settings`, `./activity`, `./activity-tui` (the last two from 0.3.0), `./menu` (from 0.4.0), `./models` (from 0.5.0), `./color`, `./text` and `./glyphs` (from 0.6.0), and `./process` (from 0.8.0); there is deliberately no root `"."` export. Future helper subpaths are not part of the package API until their implementation lands and they are added to `exports`. None is planned.
 
 ## Settings
 
@@ -83,7 +73,7 @@ Semantics:
 - A lock whose owner is a dead pid on this host is reclaimed at once; an unreadable owner, or one on another host, only after 10 s. Under contention `update()` waits synchronously, up to about 1 s, so it blocks the event loop for that long.
 - `cached()` re-reads when the file stamp moves or after `invalidate()`, and `onChange` fires for external edits and for the store's own writes.
 - There is no module state, so two copies of the package in one process interoperate through the filesystem.
-- `./settings` imports `getAgentDir` from the pi-coding-agent peer at runtime; it is the only subpath that imports pi-coding-agent at runtime. (`./activity-tui` imports one runtime function from pi-tui, below.)
+- `./settings` imports `getAgentDir` from the pi-coding-agent peer at runtime; it and `./process` (its `agents.ts`) are the two subpaths that import pi-coding-agent at runtime. (`./activity-tui` imports one runtime function from pi-tui, below.)
 
 ## Activity
 
@@ -348,6 +338,42 @@ Semantics:
 `BoxGlyphs` has no T-junctions. moa-fusion's progress table keeps its own eight-field box, because the joins are frame policy.
 
 The spinner tables are frozen `readonly` tuples (`readonly ["⠋", ...]`), so they do not satisfy an API typed as a mutable `string[]`, which pi-tui's `Loader` `frames` option is. Pass a copy: `[...SPINNER_FRAMES]`. Their `.length` is the literal type `10` and `4`.
+
+## Process
+
+`./process` finds the pi that is running this process, starts and kills child processes, and holds the small helpers around them: a bounded-concurrency map, version maths, and the agent-file loader. Nothing spawns on import and there is no module state. `agents.ts` is the only file with a runtime pi-coding-agent import (`parseFrontmatter`, `CONFIG_DIR_NAME`).
+
+| Export | Purpose | From |
+| --- | --- | --- |
+| `resolvePiInvocation(args?, facts?)` | `{ command, args, via }` for the pi hosting this process | moa-fusion `runner.ts` |
+| `escalateKill(proc, graceMs?)`, `DEFAULT_KILL_GRACE_MS` | SIGTERM, then SIGKILL after the grace | moa-fusion `processPool.ts` |
+| `createProcessTracker()` | A new registry of live processes with `add`, `delete`, `has`, `size` and `cleanup(graceMs?)` | moa-fusion `processPool.ts` |
+| `spawnCollect(command, args, { timeoutMs, … })`, `SPAWN_TIMEOUT_EXIT_CODE` | Run without a shell, collect output, never reject | pi-topping `pi-installer.ts` |
+| `mapWithConcurrencyLimit(items, limit, fn, onStart?)` | Results in input order, at most `limit` in flight | moa-fusion `processPool.ts`, persona-audit `subprocess.ts` |
+| `parsePiVersion(text)`, `versionAtLeast(version, minimum)` | The first `x.y.z` in some output; component-wise `>=` | moa-fusion `piCapabilities.ts` |
+| `hostBelow(version, minimum)` | `true` when a release is older than a floor; unreadable counts as new enough | pi-topping `util.ts` |
+| `parseAgentFile`, `loadAgentsFromDir`, `findNearestProjectAgentsDir` | Agent `.md` files and the upward `<CONFIG_DIR_NAME>/agents` walk | moa-fusion `discovery.ts`, persona-audit `subprocess.ts` |
+
+```ts
+import { createProcessTracker, resolvePiInvocation, spawnCollect } from "@underactive/pi-topping-primitives/process";
+
+const tracked = createProcessTracker();             // one per extension, never shared
+const pi = resolvePiInvocation(["--version"]);      // { command, args, via }
+if (pi.via === "path") { /* only `pi` on PATH is left: your policy */ }
+const result = await spawnCollect(pi.command, pi.args, { timeoutMs: 10_000 });
+```
+
+`resolvePiInvocation` tries, in order, the running entry script under the running runtime (`via: "script"`), the running executable when it is not `node`, `nodejs` or `bun` (`"executable"`, a compiled pi), and last `pi` on PATH (`"path"`). It reads `process.argv[1]`, `process.execPath` and `fs.existsSync` on every call; `facts` replaces any of them. It returns fresh arrays and wraps no Windows shell. `via` is where the host puts its own policy: pi-topping's installer adds `cmd.exe /c` only when `via` is `"path"` on Windows, because it validates its package spec first; moa-fusion passes arbitrary task text as an argument and never wants a shell; splash refuses to relaunch when only `pi` on PATH is left, since that may be a different pi.
+
+`createProcessTracker()` returns a frozen registry that closes over its own set. Each extension makes its own, so a `/reload` kills only what that extension started and two copies of this package in one pi process share nothing. `cleanup` sends SIGTERM to every process that has not settled, empties the registry at once, and after the grace SIGKILLs every process in the snapshot that still has not settled. "Settled" means an exit code or a terminating signal; `proc.killed` is not consulted, because it turns true as soon as a signal is sent.
+
+`spawnCollect` resolves `{ code, stdout, stderr, timedOut }`. A spawn error or a signal exit is `code: 1`. On timeout it escalates the kill, resolves at once with `code: 124`, `timedOut: true`, and `[timed out after Nms]` appended to `stderr` (on a new line when `stderr` is not empty). Output is decoded as UTF-8 across chunk boundaries. A non-finite or non-positive `timeoutMs` starts no timer.
+
+`loadAgentsFromDir(dir, source, { parseThinking? })` reads `*.md` files that are regular files or symlinks. A file that cannot be read, has malformed YAML, has a frontmatter that is not a mapping, lacks a non-empty string `name` or `description`, or has a `tools`, `model` or (with `parseThinking`) `thinking` that is present but not a string is skipped; the rest of the directory still loads. YAML `null` counts as absent. The result keeps a fixed key order, with `tools` and `model` always present and `thinking` present only when the host passed `parseThinking` (the host's own level check, so this subpath does not depend on `./models`). Layering across directories and any name-shadowing rule stay in the host.
+
+`hostBelow` is not `versionAtLeast(parsePiVersion(x))`. It is anchored, so `pi 1.2.0` does not parse, and an unreadable version on either side is `false` (new enough). The `--no-mcp` check built from `parsePiVersion` and `versionAtLeast` reads an unreadable version as too old.
+
+Not here: the sub-run transports (they differ per host), each host's agent layering, `isProcessAlive` and `acquireDirLock` (in `./settings`), and the other non-text helpers the toppings copied (the env-flag and notification helpers, `combineSignals`, `raceAbort`, `createDeadline`, `stableStringify`).
 
 ## Contracts
 

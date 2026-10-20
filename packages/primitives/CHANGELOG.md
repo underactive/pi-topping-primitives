@@ -4,6 +4,33 @@ All notable changes to this package are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this package
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- `./process`, each export with the vendored copy it comes from (line numbers are at the Phase 7 base commits: moa-fusion `9f3b187`, persona-audit `e678f0f`, pi-topping `c8e2f3e`):
+  - `resolvePiInvocation`, with `PiInvocation`, `PiInvocationVia`, `ResolvedPiInvocation` and `PiProcessFacts`: moa-fusion `src/runtime/runner.ts:76-91` (`getPiInvocation`); `PiInvocation` is also moa-fusion `src/runtime/piCapabilities.ts:10-13`.
+  - `escalateKill` and `DEFAULT_KILL_GRACE_MS`: moa-fusion `src/runtime/processPool.ts:6-14`.
+  - `createProcessTracker`, `ProcessTracker` and `KillableProcess`: moa-fusion `src/runtime/processPool.ts:3-4,16-34` (`trackedProcesses` and `cleanupTrackedProcesses`).
+  - `spawnCollect`, `SPAWN_TIMEOUT_EXIT_CODE`, `SpawnCollectOptions` and `SpawnCollectResult`: pi-topping `src/pi-installer.ts:12-62`.
+  - `mapWithConcurrencyLimit`: moa-fusion `src/runtime/processPool.ts:37-57`; persona-audit `src/subprocess.ts:181-199` (without `onStart`).
+  - `parsePiVersion`, `versionAtLeast` and `PiVersion`: moa-fusion `src/runtime/piCapabilities.ts:19-31`.
+  - `hostBelow`: pi-topping `src/util.ts:14-26`.
+  - `parseAgentFile`, `loadAgentsFromDir`, `findNearestProjectAgentsDir`, `AgentDefinition` and `AgentFileOptions`: moa-fusion `src/agents/discovery.ts:13-22,30-104`; persona-audit `src/subprocess.ts:17-26,31-95`.
+  - `agents.ts` imports `parseFrontmatter` and `CONFIG_DIR_NAME` from pi-coding-agent at runtime, the second subpath to do so after `./settings`.
+- `scripts/probe-pi-loader.sh` takes `SUBPATH=process`. It reads a project agent file through both loader branches; with `PEERS=absent` nothing else on disk can supply pi-coding-agent, so that row shows the host's alias reaching `agents.ts`. The probe spawns nothing.
+- `THIRD_PARTY_NOTICES.md` records the MIT licence of pi's `subagent` example, from which `invocation.ts`, `concurrency.ts` and `agents.ts` derive.
+
+### Differences from the vendored copies
+
+- `createProcessTracker()` replaces moa-fusion's exported `trackedProcesses` set. Each extension makes its own registry, so a `/reload` kills only what that extension started and a second copy of the package shares nothing. It has the `Set` methods moa-fusion used (`add`, `delete`, `has`, `size`) plus `cleanup`, which keeps the snapshot-then-clear order of `cleanupTrackedProcesses`.
+- `resolvePiInvocation(args, facts?)` returns `via` (`"script"`, `"executable"` or `"path"`) so a host can apply its own policy to the PATH fallback; it wraps no Windows shell. It treats `nodejs` as a generic runtime as well as `node` and `bun`. The basename comparison was already case-insensitive. It always returns fresh arrays, where moa-fusion's returned the caller's.
+- `spawnCollect` keeps pi-topping's contract (code 124 and `[timed out after Nms]` on timeout, the error message appended on a spawn error, `code ?? 1` on close) and adds `timedOut`. It decodes UTF-8 across chunk boundaries, resolves `code: 1` for a synchronous spawn throw (such as a NUL in an argument), and escalates through `escalateKill`, whose SIGKILL timer is `unref`'d. A timeout that is zero, negative or not finite starts no timer.
+- `mapWithConcurrencyLimit` takes a `readonly` input. A `NaN` or fractional limit now works (`NaN` counts as 1, fractions floor); both vendored copies threw `RangeError` from `new Array`.
+- `loadAgentsFromDir` and `parseAgentFile` take a `parseThinking` callback instead of moa-fusion's `isThinkingLevel`, so this subpath does not depend on `./models`, and the `source` label is generic. A malformed file (read failure, bad YAML, a frontmatter that is not a mapping, a non-string `name`, `description`, `tools`, `model` or `thinking`) is skipped and the rest of the directory still loads; both vendored copies let the parser's exception escape, and persona-audit would have crashed on a non-string `name`. YAML `null` counts as absent. The result keeps the vendored key order, with `tools` and `model` always present and `thinking` only when `parseThinking` is given.
+- `hostBelow` is adopted verbatim, with its own anchored parse. It is not `versionAtLeast(parsePiVersion(x))`: an unreadable version is new enough there and too old in a `--no-mcp` style check.
+- Still deferred: `isPlainObject`, the env-flag and notification helpers, `combineSignals`, `raceAbort`, `createDeadline` and `stableStringify`. The sub-run transports, each host's agent layering and persona-audit's `persona-audit-*` shadow guard stay in the hosts.
+
 ## [0.7.0] - 2026-10-20
 
 ### Fixed

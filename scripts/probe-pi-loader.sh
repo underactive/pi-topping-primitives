@@ -100,7 +100,7 @@ printf '{ "name": "@underactive/fake-prim", "type": "module", "exports": { ".": 
 [ "$have_unbundled" = 1 ] && probe index.js "unbundled SDK, compiled only"
 # Real-package rows. With PRIM_TGZ set to a packed primitives tarball, load a multi-file subpath
 # (SUBPATH, default settings; one of settings, activity, activity-tui, menu, models, color, text,
-# glyphs) from node_modules through both loader branches. Pass: no load errors and the extension's
+# glyphs, process) from node_modules through both loader branches. Pass: no load errors and the extension's
 # own calls return what the row expects. activity-tui is the first subpath with a runtime pi-tui
 # import of its own, so its rows are the ones that show the dependency resolving pi-tui through the
 # host's alias. menu goes further: it constructs a component whose keys go through pi-tui's
@@ -108,12 +108,15 @@ printf '{ "name": "@underactive/fake-prim", "type": "module", "exports": { ".": 
 # fake registry through registryLevelOptions (pi-ai's getSupportedThinkingLevels), renders at
 # width 60 and presses Enter. color has no runtime pi import at all (the rows show that it loads
 # and computes with peers absent); text measures a CJK string through pi-tui's visibleWidth and
-# sliceByColumn, which is the row that proves the host alias reaches it; glyphs is data only.
+# sliceByColumn, which is the row that proves the host alias reaches it; glyphs is data only;
+# process reads a project agent file through pi-coding-agent's parseFrontmatter and CONFIG_DIR_NAME
+# (the PEERS=absent rows are the proof that both resolve through the host alias) and spawns nothing.
 # Expect for menu: {"top":true,"rows":7,"result":{"applied":true,"values":{"on":true}}}
 # Expect for models: {"rows":2,"pick":{"ref":{"provider":"probe","id":"model"},"thinking":"off"}}
 # Expect for color: {"filled":10,"trough":10,"green":"\u001b[38;2;132;197;26m","cube":[0,175,255]}
 # Expect for text: {"fit":"日\u001b[39m...","center":"  日本  "}
 # Expect for glyphs: {"corner":"╭","frames":10,"frozen":true}
+# Expect for process: {"agents":[["probe",["read","grep"],"high"]],"atLeast":true,"inv":{"command":"pi","args":["--version"],"via":"path"},"mapped":[2,4,6],"tracked":0}
 if [ -n "$PRIM_TGZ" ]; then
 	SUBPATH=${SUBPATH:-settings}
 	RP="$T/ext/node_modules/@underactive/pi-topping-primitives"
@@ -219,8 +222,35 @@ import { BOX_STYLES, SPINNER_FRAMES } from "@underactive/pi-topping-primitives/$
 export default function () {}
 EOF2
 		;;
+	process)
+		mkdir -p "$T/proj/.pi/agents" "$T/proj/sub"
+		printf -- '---\nname: probe\ndescription: probe\ntools: read, grep\nthinking: high\n---\nProbe body.\n' > "$T/proj/.pi/agents/probe.md"
+		cat > "$T/ext/index.ts" <<EOF2
+import {
+	createProcessTracker,
+	findNearestProjectAgentsDir,
+	loadAgentsFromDir,
+	mapWithConcurrencyLimit,
+	parsePiVersion,
+	resolvePiInvocation,
+	versionAtLeast,
+} from "@underactive/pi-topping-primitives/$SUBPATH";
+export default async function () {
+	const dir = findNearestProjectAgentsDir("$T/proj/sub");
+	const agents = dir ? loadAgentsFromDir(dir, "project", { parseThinking: (raw: string) => raw }) : [];
+	const mapped = await mapWithConcurrencyLimit([1, 2, 3], 2, async (n: number) => n * 2);
+	(globalThis as { __fakePrim?: unknown }).__fakePrim = {
+		agents: agents.map((a) => [a.name, a.tools, a.thinking]),
+		atLeast: versionAtLeast(parsePiVersion("pi v1.3.0") ?? [], [1, 0, 4]),
+		inv: resolvePiInvocation(["--version"], { argv1: "", execPath: "/usr/bin/node" }),
+		mapped,
+		tracked: createProcessTracker().size,
+	};
+}
+EOF2
+		;;
 	*)
-		echo "probe-pi-loader: unknown SUBPATH '$SUBPATH' (expected settings, activity, activity-tui, menu, models, color, text or glyphs)" >&2
+		echo "probe-pi-loader: unknown SUBPATH '$SUBPATH' (expected settings, activity, activity-tui, menu, models, color, text, glyphs or process)" >&2
 		rm -rf "$T"
 		exit 1
 		;;

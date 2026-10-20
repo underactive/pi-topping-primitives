@@ -24,6 +24,7 @@ const SUBPATHS = [
 	"./color",
 	"./text",
 	"./glyphs",
+	"./process",
 ] as const;
 
 // Node's resolver realpaths the workspace symlink out of node_modules, which is also why

@@ -18,10 +18,10 @@
  *   and `dimAttribute` in `./activity-tui`; they are not repeated here.
  * - There is no token formatter: the toppings use five incompatible styles, so each host keeps
  *   its own until they agree. Cost has one style, `formatCostUsd`'s.
- * - The non-text helpers the toppings also copied (`isPlainObject`, `hostBelow`, the env-flag
- *   and notification helpers, `combineSignals`, `raceAbort`, `createDeadline`,
- *   `stableStringify`) are not here. They wait for Phase 7's `./process` or for each repo's own
- *   adoption, so this subpath stays about text.
+ * - The non-text helpers the toppings also copied (`isPlainObject`, the env-flag and
+ *   notification helpers, `combineSignals`, `raceAbort`, `createDeadline`, `stableStringify`)
+ *   are not here. `hostBelow` shipped in `./process` (0.8.0); the rest wait for web-tools',
+ *   sensei's and compact's own adoption, so this subpath stays about text.
  * - No mutable module state. The module level holds one immutable `Intl.NumberFormat` and two
  *   global regular expressions (in `ansi.ts` and `sanitize.ts`), each only ever used through
  *   `String.prototype.replace`, which resets `lastIndex`, so calls cannot affect each other.

@@ -17,6 +17,7 @@ import * as contractsNs from "@underactive/pi-topping-primitives/contracts";
 import * as glyphsNs from "@underactive/pi-topping-primitives/glyphs";
 import * as menuNs from "@underactive/pi-topping-primitives/menu";
 import * as modelsNs from "@underactive/pi-topping-primitives/models";
+import * as processNs from "@underactive/pi-topping-primitives/process";
 import * as settingsNs from "@underactive/pi-topping-primitives/settings";
 import * as textNs from "@underactive/pi-topping-primitives/text";
 
@@ -33,6 +34,7 @@ const SUBPATHS = [
 	"./color",
 	"./text",
 	"./glyphs",
+	"./process",
 ] as const;
 
 /** The statically imported namespaces, keyed by subpath. */
@@ -46,6 +48,7 @@ const NAMESPACES: Record<string, Record<string, unknown>> = {
 	"./color": colorNs as unknown as Record<string, unknown>,
 	"./text": textNs as unknown as Record<string, unknown>,
 	"./glyphs": glyphsNs as unknown as Record<string, unknown>,
+	"./process": processNs as unknown as Record<string, unknown>,
 };
 
 const manifest = JSON.parse(
