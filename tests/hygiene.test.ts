@@ -22,6 +22,8 @@ const ACTIVITY = "packages/primitives/src/activity/index.ts";
 const ACTIVITY_TUI = "packages/primitives/src/activity-tui/index.ts";
 const COLOR = "packages/primitives/src/color/rgb.ts";
 const GLYPHS = "packages/primitives/src/glyphs/index.ts";
+const ENV = "packages/primitives/src/env/flags.ts";
+const ABORT = "packages/primitives/src/abort/race.ts";
 /** Runs pi-tui at runtime by design: `layout.ts` measures with `visibleWidth`. */
 const TEXT = "packages/primitives/src/text/layout.ts";
 
@@ -394,6 +396,17 @@ test("pi-runtime-import is limited to the pi-free subpaths", () => {
 		),
 		["pi-runtime-import"],
 	);
+});
+
+test("pi-runtime-import covers the env and abort subpaths", () => {
+	const value = 'import { visibleWidth } from "@earendil-works/pi-tui";\n';
+	for (const file of [ENV, ABORT]) {
+		assert.deepEqual(
+			scan(value, file).map((finding) => finding.rule),
+			["pi-runtime-import"],
+			file,
+		);
+	}
 });
 
 test("pi-runtime-import covers the colour and glyph subpaths but not text", () => {

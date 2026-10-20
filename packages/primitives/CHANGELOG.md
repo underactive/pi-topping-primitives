@@ -4,6 +4,34 @@ All notable changes to this package are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this package
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- `./env`, each export with the vendored copy it comes from (line numbers are at the base commits: web-tools `78e6cde`, compact `cdc7995`):
+  - `isTruthyEnvFlag`: web-tools `src/env.ts:1-5`; compact `src/config.ts:18-22`. The two are byte-identical to each other and to pi-coding-agent's own.
+  - `suppressNotifications`: web-tools `src/env.ts:7-10`; compact `src/config.ts:24-27`.
+- `./abort`, with the same provenance (sensei `44b26ee`):
+  - `isAbortError`, `abortError` and `raceAbort`: sensei `src/core/abort.ts:5-38`, itself adapted from pi-advisor's `advisor/execute.ts:66-97`.
+  - `createDeadline` and `Deadline`: sensei `src/review/deadline.ts:9-50`.
+  - `combineSignals` and `CombinedSignals`: web-tools `src/abort-utils.ts:1-17`.
+- `THIRD_PARTY_NOTICES.md` carries pi-advisor's MIT notice for `isAbortError`, `abortError` and `raceAbort`; sensei drops the same lines from its own notice when it adopts this.
+- `scripts/probe-pi-loader.sh` takes `SUBPATH=env` and `SUBPATH=abort`. Neither imports a pi package, so the `PEERS=absent` rows show them loading and running with no peers on disk.
+- The hygiene scanner's `pi-runtime-import` rule now covers `env/` and `abort/`, so neither can start importing pi without a failing test.
+
+### Differences from the vendored copies
+
+- `createDeadline` and `combineSignals` clamp a timeout above 2^31 - 1 ms to that value, `Infinity` included. Node runs a longer `setTimeout` or `AbortSignal.timeout` after about a millisecond and only prints `TimeoutOverflowWarning`, so sensei's `createDeadline(Infinity, …)` and web-tools' `combineSignals(…, 2 ** 31, …)` aborted the call at once. `AbortSignal.timeout` still throws `ERR_OUT_OF_RANGE` from 2^32 up, which the clamp now also prevents.
+- `combineSignals` builds the timeout signal before it registers its controller. A `NaN`, negative or fractional timeout makes `AbortSignal.timeout` throw; web-tools' copy had already added the controller to `activeFetches` by then and left it there. It throws the same error, with the set untouched.
+- `isTruthyEnvFlag`, `suppressNotifications`, `isAbortError`, `abortError`, `raceAbort` and the rest of `createDeadline` are unchanged apart from formatting and doc comments. The sensei and web-tools tests that cover them moved over, and sensei's `deadline.test.ts` stays in sensei as a parity check against the package.
+- `createDeadline` and `combineSignals` are not merged. One owns a timer and answers `timedOut()`; the other uses an unowned `AbortSignal.timeout` and registers a controller for shutdown. Their signatures are the vendored ones.
+- The tests use real timers. Sensei's deadline tests drove vitest's fake timers; here the number of live `Timeout` resources is read from the process and the waits are generous.
+
+### Notes
+
+- 0.8.0's `spawnCollect` clamps a `timeoutMs` above 2^31 - 1 ms to 2^31 - 1, for the same Node reason as above. Its 0.8.0 notes did not say so.
+- Still local: `isPlainObject` (pi-topping keeps its own; pi-switchyard has the other copy) and `stableStringify` (sensei is the only user). The sub-run transports, each host's agent layering and persona-audit's `persona-audit-*` shadow guard stay in the hosts.
+
 ## [0.8.0] - 2026-10-20
 
 ### Added

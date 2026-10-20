@@ -47,6 +47,8 @@ const PRIMITIVES: PackageCase = {
 		"./text",
 		"./glyphs",
 		"./process",
+		"./env",
+		"./abort",
 	],
 };
 

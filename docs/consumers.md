@@ -4,7 +4,7 @@ How a topping consumes the two libraries. The decision this document records: **
 
 The checkouts are symlinked into `~/.pi/agent/extensions`, so each one resolves its own `node_modules` at runtime. That is why every mode below ends with an install inside the consumer checkout.
 
-**Latest release: 0.8.0.** It adds `./process` to the 0.7.0 API and is the last planned subpath. It exports `./contracts`, `./settings`, `./activity`, `./activity-tui`, `./menu`, `./models`, `./color`, `./text`, `./glyphs` and `./process`. A consumer commits `^0.8.0`. moa-fusion, persona-audit, pi-topping and splash have moved to it; statusline stays on `^0.7.0` and the rest may stay on `^0.6.0` until their next adoption.
+**Latest release: 0.8.0.** It adds `./process` to the 0.7.0 API and is the last planned subpath. It exports `./contracts`, `./settings`, `./activity`, `./activity-tui`, `./menu`, `./models`, `./color`, `./text`, `./glyphs` and `./process`. A consumer commits `^0.8.0`. moa-fusion, persona-audit, pi-topping and splash have moved to it; statusline stays on `^0.7.0` and the rest may stay on `^0.6.0` until their next adoption. `./env` and `./abort` arrive in the upcoming 0.9.0 and are not on the registry yet.
 
 ## 1. Published: the committed state
 

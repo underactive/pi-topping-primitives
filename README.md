@@ -6,7 +6,7 @@ Shared libraries for the pi-topping family. Two packages, versioned in lockstep,
 
 | Path | What it is |
 | --- | --- |
-| `packages/primitives` | `@underactive/pi-topping-primitives`, the runtime library: contracts, settings, activity, menu, models, colour, text, glyphs, process |
+| `packages/primitives` | `@underactive/pi-topping-primitives`, the runtime library: contracts, settings, activity, menu, models, colour, text, glyphs, process, env, abort |
 | `packages/test-utils` | `@underactive/pi-topping-test-utils`, devDependency-only test doubles and fixtures |
 | `tools/ts-resolve.ts` | Node `--import` hook that maps relative `.js` specifiers onto their `.ts` siblings, so source tests run without a build |
 | `tests/` | Repo-level tests, including the hook itself and its fixtures |
@@ -48,7 +48,7 @@ The hygiene scanner lexes each file first, blanking comments, string bodies and 
 - `module-state`: a top-level `let` or `var`; a top-level `const` bound to `new Map(`, `new Set(`, `new WeakMap(` or `new WeakSet(`; and a top-level `const` bound to an object or array literal that the file later assigns into or mutates. Two copies of a package in one pi process share nothing but what the module exports, and mutable module state is the only way that becomes observable.
 - `instanceof`: only against a fixed allow-list of built-ins, because a class from a second copy of the package is a different class and the check would silently fail.
 - `console`: banned. Console output corrupts the TUI pi is drawing.
-- `pi-runtime-import`: in `contracts/`, `activity/`, `color/` and `glyphs/` only (the directory straight under `src`), any non-type import or dynamic import from `@earendil-works/*`. `activity-tui` is exempt because it renders against pi-tui by design, and so is `text/`, whose `layout.ts` measures with pi-tui.
+- `pi-runtime-import`: in `contracts/`, `activity/`, `color/`, `glyphs/`, `env/` and `abort/` only (the directory straight under `src`), any non-type import or dynamic import from `@earendil-works/*`. `activity-tui` is exempt because it renders against pi-tui by design, and so is `text/`, whose `layout.ts` measures with pi-tui.
 
 Each rule has an escape hatch: `// hygiene-allow: <rule> <reason>` on the same line or the line above. The reason is required, and a directive without one is ignored so the rule still fires. It is reserved for deliberate, documented cases.
 

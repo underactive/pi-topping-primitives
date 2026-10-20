@@ -91,6 +91,8 @@ const PI_FREE_PATH_SEGMENTS: ReadonlySet<string> = new Set([
 	"activity",
 	"color",
 	"glyphs",
+	"env",
+	"abort",
 ]);
 
 const PI_SCOPE_PREFIX = "@earendil-works/";

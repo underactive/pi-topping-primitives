@@ -6,17 +6,17 @@ Shared runtime pieces for the pi-topping family: cross-extension contracts (name
 
 ## Install
 
-Version 0.1.0 (contracts only) is published; 0.2.0 adds `./settings`; 0.3.0 adds `./activity` and `./activity-tui`; 0.4.0 adds `./menu`; 0.5.0 adds `./models`; 0.6.0 adds `./color`, `./text` and `./glyphs`; 0.7.0 corrects `xterm256ToRgb`'s cube levels; 0.8.0 adds `./process`. A topping takes it as a runtime dependency:
+Version 0.1.0 (contracts only) is published; 0.2.0 adds `./settings`; 0.3.0 adds `./activity` and `./activity-tui`; 0.4.0 adds `./menu`; 0.5.0 adds `./models`; 0.6.0 adds `./color`, `./text` and `./glyphs`; 0.7.0 corrects `xterm256ToRgb`'s cube levels; 0.8.0 adds `./process`; 0.9.0 adds `./env` and `./abort`. A topping takes it as a runtime dependency:
 
 ```sh
-npm install @underactive/pi-topping-primitives@^0.8.0
+npm install @underactive/pi-topping-primitives@^0.9.0
 ```
 
 That writes a `dependencies` entry. The code is loaded by pi at runtime, so it does not belong in `devDependencies`.
 
 ## Exported subpaths
 
-The package exports `./contracts`, `./settings`, `./activity`, `./activity-tui` (the last two from 0.3.0), `./menu` (from 0.4.0), `./models` (from 0.5.0), `./color`, `./text` and `./glyphs` (from 0.6.0), and `./process` (from 0.8.0); there is deliberately no root `"."` export. Future helper subpaths are not part of the package API until their implementation lands and they are added to `exports`. None is planned.
+The package exports `./contracts`, `./settings`, `./activity`, `./activity-tui` (the last two from 0.3.0), `./menu` (from 0.4.0), `./models` (from 0.5.0), `./color`, `./text` and `./glyphs` (from 0.6.0), `./process` (from 0.8.0), and `./env` and `./abort` (from 0.9.0); there is deliberately no root `"."` export. Future helper subpaths are not part of the package API until their implementation lands and they are added to `exports`. None is planned.
 
 ## Settings
 
@@ -373,7 +373,61 @@ const result = await spawnCollect(pi.command, pi.args, { timeoutMs: 10_000 });
 
 `hostBelow` is not `versionAtLeast(parsePiVersion(x))`. It is anchored, so `pi 1.2.0` does not parse, and an unreadable version on either side is `false` (new enough). The `--no-mcp` check built from `parsePiVersion` and `versionAtLeast` reads an unreadable version as too old.
 
-Not here: the sub-run transports (they differ per host), each host's agent layering, `isProcessAlive` and `acquireDirLock` (in `./settings`), and the other non-text helpers the toppings copied (the env-flag and notification helpers, `combineSignals`, `raceAbort`, `createDeadline`, `stableStringify`).
+Not here: the sub-run transports (they differ per host), each host's agent layering, `isProcessAlive` and `acquireDirLock` (in `./settings`), and the other non-text helpers the toppings copied that are still local (`isPlainObject` and `stableStringify`; the env-flag, notification and abort helpers are in `./env` and `./abort`).
+
+## Env
+
+`./env` reads environment flags the way pi does. It imports no pi package, reads `process.env` only when called, and has no module state.
+
+| Export | Purpose | From |
+| --- | --- | --- |
+| `isTruthyEnvFlag(value)` | `true` for `1`, `true` or `yes`, ignoring case; unset, empty and anything else is `false` (a padded `" true "` too) | pi-coding-agent; web-tools `env.ts`, compact `config.ts` |
+| `suppressNotifications(env?)` | `isTruthyEnvFlag` of `PI_SUPPRESS_NOTIFICATIONS`; `env` defaults to `process.env` and is read on each call | web-tools `env.ts`, compact `config.ts` |
+
+```ts
+import { suppressNotifications } from "@underactive/pi-topping-primitives/env";
+
+if (!suppressNotifications()) ctx.ui.notify("Browser ready", "info");
+```
+
+Both copies this replaces were byte-identical to each other and to pi-coding-agent's own `isTruthyEnvFlag`. Only the rule pi itself uses lives here; a topping's own variables keep their own readers.
+
+## Abort
+
+`./abort` holds the abort-signal helpers two toppings had each written. It imports no pi package and has no module state; every export is a function.
+
+| Export | Purpose | From |
+| --- | --- | --- |
+| `isAbortError(error)`, `abortError(message)` | An `Error` named `AbortError`, and the test for one (it also matches what `fetch` and `AbortSignal` reject with) | sensei `core/abort.ts` |
+| `raceAbort(promise, signal, message)` | Settle with the promise, or reject with `abortError(message)` when `signal` fires first; the abort listener is removed on settle | sensei `core/abort.ts` |
+| `createDeadline(timeoutMs, callerSignal)` | `{ signal, timedOut(), dispose() }`: one timer, the caller's signal composed with it, and a way to tell a timeout from a caller abort | sensei `review/deadline.ts` |
+| `combineSignals(userSignal, timeoutMs, activeFetches)` | `{ signal, cleanup }`: a request signal that aborts on the caller, on `AbortSignal.timeout`, or when a controller registered in the host's set is aborted | web-tools `abort-utils.ts` |
+
+```ts
+import { combineSignals, createDeadline } from "@underactive/pi-topping-primitives/abort";
+
+// A call that must report whether it timed out. Dispose on every exit path.
+const deadline = createDeadline(60_000, ctx.signal);
+try {
+	await send({ signal: deadline.signal });
+} catch (error) {
+	if (deadline.timedOut()) report("timed out");
+	else throw error;
+} finally {
+	deadline.dispose();
+}
+
+// A fetch the host can abort on shutdown: it keeps the set, and aborts every entry when the session ends.
+const active = new Set<AbortController>();
+const { signal, cleanup } = combineSignals(ctx.signal, 30_000, active);
+try { await fetch(url, { signal }); } finally { cleanup(); }
+```
+
+The two timeout helpers solve one problem for different hosts, so both stay. `createDeadline` owns a `setTimeout` that `dispose()` must clear, answers `timedOut()`, and treats a timeout of zero as "no timer". `combineSignals` uses `AbortSignal.timeout`, which has no timer to clear and cannot say whether it fired; its use is the registered controller, which lets a host abort every request in flight from its own set. Neither is a drop-in for the other.
+
+Both clamp a timeout above 2^31 - 1 ms (about 24.8 days, `Infinity` included) to that value. Node runs a longer `setTimeout` or `AbortSignal.timeout` after about a millisecond and only warns, so an unclamped "no practical limit" aborts the call at once. `AbortSignal.timeout` still throws `ERR_OUT_OF_RANGE` for `NaN`, a negative number or a fraction; `combineSignals` now validates before it registers the controller, so a throw leaves nothing in the set.
+
+`isAbortError`, `abortError` and `raceAbort` are adapted from pi-advisor (MIT); the notice is in `THIRD_PARTY_NOTICES.md`. Not here: `stableStringify`, which only sensei uses.
 
 ## Contracts
 

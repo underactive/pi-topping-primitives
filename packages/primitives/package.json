@@ -77,6 +77,16 @@
 			"types": "./dist/process/index.d.ts",
 			"compiled": "./dist/process/index.js",
 			"default": "./src/process/index.ts"
+		},
+		"./env": {
+			"types": "./dist/env/index.d.ts",
+			"compiled": "./dist/env/index.js",
+			"default": "./src/env/index.ts"
+		},
+		"./abort": {
+			"types": "./dist/abort/index.d.ts",
+			"compiled": "./dist/abort/index.js",
+			"default": "./src/abort/index.ts"
 		}
 	},
 	"peerDependencies": {

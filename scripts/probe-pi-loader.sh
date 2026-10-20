@@ -100,7 +100,7 @@ printf '{ "name": "@underactive/fake-prim", "type": "module", "exports": { ".": 
 [ "$have_unbundled" = 1 ] && probe index.js "unbundled SDK, compiled only"
 # Real-package rows. With PRIM_TGZ set to a packed primitives tarball, load a multi-file subpath
 # (SUBPATH, default settings; one of settings, activity, activity-tui, menu, models, color, text,
-# glyphs, process) from node_modules through both loader branches. Pass: no load errors and the extension's
+# glyphs, process, env, abort) from node_modules through both loader branches. Pass: no load errors and the extension's
 # own calls return what the row expects. activity-tui is the first subpath with a runtime pi-tui
 # import of its own, so its rows are the ones that show the dependency resolving pi-tui through the
 # host's alias. menu goes further: it constructs a component whose keys go through pi-tui's
@@ -110,12 +110,15 @@ printf '{ "name": "@underactive/fake-prim", "type": "module", "exports": { ".": 
 # and computes with peers absent); text measures a CJK string through pi-tui's visibleWidth and
 # sliceByColumn, which is the row that proves the host alias reaches it; glyphs is data only;
 # process reads a project agent file through pi-coding-agent's parseFrontmatter and CONFIG_DIR_NAME
-# (the PEERS=absent rows are the proof that both resolve through the host alias) and spawns nothing.
+# (the PEERS=absent rows are the proof that both resolve through the host alias) and spawns nothing;
+# env and abort import no pi package, so their rows show that they load and run with the peers absent.
 # Expect for menu: {"top":true,"rows":7,"result":{"applied":true,"values":{"on":true}}}
 # Expect for models: {"rows":2,"pick":{"ref":{"provider":"probe","id":"model"},"thinking":"off"}}
 # Expect for color: {"filled":10,"trough":10,"green":"\u001b[38;2;132;197;26m","cube":[0,175,255]}
 # Expect for text: {"fit":"日\u001b[39m...","center":"  日本  "}
 # Expect for glyphs: {"corner":"╭","frames":10,"frozen":true}
+# Expect for env: {"yes":true,"no":false,"off":false,"on":true}
+# Expect for abort: {"named":true,"plain":false,"registered":1,"after":0,"noTimer":true,"timedOut":false}
 # Expect for process: {"agents":[["probe",["read","grep"],"high"]],"atLeast":true,"inv":{"command":"pi","args":["--version"],"via":"path"},"mapped":[2,4,6],"tracked":0}
 if [ -n "$PRIM_TGZ" ]; then
 	SUBPATH=${SUBPATH:-settings}
@@ -249,8 +252,39 @@ export default async function () {
 }
 EOF2
 		;;
+	env)
+		cat > "$T/ext/index.ts" <<EOF2
+import { isTruthyEnvFlag, suppressNotifications } from "@underactive/pi-topping-primitives/$SUBPATH";
+(globalThis as { __fakePrim?: unknown }).__fakePrim = {
+	yes: isTruthyEnvFlag("YES"),
+	no: isTruthyEnvFlag("0"),
+	off: suppressNotifications({}),
+	on: suppressNotifications({ PI_SUPPRESS_NOTIFICATIONS: "1" }),
+};
+export default function () {}
+EOF2
+		;;
+	abort)
+		cat > "$T/ext/index.ts" <<EOF2
+import { abortError, combineSignals, createDeadline, isAbortError } from "@underactive/pi-topping-primitives/$SUBPATH";
+const active = new Set<AbortController>();
+const combined = combineSignals(undefined, 1000, active);
+const registered = active.size;
+combined.cleanup();
+const deadline = createDeadline(0, undefined);
+(globalThis as { __fakePrim?: unknown }).__fakePrim = {
+	named: isAbortError(abortError("x")),
+	plain: isAbortError(new Error("x")),
+	registered,
+	after: active.size,
+	noTimer: deadline.signal === undefined,
+	timedOut: deadline.timedOut(),
+};
+export default function () {}
+EOF2
+		;;
 	*)
-		echo "probe-pi-loader: unknown SUBPATH '$SUBPATH' (expected settings, activity, activity-tui, menu, models, color, text, glyphs or process)" >&2
+		echo "probe-pi-loader: unknown SUBPATH '$SUBPATH' (expected settings, activity, activity-tui, menu, models, color, text, glyphs, process, env or abort)" >&2
 		rm -rf "$T"
 		exit 1
 		;;

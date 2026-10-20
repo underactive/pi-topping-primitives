@@ -10,10 +10,12 @@ import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { test } from "node:test";
 import { fileURLToPath, pathToFileURL } from "node:url";
+import * as abortNs from "@underactive/pi-topping-primitives/abort";
 import * as activityNs from "@underactive/pi-topping-primitives/activity";
 import * as activityTuiNs from "@underactive/pi-topping-primitives/activity-tui";
 import * as colorNs from "@underactive/pi-topping-primitives/color";
 import * as contractsNs from "@underactive/pi-topping-primitives/contracts";
+import * as envNs from "@underactive/pi-topping-primitives/env";
 import * as glyphsNs from "@underactive/pi-topping-primitives/glyphs";
 import * as menuNs from "@underactive/pi-topping-primitives/menu";
 import * as modelsNs from "@underactive/pi-topping-primitives/models";
@@ -35,6 +37,8 @@ const SUBPATHS = [
 	"./text",
 	"./glyphs",
 	"./process",
+	"./env",
+	"./abort",
 ] as const;
 
 /** The statically imported namespaces, keyed by subpath. */
@@ -49,6 +53,8 @@ const NAMESPACES: Record<string, Record<string, unknown>> = {
 	"./text": textNs as unknown as Record<string, unknown>,
 	"./glyphs": glyphsNs as unknown as Record<string, unknown>,
 	"./process": processNs as unknown as Record<string, unknown>,
+	"./env": envNs as unknown as Record<string, unknown>,
+	"./abort": abortNs as unknown as Record<string, unknown>,
 };
 
 const manifest = JSON.parse(

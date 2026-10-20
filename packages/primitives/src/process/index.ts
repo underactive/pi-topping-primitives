@@ -16,8 +16,9 @@
  * - `hostBelow` is not `versionAtLeast`: it is anchored, and an unparseable version counts as
  *   new enough.
  * - `isProcessAlive` and `acquireDirLock` stay in `./settings`.
- * - The other non-text helpers the toppings copied (the env-flag and notification helpers,
- *   `combineSignals`, `raceAbort`, `createDeadline`, `stableStringify`) are not here.
+ * - The other non-text helpers the toppings copied are not here: the env-flag and notification
+ *   helpers are in `./env`, the abort helpers in `./abort`, and `isPlainObject` and
+ *   `stableStringify` are still local.
  */
 
 export type { AgentDefinition, AgentFileOptions } from "./agents.js";
