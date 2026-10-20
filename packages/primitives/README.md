@@ -2,36 +2,31 @@
 
 A library, not an extension.
 
-Shared runtime pieces for the pi-topping family: cross-extension contracts (names, typed payloads, parsers, event-bus helpers), the atomic settings store, the token-activity meter, rate readout and their renderers, and the box-drawing settings menu.
+Shared runtime pieces for the pi-topping family: cross-extension contracts (names, typed payloads, parsers, event-bus helpers), the atomic settings store, the token-activity meter, rate readout and their renderers, the box-drawing settings menu, model pickers, colour maths, text layout and sanitisers, and glyph tables.
 
 ## Install
 
-Version 0.1.0 (contracts only) is published; 0.2.0 adds `./settings`; 0.3.0 adds `./activity` and `./activity-tui`; 0.4.0 adds `./menu`; 0.5.0 adds `./models`. A topping takes it as a runtime dependency:
+Version 0.1.0 (contracts only) is published; 0.2.0 adds `./settings`; 0.3.0 adds `./activity` and `./activity-tui`; 0.4.0 adds `./menu`; 0.5.0 adds `./models`; 0.6.0 adds `./color`, `./text` and `./glyphs`. A topping takes it as a runtime dependency:
 
 ```sh
-npm install @underactive/pi-topping-primitives@^0.5.0
+npm install @underactive/pi-topping-primitives@^0.6.0
 ```
 
 That writes a `dependencies` entry. The code is loaded by pi at runtime, so it does not belong in `devDependencies`.
 
 ## Exported subpaths
 
-The package exports `./contracts`, `./settings`, `./activity`, `./activity-tui` (the last two from 0.3.0), `./menu` (from 0.4.0) and `./models` (from 0.5.0); there is deliberately no root `"."` export. Future helper subpaths are not part of the package API until their implementation lands and they are added to `exports`.
+The package exports `./contracts`, `./settings`, `./activity`, `./activity-tui` (the last two from 0.3.0), `./menu` (from 0.4.0), `./models` (from 0.5.0), and `./color`, `./text` and `./glyphs` (from 0.6.0); there is deliberately no root `"."` export. Future helper subpaths are not part of the package API until their implementation lands and they are added to `exports`.
 
 ## Future subpaths
 
-These entries are a roadmap, not current exports:
+This entry is a roadmap, not a current export:
 
 | Planned subpath | Planned contents | Phase |
 | --- | --- | --- |
-| `./color` | `Rgb`, `parseHex`, `mixRgb`, `rgbTo256`, `rgbToFgAnsi`, `ansiToRgb`, `hslToRgb`, the palette constants, `renderCometBar`, the fade helpers | 6 |
-| `./text` | `padRight`, `padCenter`, `fitCell`, `truncateVisible`, `pickFitting`, `stripControlChars`, `stableStringify`, the cost and percent formatters | 6 |
-| `./glyphs` | `BoxGlyphs`, `BOX_STYLES`, `SPINNER_FRAMES`, `SPINNER_FRAME_MS`, the braille and quadrant spinner sets | 6 |
 | `./process` | `resolvePiInvocation`, `escalateKill`, `spawnCollect`, `mapWithConcurrencyLimit`, `parsePiVersion`, `versionAtLeast`, `loadAgentsFromDir`, `findNearestProjectAgentsDir` | 7 |
 
-`./color` will have its own `ansiToRgb` that covers 38/48 truecolor, 256-colour and `39`. It must not silently replace `./activity-tui`'s `ansiToRgb`, which reads truecolor foreground only and returns `null` for anything else; the shimmer and fade rely on `null` meaning "cannot blend". Phase 6 should re-export one from the other or rename one.
-
-The repository keeps empty source placeholders for these future phases, but they are not exported and therefore are not reachable through package specifiers in the current API. The release guard refuses to publish any subpath that is present in `exports` but still empty.
+The repository keeps an empty source placeholder for it, but it is not exported and therefore is not reachable through package specifiers in the current API. The release guard refuses to publish any subpath that is present in `exports` but still empty.
 
 ## Settings
 
@@ -271,6 +266,88 @@ if (picker.handleInput(data) === "confirm") use(picker.getSelected());
 The row budget reserves scroll information when the item count equals the available list space as well as when it exceeds it. At equality this displays one fewer item plus scroll information; `maxVisibleRows` is a cap, not a promise to show every item that could fit without a scrollbar. A host needing ten item rows can budget twelve total rows plus one while filtering (header + ten items + a possible scroll row).
 
 `thinkingOptionsForModel(levels, { fallback })` uses a copied fallback on any empty filtered result, including `undefined` and `[]`; the default is empty. `registryLevelOptions` exposes the same policy. The only allowed module state is the catalogue WeakMap, keyed by the host registry so it dies with that object; each package copy owns an independent cache. The catalogue snapshots `getAvailable()` the first time it is asked and does not observe `registry.refresh()` (pi refreshes in place after a login or a models.json reload), so a host whose picker must reflect those reads `getAvailable()` and `find()` directly and passes `thinkingOptionsForModel` as `levelOptions`. No global theme or runtime pi-coding-agent import is used.
+
+## Color
+
+`./color` is colour maths pi-tui does not export: tuple RGB, 256-colour conversion, hue conversion, a fade, a shimmer cell, the Switchyard palette and the phosphor comet bar. Where pi-tui already has the function (`parseColor`, `colorToHex`, `mixColors`, `foregroundAnsi`, `backgroundAnsi`, `getTerminalColorMode`, `stripTerminalSequences`, `okhslColor`), use pi-tui's. There is no runtime pi import; the only pi reference is the `TerminalColorMode` type, which is re-exported.
+
+```ts
+import { getTerminalColorMode } from "@earendil-works/pi-tui";
+import { renderCometBar } from "@underactive/pi-topping-primitives/color";
+
+const bar = renderCometBar(percent, { mode: getTerminalColorMode(), elapsedMs: Date.now() - startedAt });
+```
+
+| Export | Purpose |
+| --- | --- |
+| `Rgb`, `parseHex(hex)`, `mixRgb(from, to, amount)` | A readonly `[r, g, b]` tuple, `#rrggbb` parsing (`undefined` on anything else), and a clamped, rounded blend |
+| `rgbTo256(r, g, b)`, `xterm256ToRgb(n)` | An approximate xterm-256 index for an RGB colour (gray ramp for equal channels, otherwise the 6x6x6 cube by linear scaling), and the reverse (see the known defect below) |
+| `channelsToFgAnsi(r, g, b, mode)`, `rgbToFgAnsi(rgb, mode)`, `hexToFgAnsi(hex, mode)` | Foreground escapes. `mode` is always passed in; `hexToFgAnsi` answers an empty string for a bad hex |
+| `parseSgrColor(text)`, `SgrColor` | The first colour escape in a string: truecolor or 256-colour, foreground or background, or `ESC[39m` |
+| `hslToRgb(h, s, l)`, `hsvToRgb(h, s, v)`, `wrapDeg(deg)` | Hue conversion to integer tuples. `hsvToRgb` wraps the hue; `hslToRgb` expects 0 to 360, so wrap first |
+| `fadeRgbToward(text, target, opacity, mode)`, `cosineFalloff(distance, halfWidth)` | Blend every colour already in a string toward a target, and a raised-cosine bump |
+| `shimmerCell(ch, dist, palette, options?)`, `ShimmerCellPalette`, `ShimmerCellOptions` | One cell of a light-sweep shimmer (band 5, peak 0.9, bold above 0.2 by default) |
+| `SWITCHYARD_PROVIDER`, `NVIDIA_GREEN_HEX`, `NVIDIA_GREEN_DARK_HEX`, `isSwitchyardProvider(provider?)` | The Switchyard provider id, its two greens, and the case- and space-insensitive check |
+| `renderCometBar(percent, { mode, elapsedMs?, palette? })`, `BAR_CELLS`, `BAR_FILLED`, `BAR_TROUGH`, `SYNTHWAVE_GREENS`, `CometPalette` | The 20-cell phosphor progress bar compact and statusline both draw, its glyphs, and its default palette |
+
+Semantics:
+
+- **`parseSgrColor` is not `./activity-tui`'s `ansiToRgb`.** `ansiToRgb` answers "can this foreground be blended?" and returns `null` for everything but a truecolor foreground, which is what the shimmer and the colour fade rely on. `parseSgrColor` reads every colour escape and returns a tagged `SgrColor` (`truecolor`, `indexed` with its resolved `rgb`, or `default`), or `undefined`. The names and the result shapes differ on purpose, so one cannot be passed where the other is expected. Both are unanchored: a colour after `ESC[1m` is found.
+- `fadeRgbToward` recognises truecolor and 256-colour foregrounds and backgrounds, writing each back in the same plane and in `mode`, and `ESC[39m`, which it recolours from a neutral stand-in so plain labels fade with their coloured neighbours. `ESC[49m` is left alone, so a transparent bar keeps the terminal's background. A colour folded into a compound SGR (`ESC[1;38;2;...m`) is not recognised. Opacity clamps to 0..1, NaN reads as no fade, and 1 returns the string unchanged.
+- `renderCometBar` ends every run with a foreground or attribute reset (`ESC[39m`, `ESC[22m`, never `ESC[0m`), so a background the caller painted underneath survives. `percent` clamps to 0..100, and NaN and the infinities read as 0; `elapsedMs` that is not a finite positive number reads as 0. The comet crosses the bar right to left every two seconds.
+- Hot paths allocate no more than the vendored copies: `channelsToFgAnsi` takes channels so a per-cell caller builds no tuple, the palettes are frozen once at load, and `shimmerCell` takes its options as an optional argument rather than building a default object.
+- `easeFade` and `FADE_SHADE_COUNT` live in `./activity`, and `dimAttribute` in `./activity-tui`. They are not repeated here.
+- **Known defect, kept for byte parity:** `xterm256ToRgb` computes the cube as `55 + v * 51`, where xterm's levels are `55 + v * 40` (0, 95, 135, 175, 215, 255). Every non-zero level therefore reads brighter than the terminal draws it, and levels 4 and 5 come out as 259 and 310, above what a channel can hold. It shows in `xterm256ToRgb` itself, in the `rgb` that `parseSgrColor` reports for an indexed colour, and in `fadeRgbToward` on a 256-colour escape, which statusline's working-group fade uses for a few segments: a faded colour with a level-5 component (index 39's blue is 310, for example) passes 255 once the opacity is high enough (about 0.81 toward statusline's `#121212`), which writes an out-of-range channel in truecolor mode and lands one cube step high in 256-colour mode. Indices 0 to 15, the terminal's own colours, read as black. Correcting the cube changes every faded colour that started as a 256-colour escape, so it is a deliberate, separate change; `tests/color-rgb.test.ts` pins the current values as a defect so that change is made on purpose.
+- Statusline's `StatusTheme`, `NvidiaGreenBorder` and `RainbowBorder`, and splash's backdrop samplers, are policy over these primitives and stay in their repos.
+
+## Text
+
+`./text` is text measurement and layout, the sanitisers, and the few formatters the toppings share. Widths come from pi-tui's own ruler (`visibleWidth`, `sliceByColumn`), so they agree with what the renderer draws for wide characters, graphemes and escape sequences. `layout.ts` is the only file with a runtime pi-tui import.
+
+| Export | Purpose |
+| --- | --- |
+| `padRight(text, width)`, `padCenter(text, width)` | Pad to visible columns; never truncate |
+| `truncateVisible(text, maxWidth)`, `fitCell(text, width)`, `ELLIPSIS` | Cut at a column without splitting an escape or a wide character; `fitCell` also marks the cut with `...` and closes any colour span with `ESC[39m` |
+| `pickFitting(candidates, width)`, `joinParts(parts, separator?)`, `wrapCommaDelimited(items, width, itemWidths?)` | The first candidate that fits (else the last, truncated); join the parts that are present; wrap a comma-separated list |
+| `stripSgr(text)` | Remove colour and style escapes only; an OSC 8 hyperlink survives |
+| `stripControlChars(text)`, `sanitizedText(value)`, `sanitizeTerminalBytes(text)`, `sanitizeLabel(text)` | Four sanitisers, below |
+| `formatDurationCompact(ms)`, `formatCount(n)`, `formatPercent(fraction, decimals?)`, `formatCostUsd(costUsd)` | `842ms` / `3.2s` / `1m05s`; `1,234,567`; `67.9%`; `$0.123` or `—` |
+
+The four sanitisers are kept apart because the vendored copies disagree, and none is a superset of another:
+
+| | `stripControlChars` | `sanitizedText` | `sanitizeTerminalBytes` | `sanitizeLabel` |
+| --- | --- | --- | --- | --- |
+| From | pi-topping | pi-topping | persona-audit | statusline |
+| Deletes C0, DEL, C1 (including tab and newline) | yes | yes | yes | becomes a space |
+| Deletes Unicode format characters (zero-width, bidi, BOM) | yes | yes | no | zero-width, bidi and BOM become a space; other format characters, such as a soft hyphen, are kept |
+| Strips escape sequences | no | no | no | CSI and OSC (`stripVTControlCharacters`, regex-based; see below) |
+| Trims | no | yes | no | no |
+| Collapses runs of spaces | no | no | no | yes |
+| Non-string input | n/a | `""` | n/a | n/a |
+
+Only `sanitizeLabel` looks at escape sequences at all, and Node's `stripVTControlCharacters` is regex-based: it removes CSI (including the 8-bit C1 form) and OSC sequences whole, but a DCS, APC, PM or SOS string whose payload holds spaces or punctuation can survive as visible text, with only its control bytes turned into spaces. pi-tui's `stripTerminalSequences` covers a different subset (APC but not 8-bit CSI, DCS, PM or SOS). For untrusted text that can carry whole escape sequences, run `stripTerminalSequences` first and then one of these; the other three would otherwise leave an escape's payload behind (`ESC[31m` becomes the visible text `[31m`).
+
+Semantics:
+
+- `pickFitting([], width)` returns an empty string. Splash's copy threw.
+- `formatCostUsd` has one style, persona-audit's and moa-fusion's: three decimals, `—` for undefined or non-finite, negatives as zero. routesense's signed `$0.0042` / `-` style stays in routesense.
+- The elapsed formatters live in `./activity` (`formatElapsedClock`, `formatElapsedUnits`). There is **no token formatter**: the toppings use five incompatible styles (`12.3K`, `10.3k`, `~512 tokens`, ...), and the handoff asks for named styles or nothing, so each host keeps its own until they agree.
+- Module-level objects: one immutable `Intl.NumberFormat` behind `formatCount`, and two global regular expressions (`stripSgr`, `sanitizeLabel`) that are only ever used through `String.prototype.replace`, which resets `lastIndex`, so calls cannot affect each other.
+- `formatDurationCompact` and `formatPercent` expect finite numbers: NaN and the infinities are not special-cased and print as `NaN`.
+
+## Glyphs
+
+`./glyphs` is data: frames and spinners. No imports, and every table is frozen at every level.
+
+| Export | Purpose |
+| --- | --- |
+| `BoxGlyphs`, `BoxStyle`, `BOX_STYLES`, `ASCII_BOX` | The six glyphs of a rectangle (`topLeft`, `topRight`, `bottomLeft`, `bottomRight`, `horizontal`, `vertical`) for `rounded`, `heavy`, `double` and `single`, and the plain-text fallback |
+| `SPINNER_FRAMES`, `SPINNER_FRAME_MS` | The braille set pi-tui's Loader cycles, at 80 ms a frame (moa-fusion's `BRAILLE_SPINNER_FRAMES`) |
+| `QUADRANT_SPINNER_FRAMES` | The four-step circle the progress tables use |
+
+`BoxGlyphs` has no T-junctions. moa-fusion's progress table keeps its own eight-field box, because the joins are frame policy.
+
+The spinner tables are frozen `readonly` tuples (`readonly ["⠋", ...]`), so they do not satisfy an API typed as a mutable `string[]`, which pi-tui's `Loader` `frames` option is. Pass a copy: `[...SPINNER_FRAMES]`. Their `.length` is the literal type `10` and `4`.
 
 ## Contracts
 

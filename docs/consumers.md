@@ -4,6 +4,8 @@ How a topping consumes the two libraries. The decision this document records: **
 
 The checkouts are symlinked into `~/.pi/agent/extensions`, so each one resolves its own `node_modules` at runtime. That is why every mode below ends with an install inside the consumer checkout.
 
+**Latest release: 0.6.0.** It exports `./contracts`, `./settings`, `./activity`, `./activity-tui`, `./menu`, `./models`, `./color`, `./text` and `./glyphs`; `./process` is planned for Phase 7 and is not exported yet. A consumer commits `^0.6.0`. The earlier subpaths ship unchanged in 0.6.0: compact moved up from `^0.1.0` and statusline from `^0.4.0` with their existing imports untouched, and only the new imports were added.
+
 ## 1. Published: the committed state
 
 The only form that may appear in a committed `package.json`:
@@ -69,7 +71,7 @@ Verify runner behavior against the packed or registry package, not only a `--no-
 
 Handoff section 7, with two corrections from this phase.
 
-1. `package.json`: add `"@underactive/pi-topping-primitives": "^0.1.0"` under `dependencies`, and `"@underactive/pi-topping-test-utils": "^0.1.0"` under `devDependencies`. Do not touch `peerDependencies` or `files`. **Correction (a):** a registry range is the only committable form. `file:` links exist for `--no-save` work only.
+1. `package.json`: add `"@underactive/pi-topping-primitives": "^0.6.0"` (the latest release) under `dependencies`, and `"@underactive/pi-topping-test-utils": "^0.1.0"` under `devDependencies`. Do not touch `peerDependencies` or `files`. **Correction (a):** a registry range is the only committable form. `file:` links exist for `--no-save` work only.
 2. Test script: `node -C compiled --test ...`. moa-fusion's `.mjs` tests keep `-C compiled` and `--experimental-transform-types` on the parent command so relaunches inherit them. Sensei uses `resolve.conditions: ["compiled"]`, verified against the published package; see the runner notes.
 3. `npm install` in the checkout. With a `file:` link, run `npm run build` in the primitives checkout first.
 4. Replace the vendored module with imports from the package subpath. Delete the tests that moved; keep one host-level smoke assertion.

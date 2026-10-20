@@ -4,6 +4,12 @@ All notable changes to this package are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this package
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.0] - 2026-10-20
+
+### Changed
+
+- Version moves to 0.6.0 in lockstep with `@underactive/pi-topping-primitives`; no API change. This package stays unpublished.
+
 ## [0.5.0] - 2026-10-19
 
 ### Changed

@@ -48,7 +48,7 @@ The hygiene scanner lexes each file first, blanking comments, string bodies and 
 - `module-state`: a top-level `let` or `var`; a top-level `const` bound to `new Map(`, `new Set(`, `new WeakMap(` or `new WeakSet(`; and a top-level `const` bound to an object or array literal that the file later assigns into or mutates. Two copies of a package in one pi process share nothing but what the module exports, and mutable module state is the only way that becomes observable.
 - `instanceof`: only against a fixed allow-list of built-ins, because a class from a second copy of the package is a different class and the check would silently fail.
 - `console`: banned. Console output corrupts the TUI pi is drawing.
-- `pi-runtime-import`: in `contracts/` and `activity/` only, any non-type import or dynamic import from `@earendil-works/*`. `activity-tui` is exempt because it renders against pi-tui by design.
+- `pi-runtime-import`: in `contracts/`, `activity/`, `color/` and `glyphs/` only (the directory straight under `src`), any non-type import or dynamic import from `@earendil-works/*`. `activity-tui` is exempt because it renders against pi-tui by design, and so is `text/`, whose `layout.ts` measures with pi-tui.
 
 Each rule has an escape hatch: `// hygiene-allow: <rule> <reason>` on the same line or the line above. The reason is required, and a directive without one is ignored so the rule still fires. It is reserved for deliberate, documented cases.
 
@@ -62,7 +62,7 @@ Publishing is not tied to a phase. Publish when at least one consumer has to tak
 
 At the moment you publish, every subpath still listed in `exports` must export something. Either fill it in that change, or remove it from `exports` first and add it back in the phase that owns it. Removal is allowed by the package-shape guard, which checks that the export keys are a subsequence of the planned list rather than equal to it, deliberately; re-adding is additive, so no consumer breaks. `contracts` is additive-only forever, so dropping and re-adding a subpath must never remove or rename a name that already shipped.
 
-The 0.5.0 release (`./models`: model vocabulary, a cached registry catalogue, thinking policy and an unframed two-pane picker) and the 0.4.0 release (`./menu`) publish only `@underactive/pi-topping-primitives`, with `npm publish -w @underactive/pi-topping-primitives` after every consumer is green against the packed tarball; test-utils stays unpublished.
+The 0.6.0 release (`./color`, `./text`, `./glyphs`: colour maths, the comet bar, text layout and sanitisers, frames and spinners), the 0.5.0 release (`./models`: model vocabulary, a cached registry catalogue, thinking policy and an unframed two-pane picker) and the 0.4.0 release (`./menu`) publish only `@underactive/pi-topping-primitives`, with `npm publish -w @underactive/pi-topping-primitives` after every consumer is green against the packed tarball; test-utils stays unpublished.
 
 The 0.3.0 release (`./activity`, `./activity-tui`) and the 0.2.0 release (`./settings`) published only `@underactive/pi-topping-primitives`, the same way as 0.1.0 (test-utils is still unpublished). The 0.1.0 release published only `@underactive/pi-topping-primitives`, using `npm publish -w @underactive/pi-topping-primitives`. `@underactive/pi-topping-test-utils` remains unpublished because its subpaths are still placeholders. Do not use `npm publish --workspaces` while any workspace package still has empty exported subpaths.
 

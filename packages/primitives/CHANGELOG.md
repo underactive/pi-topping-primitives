@@ -4,6 +4,42 @@ All notable changes to this package are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this package
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.0] - 2026-10-20
+
+### Added
+
+- `./color`: `Rgb`, `parseHex`, `mixRgb`, `rgbTo256`, `xterm256ToRgb`, `channelsToFgAnsi`, `rgbToFgAnsi`, `hexToFgAnsi`, `parseSgrColor` (with `SgrColor`), `hslToRgb`, `hsvToRgb`, `wrapDeg`, `fadeRgbToward`, `cosineFalloff`, `shimmerCell` (with `ShimmerCellPalette` and `ShimmerCellOptions`), `SWITCHYARD_PROVIDER`, `NVIDIA_GREEN_HEX`, `NVIDIA_GREEN_DARK_HEX`, `isSwitchyardProvider`, `SYNTHWAVE_GREENS` (with `CometPalette`), `renderCometBar` (with `CometBarOptions`), `BAR_CELLS`, `BAR_FILLED`, `BAR_TROUGH` and the `TerminalColorMode` type. Merged from statusline (`theme.ts`, `rainbow.ts`, `nvidia-green.ts`, `compaction-bar.ts`), compact (`progress-bar.ts`), splash (`reveal.ts`, `color.ts`) and pi-topping (`nvidia-green.ts`). No runtime pi import.
+- `./text`: `padRight`, `padCenter`, `truncateVisible`, `fitCell`, `ELLIPSIS`, `pickFitting`, `joinParts`, `wrapCommaDelimited` (splash `text.ts`); `stripSgr` (statusline `footer.ts`); `stripControlChars`, `sanitizedText` (pi-topping `util.ts`), `sanitizeTerminalBytes` (persona-audit `AuditProgress.ts`) and `sanitizeLabel` (statusline `utils.ts`); `formatDurationCompact`, `formatCount`, `formatPercent` (routesense `format.ts`) and `formatCostUsd` (persona-audit and moa-fusion). `layout.ts` imports pi-tui's `visibleWidth` and `sliceByColumn` at runtime; nothing else here needs pi.
+- `./glyphs`: `BoxGlyphs`, `BoxStyle`, `BOX_STYLES`, `ASCII_BOX` (statusline `theme.ts`, identical to pi-topping `prompt-decorator.ts`), `SPINNER_FRAMES`, `SPINNER_FRAME_MS` (pi-topping `format.ts`, moa-fusion `BRAILLE_SPINNER_FRAMES`) and `QUADRANT_SPINNER_FRAMES` (moa-fusion, persona-audit `TABLE_FRAMES`).
+- `scripts/probe-pi-loader.sh` takes `SUBPATH=color|text|glyphs`. The `text` row measures a CJK string through pi-tui; with `PEERS=absent` nothing else on disk can supply pi-tui, so that row shows the host's alias reaching the subpath.
+- `tools/hygiene.ts` treats `color` and `glyphs` as pi-free, so a runtime pi import there fails the scan; `text` stays allowed because `layout.ts` measures with pi-tui. The subpath is now the directory straight under `src`, so a checkout that happens to live under a directory called `color` or `glyphs` no longer makes every file pi-free.
+
+### Differences from the vendored copies
+
+- `rgbToFgAnsi` takes a tuple and a mode, `rgbToFgAnsi(rgb, mode)`. Statusline's took spread channels, `rgbToFgAnsi(r, g, b, mode)`; that form is now `channelsToFgAnsi`, which a hot path calls so that it builds no tuple per colour.
+- `mode` is required wherever an escape is written (`hexToFgAnsi`, `renderCometBar`, `fadeRgbToward`). Statusline's `hexToFgAnsi` and compact's bar read pi-tui's capability cache when it was left out; the host now passes `getTerminalColorMode()` itself, so the maths needs no terminal state.
+- `parseSgrColor` is a new reader, not `./activity-tui`'s `ansiToRgb`. It covers truecolor, 256-colour and `ESC[39m`, foreground and background, and returns a tagged `SgrColor` or `undefined`. `ansiToRgb` is unchanged: it answers "can this foreground be blended?" with `[r, g, b]` or `null`, and the shimmer and fade rely on that.
+- `renderCometBar` is compact's `renderProgressBar` and statusline's `renderCompactionBar` as one function, byte for byte over the 162-case matrix both were captured over. Its elapsed option is `elapsedMs`; both hosts named it `shimmerElapsedMs` and keep that name on their own wrappers.
+- `pickFitting([], width)` returns an empty string. Splash's copy threw a `TypeError`.
+- `BoxGlyphs` has six readonly fields and no T-junctions; moa-fusion's eight-field box keeps its joins locally. pi-topping's `tl`/`tr`/`bl`/`br`/`h`/`v` are `topLeft`/`topRight`/`bottomLeft`/`bottomRight`/`horizontal`/`vertical`.
+- Every exported table is frozen at every level (`BOX_STYLES` and each style, the spinner arrays, `SYNTHWAVE_GREENS` and each colour). The vendored copies were mutable.
+- `formatDuration` in routesense is `formatDurationCompact`. routesense's signed `formatCost` (`$0.0042`, `-`) stays in routesense; `formatCostUsd` is persona-audit's and moa-fusion's style.
+- `wrapCommaDelimited`, `pickFitting` and `joinParts` accept readonly arrays; `isSwitchyardProvider` accepts a missing argument.
+- No token formatter. The toppings use five incompatible styles and the handoff leaves them out until the repos agree.
+- `easeFade`, `FADE_SHADE_COUNT`, `formatElapsedClock`, `formatElapsedUnits` and `dimAttribute` are not repeated here; they shipped in `./activity` and `./activity-tui`.
+- The spinner tables are frozen `readonly` tuples, not `string[]`. They do not satisfy an API typed as a mutable array (pi-tui's `Loader` `frames` option is one); pass `[...SPINNER_FRAMES]`. `Rgb`, the `rgb` of an `SgrColor`, and every `CometPalette` field are `readonly` tuples too, while `parseHex`, `mixRgb`, `hslToRgb`, `hsvToRgb` and `xterm256ToRgb` return mutable ones.
+- `shimmerCell` takes optional `bandHalf`, `peakAlpha` and `boldAbove` (5, 0.9 and 0.2, splash's constants); splash passes its own through a frozen options object so a cell builds none.
+- Inputs the vendored copies mishandled are now defined. Neither host reaches them (splash passes `Math.abs(i - pos)` with its fixed band, and statusline only fades while `leftFade < 1`, which a NaN fails), so no host's output changes:
+  - `shimmerCell` and `cosineFalloff` read a distance as a magnitude. Before, a negative distance wrapped round the cosine (a distance of -7 glowed at about a third of the crest and went bold), and a `bandHalf` of 0 wrote `NaN` into the escape. A zero or negative band, or a non-finite distance, is all base ink.
+  - `fadeRgbToward` with a NaN opacity returns the text unchanged; the vendored fade wrote `NaN` into every channel. `mixRgb` with a NaN amount reads it as 0.
+  - `renderCometBar` reads NaN and both infinities as 0%, as compact's copy always did; the README now says so.
+
+### Known issues
+
+- `xterm256ToRgb` computes the cube levels as `55 + v * 51`; xterm's are `55 + v * 40`. Every non-zero level reads brighter than the terminal draws it, and levels 4 and 5 come out as 259 and 310, above 255. This is statusline's arithmetic, kept so faded colours match byte for byte. It reaches `fadeRgbToward` and the `rgb` that `parseSgrColor` reports for an indexed colour. In the fade, a colour with a level-5 component (index 39's blue is 310) passes 255 once the opacity is high enough, about 0.81 toward statusline's `#121212`; that writes an out-of-range channel in truecolor mode and lands one cube step high in 256-colour mode. Correcting it changes every faded colour that started as a 256-colour escape, so it is a separate, deliberate change, and `tests/color-rgb.test.ts` pins the current values as a defect.
+- `sanitizeLabel` strips escape sequences with Node's regex-based `stripVTControlCharacters`, which removes CSI and OSC sequences whole but can leave the payload of a DCS, APC, PM or SOS string behind as text when it holds spaces or punctuation. pi-tui's `stripTerminalSequences` covers a different subset; run it first on untrusted text.
+- `formatDurationCompact` and `formatPercent` print `NaN` for NaN, as routesense's copies did.
+
 ## [0.5.0] - 2026-10-19
 
 ### Added
