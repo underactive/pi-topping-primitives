@@ -6,10 +6,10 @@ Shared runtime pieces for the pi-topping family: cross-extension contracts (name
 
 ## Install
 
-Version 0.1.0 (contracts only) is published; 0.2.0 adds `./settings`; 0.3.0 adds `./activity` and `./activity-tui`; 0.4.0 adds `./menu`; 0.5.0 adds `./models`; 0.6.0 adds `./color`, `./text` and `./glyphs`; 0.7.0 corrects `xterm256ToRgb`'s cube levels; 0.8.0 adds `./process`; 0.9.0 adds `./env` and `./abort`. A topping takes it as a runtime dependency:
+Version 0.1.0 (contracts only) is published; 0.2.0 adds `./settings`; 0.3.0 adds `./activity` and `./activity-tui`; 0.4.0 adds `./menu`; 0.5.0 adds `./models`; 0.6.0 adds `./color`, `./text` and `./glyphs`; 0.7.0 corrects `xterm256ToRgb`'s cube levels; 0.8.0 adds `./process`; 0.9.0 adds `./env` and `./abort`; 0.10.0 removes the pi-topping-compact entry names and types from `./contracts` (breaking). A topping takes it as a runtime dependency:
 
 ```sh
-npm install @underactive/pi-topping-primitives@^0.9.0
+npm install @underactive/pi-topping-primitives@^0.10.0
 ```
 
 That writes a `dependencies` entry. The code is loaded by pi at runtime, so it does not belong in `devDependencies`.
@@ -431,19 +431,16 @@ Both clamp a timeout above 2^31 - 1 ms (about 24.8 days, `Infinity` included) to
 
 ## Contracts
 
-`./contracts` is the permanent cross-extension wire registry. The names never change, payloads only gain fields, and parsers ignore unknown fields. The `V1` suffix appears only on versioned payloads; an incompatible change to an unversioned payload takes a new name.
+`./contracts` is the permanent cross-extension wire registry. The names never change, payloads only gain fields, and parsers ignore unknown fields. The `V1` suffix appears only on versioned payloads; an incompatible change to an unversioned payload takes a new name. The one exception is a name whose only publisher has been retired: 0.10.0 removed the three `pi-topping-compact/` entry names, their payload types (`SavingsEntry`, `CompactionOutcomeEntry`) and their `EntryPayloads` rows that way.
 
 | Name | Value | Publisher | Payload type | Parser / validation |
 | --- | --- | --- | --- | --- |
 | `CHANNELS.routedModel` | `pi-topping-routesense:routed-model` | routesense | `RoutedModelAnnouncementV1` | `parseRoutedModel` |
 | `CHANNELS.workingStatusEmbedded` | `pi-topping-statusline:working-status-embedded` | statusline | `EmbeddedAnnouncement` | `parseEmbeddedAnnouncement` |
-| `ENTRY_TYPES.compactSavings` | `pi-topping-compact/savings` | compact | `SavingsEntry` | Consumer validates its fields |
-| `ENTRY_TYPES.compactCompactionSavings` | `pi-topping-compact/compaction-savings` | compact | `SavingsEntry` | Consumer validates its fields |
-| `ENTRY_TYPES.compactCompaction` | `pi-topping-compact/compaction` | compact | `CompactionOutcomeEntry` | Consumer validates its fields |
 | `ENTRY_TYPES.browser` | `pi-topping-web-tools/browser` | web-tools | `BrowserFeedPayload` | Consumer validates its fields |
 | `ENTRY_TYPES.splashLocalChanges` | `pi-topping-splash:local-changes` | splash | `unknown` | Name only; payload and strict validator stay local to splash |
 
-`PI_VIRTUAL_MODEL_API` is pi's `VIRTUAL_MODEL_API` string (`pi-virtual`), and `WORKING_STATUS_SLIDE_MS` is the shared 300 ms slide interval. `ChannelPayloads` describes strict emit-side channel payloads; `ParsedChannelPayloads` describes the smaller subscriber shapes. `EntryPayloads` maps entry names to their payload types. The module also exports `Channel`, `EntryType`, `RouteReason`, `RoutedModelAnnouncementV1`, `ParsedRoutedModel`, `EmbeddedAnnouncement`, `SavingsEntry`, `CompactionOutcomeEntry`, `BrowserFeedPayload`, and the structural `EventBusLike` type.
+`PI_VIRTUAL_MODEL_API` is pi's `VIRTUAL_MODEL_API` string (`pi-virtual`), and `WORKING_STATUS_SLIDE_MS` is the shared 300 ms slide interval. `ChannelPayloads` describes strict emit-side channel payloads; `ParsedChannelPayloads` describes the smaller subscriber shapes. `EntryPayloads` maps entry names to their payload types. The module also exports `Channel`, `EntryType`, `RouteReason`, `RoutedModelAnnouncementV1`, `ParsedRoutedModel`, `EmbeddedAnnouncement`, `BrowserFeedPayload`, and the structural `EventBusLike` type.
 
 Publish a routed-model announcement without copying or runtime validation:
 
@@ -461,7 +458,7 @@ const unsubscribe = subscribe(pi.events, CHANNELS.routedModel, (routed) => {
 
 The parsers require a non-array object. Routed-model messages must have `version: 1`, non-empty sanitized `provider` and `modelId`, and one of `user`, `continuation`, `retry`, or `direct`; a sanitized empty `thinkingLevel` is omitted. Embed messages require a boolean `embedded` and ignore every other field, including `version`.
 
-The retired names `pi-topping-statusline:compaction-progress-embedded`, `pi-topping-compact:compaction-progress`, and `pi-prompt-cache/savings` are intentionally absent. They are not aliases and must not be reintroduced.
+The retired names `pi-topping-statusline:compaction-progress-embedded`, `pi-topping-compact:compaction-progress`, `pi-prompt-cache/savings`, and (since 0.10.0) `pi-topping-compact/savings`, `pi-topping-compact/compaction-savings` and `pi-topping-compact/compaction` are intentionally absent. They are not aliases and must not be reintroduced.
 
 ## Releases
 

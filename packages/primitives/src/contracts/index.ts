@@ -4,6 +4,11 @@
  * Compatibility rules: names never change; payloads only gain fields; parsers
  * ignore unknown fields. The `V1` suffix is used only on versioned payloads.
  * An incompatible change to an unversioned payload must take a new name.
+ *
+ * The one exception is a name whose only publisher has been retired: it may be
+ * removed in a breaking release, and then stays on the retired list in the tests
+ * and the README and is never reused. 0.10.0 removed the three
+ * `pi-topping-compact/` entry names that way.
  */
 export const CHANNELS = Object.freeze({
 	routedModel: "pi-topping-routesense:routed-model",
@@ -12,9 +17,6 @@ export const CHANNELS = Object.freeze({
 export type Channel = (typeof CHANNELS)[keyof typeof CHANNELS];
 
 export const ENTRY_TYPES = Object.freeze({
-	compactSavings: "pi-topping-compact/savings",
-	compactCompactionSavings: "pi-topping-compact/compaction-savings",
-	compactCompaction: "pi-topping-compact/compaction",
 	browser: "pi-topping-web-tools/browser",
 	splashLocalChanges: "pi-topping-splash:local-changes",
 } as const);
@@ -66,30 +68,12 @@ export interface ParsedChannelPayloads {
 	[CHANNELS.workingStatusEmbedded]: EmbeddedAnnouncement;
 }
 
-export interface SavingsEntry {
-	savedUsd: number;
-}
-
-export interface CompactionOutcomeEntry {
-	tokensBefore: number;
-	estimatedTokensAfter: number | null;
-	contextWindow: number;
-	percentBefore: number;
-	percentAfter: number | null;
-	/** "threshold" | "idle" | "manual" | "overflow" today; readers must tolerate others. */
-	reason: string;
-	label: string;
-}
-
 export interface BrowserFeedPayload {
 	label: string;
 	open: 0 | 1;
 }
 
 export interface EntryPayloads {
-	[ENTRY_TYPES.compactSavings]: SavingsEntry;
-	[ENTRY_TYPES.compactCompactionSavings]: SavingsEntry;
-	[ENTRY_TYPES.compactCompaction]: CompactionOutcomeEntry;
 	[ENTRY_TYPES.browser]: BrowserFeedPayload;
 	/** Name reserved here; the payload and its strict validator stay owned by splash. */
 	[ENTRY_TYPES.splashLocalChanges]: unknown;

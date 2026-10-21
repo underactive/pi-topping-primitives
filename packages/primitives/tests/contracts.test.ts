@@ -40,9 +40,6 @@ test("contract tables keep the permanent channel and entry names", () => {
 		workingStatusEmbedded: "pi-topping-statusline:working-status-embedded",
 	});
 	assert.deepEqual(ENTRY_TYPES, {
-		compactSavings: "pi-topping-compact/savings",
-		compactCompactionSavings: "pi-topping-compact/compaction-savings",
-		compactCompaction: "pi-topping-compact/compaction",
 		browser: "pi-topping-web-tools/browser",
 		splashLocalChanges: "pi-topping-splash:local-changes",
 	});
@@ -62,6 +59,10 @@ test("retired wire names stay absent from the permanent name tables", () => {
 	);
 	assert.ok(!names.includes("pi-topping-compact:compaction-progress"));
 	assert.ok(!names.includes("pi-prompt-cache/savings"));
+	// Removed in 0.10.0 with their only publisher, pi-topping-compact.
+	assert.ok(!names.includes("pi-topping-compact/savings"));
+	assert.ok(!names.includes("pi-topping-compact/compaction-savings"));
+	assert.ok(!names.includes("pi-topping-compact/compaction"));
 });
 
 test("parseRoutedModel returns only the sanitised stable fields", () => {

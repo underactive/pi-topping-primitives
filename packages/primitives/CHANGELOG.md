@@ -4,6 +4,16 @@ All notable changes to this package are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this package
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Removed
+
+- **Breaking.** `./contracts` no longer exports `ENTRY_TYPES.compactSavings`, `compactCompactionSavings` and `compactCompaction` (`pi-topping-compact/savings`, `pi-topping-compact/compaction-savings`, `pi-topping-compact/compaction`), the `SavingsEntry` and `CompactionOutcomeEntry` types, or their `EntryPayloads` rows. Their only publisher, pi-topping-compact, is a private extension that is being retired, and the one consumer outside it, statusline's default feed seed, no longer uses them (its unreleased CHANGELOG records that). The three names join the retired names that must not be reintroduced, and the test that guards the retired list now covers them. A consumer that still reads them stays on `^0.9.0` (a caret range on 0.x does not take 0.10.0) or writes the strings itself.
+
+### Changed
+
+- The `./contracts` compatibility note, in the source and the README, now records the one exception to "names never change": a name whose only publisher has been retired may be removed in a breaking release.
+
 ## [0.9.0] - 2026-10-20
 
 ### Added
