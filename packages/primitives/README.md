@@ -26,7 +26,7 @@ The package exports `./contracts`, `./settings`, `./activity`, `./activity-tui` 
 import { createSettingsStore, sanitize, toppingSettingsPath } from "@underactive/pi-topping-primitives/settings";
 
 const store = createSettingsStore<Settings>({
-	path: toppingSettingsPath("pi-topping-bash-gate"),
+	path: toppingSettingsPath("pi-topping-example"),
 	codec: {
 		sanitize: (raw) => {
 			const r = sanitize.isRecord(raw) ? raw : {};

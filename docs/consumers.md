@@ -4,7 +4,7 @@ How a topping consumes the two libraries. The decision this document records: **
 
 The checkouts are symlinked into `~/.pi/agent/extensions`, so each one resolves its own `node_modules` at runtime. That is why every mode below ends with an install inside the consumer checkout.
 
-**Latest release: 0.9.0.** It adds `./env` and `./abort` to the 0.8.0 API; `./process` was the last of the planned subpaths. It exports `./contracts`, `./settings`, `./activity`, `./activity-tui`, `./menu`, `./models`, `./color`, `./text`, `./glyphs`, `./process`, `./env` and `./abort`. A consumer commits `^0.9.0`. sensei, web-tools and compact have moved to it; moa-fusion, persona-audit, pi-topping and splash are on `^0.8.0`, statusline stays on `^0.7.0`, routesense on `^0.6.0` and bash-gate on `^0.4.0` until their next adoption, and pi-switchyard does not depend on it yet.
+**Latest release: 0.9.0.** It adds `./env` and `./abort` to the 0.8.0 API; `./process` was the last of the planned subpaths. It exports `./contracts`, `./settings`, `./activity`, `./activity-tui`, `./menu`, `./models`, `./color`, `./text`, `./glyphs`, `./process`, `./env` and `./abort`. A consumer commits `^0.9.0`. sensei and web-tools have moved to it; moa-fusion, persona-audit, pi-topping and splash are on `^0.8.0`, statusline stays on `^0.7.0` and routesense on `^0.6.0` until their next adoption, and pi-switchyard does not depend on it yet. compact (which also moved, on an unpushed local branch) and bash-gate (`^0.4.0`) are being retired and will not adopt anything further.
 
 ## 1. Published: the committed state
 
