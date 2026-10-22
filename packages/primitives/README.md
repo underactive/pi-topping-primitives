@@ -498,7 +498,7 @@ Consequences for consumers:
 
 ## Compatibility
 
-Tested against pi 1.3.0; `peerDependencies` are `*`.
+Tested against pi 1.4.0; `peerDependencies` are `*`.
 
 ## House rules
 
@@ -523,7 +523,7 @@ The proof that the resolve hook works is `tests/ts-resolve.test.ts` at the repos
 
 This is the record of Phase 0 step 4: the packaging recipe of handoff section 3 reproduced, plus the loader branch that section's experiment did not cover.
 
-Environment: Node 24.18.0, npm 11.16.0, `@earendil-works/pi-coding-agent` 1.3.0, `@earendil-works/pi-tui` 1.3.0, jiti 2.7.0. Date: 2026-10-17.
+Environment: Node 24.18.0, npm 11.16.0, `@earendil-works/pi-coding-agent` 1.4.0, `@earendil-works/pi-tui` 1.4.0, jiti 2.7.0. Date: 2026-10-21. First recorded against pi 1.3.0 on 2026-10-17; every row below reproduced unchanged on 1.4.0.
 
 ### Section 3 recipe
 
@@ -537,7 +537,7 @@ The recipe's three expectations, all reproduced:
 
 ### Which pi branch runs which code
 
-`bin.pi` is `dist/bundle/cli.js`. The bundle is built with `PI_BUNDLED_NODE` defined, so `isBundledNode` is `true` in the shipped chunk and the CLI passes `{ virtualModules, tryNative: false }` from `dist/core/extensions/loader.js` (lines 472-476). The unbundled SDK entry `dist/index.js` falls through to `{ alias: getAliases() }` at the same lines.
+`bin.pi` is `dist/bundle/cli.js`. The bundle is built with `PI_BUNDLED_NODE` defined, so `isBundledNode` is `true` in the shipped chunk and the CLI passes `{ virtualModules, tryNative: false }` from `dist/core/extensions/loader.js` (lines 475-479). The unbundled SDK entry `dist/index.js` falls through to `{ alias: getAliases() }` at the same lines.
 
 The section 3 recipe only reproduced the alias branch. The CLI branch was verified separately, by driving `discoverAndLoadExtensions` through each branch in turn.
 
@@ -563,7 +563,7 @@ Both are load-bearing.
 
 That is exactly the dev-versus-installed inconsistency section 3 fact 2 warns about. The `.ts` default target is therefore required, not merely preferred.
 
-Scope: the evidence covers pi 1.3.0 and Node 24.18.0. The `compiled` condition is the only thing a test-side change can break; the runtime `default` target is fixed by the loader.
+Scope: the evidence covers pi 1.3.0 and 1.4.0 on Node 24.18.0. The `compiled` condition is the only thing a test-side change can break; the runtime `default` target is fixed by the loader.
 
 ### Re-running
 

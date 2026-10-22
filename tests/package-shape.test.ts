@@ -80,7 +80,7 @@ const PI_PEERS = [
 ];
 
 /** The one pi version the packages are tested against, pinned exactly in devDependencies. */
-const PI_PIN = "1.3.0";
+const PI_PIN = "1.4.0";
 
 /** Exactly what ships: source for pi's loader, dist for tests, and the docs. */
 const FILES = [

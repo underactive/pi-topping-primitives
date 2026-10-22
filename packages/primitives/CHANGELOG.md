@@ -4,6 +4,12 @@ All notable changes to this package are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this package
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Changed
+
+- The pi development baseline moves from 1.3.0 to 1.4.0: the exact `@earendil-works/pi-ai`, `pi-coding-agent` and `pi-tui` devDependency pins, the lockfile and the README compatibility and loader-verification records. No source change; `peerDependencies` stay `*`.
+
 ## [0.10.0] - 2026-10-20
 
 ### Removed
