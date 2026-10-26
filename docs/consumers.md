@@ -4,7 +4,7 @@ How a topping consumes the two libraries. The decision this document records: **
 
 The checkouts are symlinked into `~/.pi/agent/extensions`, so each one resolves its own `node_modules` at runtime. That is why every mode below ends with an install inside the consumer checkout.
 
-**Latest release: 0.10.0.** It removes the three pi-topping-compact entry names and their payload types from `./contracts` (a breaking change; their only publisher is being retired) and otherwise has the 0.9.0 API; `./process` was the last of the planned subpaths. It exports `./contracts`, `./settings`, `./activity`, `./activity-tui`, `./menu`, `./models`, `./color`, `./text`, `./glyphs`, `./process`, `./env` and `./abort`. A consumer commits `^0.10.0`. None has moved to it yet, and none needs to: nothing outside compact read the removed names once statusline dropped its feed seed. sensei and web-tools are on `^0.9.0`; moa-fusion, persona-audit, pi-topping and splash are on `^0.8.0`; statusline stays on `^0.7.0` and routesense on `^0.6.0` until their next adoption; pi-switchyard does not depend on it yet. A caret range on 0.x stops at the next minor, so each consumer bumps on purpose. compact (an unpushed branch on `^0.9.0`) and bash-gate (`^0.4.0`) are being retired and will not adopt anything further.
+**Latest release: 0.11.0.** It is additive (`./glyphs` gains `THINKING_LEVEL_LABELS`, `thinkingLevelLabel` and the `GradedThinkingLevel` and `ThinkingGlyphPreset` types); 0.10.1 only moved the pi baseline. A consumer commits `^0.11.0`. statusline, sensei and pi-topping adopt the labels; routesense, moa-fusion, persona-audit, splash and web-tools bump the range only. pi-switchyard has no dependency. compact and bash-gate are retired. A caret range on 0.x stops at the next minor, so every consumer must move together to avoid two copies of the package in a shared pi install.
 
 ## 1. Published: the committed state
 
@@ -71,7 +71,7 @@ Verify runner behavior against the packed or registry package, not only a `--no-
 
 Handoff section 7, with two corrections from this phase.
 
-1. `package.json`: add `"@underactive/pi-topping-primitives": "^0.10.0"` (the latest release) under `dependencies`, and `"@underactive/pi-topping-test-utils": "^0.1.0"` under `devDependencies`. Do not touch `peerDependencies` or `files`. **Correction (a):** a registry range is the only committable form. `file:` links exist for `--no-save` work only.
+1. `package.json`: add `"@underactive/pi-topping-primitives": "^0.11.0"` (the latest release) under `dependencies`, and `"@underactive/pi-topping-test-utils": "^0.1.0"` under `devDependencies`. Do not touch `peerDependencies` or `files`. **Correction (a):** a registry range is the only committable form. `file:` links exist for `--no-save` work only.
 2. Test script: `node -C compiled --test ...`. moa-fusion's `.mjs` tests keep `-C compiled` and `--experimental-transform-types` on the parent command so relaunches inherit them. Sensei uses `resolve.conditions: ["compiled"]`, verified against the published package; see the runner notes.
 3. `npm install` in the checkout. With a `file:` link, run `npm run build` in the primitives checkout first.
 4. Replace the vendored module with imports from the package subpath. Delete the tests that moved; keep one host-level smoke assertion.

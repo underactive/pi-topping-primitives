@@ -6,6 +6,12 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.11.0] - 2026-10-25
+
+### Changed
+
+- Version moves to 0.11.0 in lockstep with `@underactive/pi-topping-primitives`; no API change. This package stays unpublished.
+
 ## [0.10.1] - 2026-10-21
 
 ### Changed

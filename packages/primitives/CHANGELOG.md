@@ -6,6 +6,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.11.0] - 2026-10-25
+
 ### Added
 
 - `./glyphs`: `GradedThinkingLevel`, `ThinkingGlyphPreset`, `THINKING_LEVEL_LABELS` and `thinkingLevelLabel(level, preset)`. The three presets come from statusline `src/theme.ts`, `StatusSymbols.thinking` in `UNICODE_SYMBOLS`, `NERD_SYMBOLS` and `ASCII_SYMBOLS`; the nerd preset was copied by sensei `src/text/effort.ts` and pi-topping `src/format.ts`.
