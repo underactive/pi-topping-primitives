@@ -6,6 +6,17 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- `./glyphs`: `GradedThinkingLevel`, `ThinkingGlyphPreset`, `THINKING_LEVEL_LABELS` and `thinkingLevelLabel(level, preset)`. The three presets come from statusline `src/theme.ts`, `StatusSymbols.thinking` in `UNICODE_SYMBOLS`, `NERD_SYMBOLS` and `ASCII_SYMBOLS`; the nerd preset was copied by sensei `src/text/effort.ts` and pi-topping `src/format.ts`.
+- `scripts/probe-pi-loader.sh` adds a `label` field to the glyphs loader probe.
+
+### Differences from the vendored copies
+
+- The lookup returns `""` for unknown and prototype keys. Sensei returned raw text for unknown levels and keeps that choice at its own call site.
+- pi-topping's bare-name non-Nerd-Font form has no preset here; pi-topping moves to the unicode preset.
+- The level union is declared locally and held to `THINKING_LEVELS` by a runtime key test and a compile-time type check.
+
 ## [0.10.1] - 2026-10-21
 
 ### Changed

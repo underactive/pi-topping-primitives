@@ -327,15 +327,18 @@ Semantics:
 
 ## Glyphs
 
-`./glyphs` is data: frames and spinners. No imports, and every table is frozen at every level.
+`./glyphs` is data: frames, spinners and thinking-level labels, plus one pure lookup. No imports, and every table is frozen at every level.
 
 | Export | Purpose |
 | --- | --- |
 | `BoxGlyphs`, `BoxStyle`, `BOX_STYLES`, `ASCII_BOX` | The six glyphs of a rectangle (`topLeft`, `topRight`, `bottomLeft`, `bottomRight`, `horizontal`, `vertical`) for `rounded`, `heavy`, `double` and `single`, and the plain-text fallback |
 | `SPINNER_FRAMES`, `SPINNER_FRAME_MS` | The braille set pi-tui's Loader cycles, at 80 ms a frame (moa-fusion's `BRAILLE_SPINNER_FRAMES`) |
 | `QUADRANT_SPINNER_FRAMES` | The four-step circle the progress tables use |
+| `GradedThinkingLevel`, `ThinkingGlyphPreset`, `THINKING_LEVEL_LABELS`, `thinkingLevelLabel(level, preset)` | Statusline's nerd, unicode and ascii labels for the graded levels, and the lookup |
 
 `BoxGlyphs` has no T-junctions. moa-fusion's progress table keeps its own eight-field box, because the joins are frame policy.
+
+`thinkingLevelLabel` returns `""` for `off`, absent and unknown levels; a host that wants unknown levels visible adds its own fallback.
 
 The spinner tables are frozen `readonly` tuples (`readonly ["⠋", ...]`), so they do not satisfy an API typed as a mutable `string[]`, which pi-tui's `Loader` `frames` option is. Pass a copy: `[...SPINNER_FRAMES]`. Their `.length` is the literal type `10` and `4`.
 

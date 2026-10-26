@@ -6,10 +6,15 @@ import {
 	BOX_STYLES,
 	type BoxGlyphs,
 	type BoxStyle,
+	type GradedThinkingLevel,
 	QUADRANT_SPINNER_FRAMES,
 	SPINNER_FRAME_MS,
 	SPINNER_FRAMES,
+	THINKING_LEVEL_LABELS,
+	type ThinkingGlyphPreset,
+	thinkingLevelLabel,
 } from "../src/glyphs/index.js";
+import { THINKING_LEVELS } from "../src/models/refs.js";
 
 /*
  * The expected tables are written as code points on purpose: several box-drawing glyphs differ
@@ -18,6 +23,36 @@ import {
  * the corners tl/tr/bl/br and the edges h/v), moa-fusion's src/ui/chrome.ts, pi-topping's
  * src/format.ts and persona-audit's TABLE_FRAMES before any of them was edited.
  */
+const EXPECTED_THINKING: Record<
+	ThinkingGlyphPreset,
+	Record<GradedThinkingLevel, string>
+> = {
+	nerd: {
+		minimal: "\u{f0a9e} min",
+		low: "\u{f0a9f} low",
+		medium: "\u{f0aa1} med",
+		high: "\u{f0aa3} high",
+		xhigh: "\u{f0aa5} xhigh",
+		max: "\u{f06d} max",
+	},
+	unicode: {
+		minimal: "\u25cb min",
+		low: "\u25d4 low",
+		medium: "\u25d1 med",
+		high: "\u25d2 high",
+		xhigh: "\u25d5 xhigh",
+		max: "\u25c9 max",
+	},
+	ascii: {
+		minimal: "[min]",
+		low: "[low]",
+		medium: "[med]",
+		high: "[high]",
+		xhigh: "[xhigh]",
+		max: "[max]",
+	},
+};
+
 const EXPECTED: Record<BoxStyle, BoxGlyphs> = {
 	rounded: {
 		topLeft: "\u256d",
@@ -131,17 +166,72 @@ test("QUADRANT_SPINNER_FRAMES is the four-step circle", () => {
 	);
 });
 
+test("thinking-level labels hold each preset and stay aligned with THINKING_LEVELS", () => {
+	const presets = Object.keys(
+		THINKING_LEVEL_LABELS,
+	).sort() as ThinkingGlyphPreset[];
+	assert.deepEqual(presets, ["ascii", "nerd", "unicode"]);
+	for (const preset of presets) {
+		assert.deepEqual(
+			{ ...THINKING_LEVEL_LABELS[preset] },
+			EXPECTED_THINKING[preset],
+			preset,
+		);
+		assert.deepEqual(
+			Object.keys(THINKING_LEVEL_LABELS[preset]),
+			THINKING_LEVELS.filter((level) => level !== "off"),
+			`${preset} level order`,
+		);
+	}
+});
+
+test("thinkingLevelLabel returns graded labels and rejects absent, unknown and prototype keys", () => {
+	for (const preset of Object.keys(
+		EXPECTED_THINKING,
+	) as ThinkingGlyphPreset[]) {
+		for (const level of Object.keys(
+			EXPECTED_THINKING[preset],
+		) as GradedThinkingLevel[]) {
+			assert.equal(
+				thinkingLevelLabel(level, preset),
+				EXPECTED_THINKING[preset][level],
+			);
+		}
+		for (const level of [
+			"off",
+			undefined,
+			"",
+			"ultra",
+			"XHIGH",
+			"constructor",
+			"__proto__",
+			"toString",
+			"hasOwnProperty",
+		]) {
+			assert.equal(
+				thinkingLevelLabel(level, preset),
+				"",
+				`${preset} ${String(level)}`,
+			);
+		}
+	}
+});
+
 test("every table is frozen at every level", () => {
 	for (const table of [
 		BOX_STYLES,
 		ASCII_BOX,
 		SPINNER_FRAMES,
 		QUADRANT_SPINNER_FRAMES,
+		THINKING_LEVEL_LABELS,
 	]) {
 		assert.ok(Object.isFrozen(table));
 	}
 	for (const glyphs of Object.values(BOX_STYLES)) {
 		assert.ok(Object.isFrozen(glyphs));
+	}
+	for (const labels of Object.values(THINKING_LEVEL_LABELS)) {
+		assert.ok(Object.isFrozen(labels));
 	}
 });
 
@@ -151,5 +241,13 @@ test("a frozen table refuses a write", () => {
 	}, TypeError);
 	assert.throws(() => {
 		(BOX_STYLES.rounded as unknown as Record<string, string>).topLeft = "x";
+	}, TypeError);
+	assert.throws(() => {
+		(
+			THINKING_LEVEL_LABELS.nerd as unknown as Record<
+				GradedThinkingLevel,
+				string
+			>
+		).xhigh = "x";
 	}, TypeError);
 });

@@ -116,7 +116,7 @@ printf '{ "name": "@underactive/fake-prim", "type": "module", "exports": { ".": 
 # Expect for models: {"rows":2,"pick":{"ref":{"provider":"probe","id":"model"},"thinking":"off"}}
 # Expect for color: {"filled":10,"trough":10,"green":"\u001b[38;2;132;197;26m","cube":[0,175,255]}
 # Expect for text: {"fit":"日\u001b[39m...","center":"  日本  "}
-# Expect for glyphs: {"corner":"╭","frames":10,"frozen":true}
+# Expect for glyphs: {"corner":"╭","frames":10,"frozen":true,"label":"[xhigh]"}
 # Expect for env: {"yes":true,"no":false,"off":false,"on":true}
 # Expect for abort: {"named":true,"plain":false,"registered":1,"after":0,"noTimer":true,"timedOut":false}
 # Expect for process: {"agents":[["probe",["read","grep"],"high"]],"atLeast":true,"inv":{"command":"pi","args":["--version"],"via":"path"},"mapped":[2,4,6],"tracked":0}
@@ -216,11 +216,12 @@ EOF2
 		;;
 	glyphs)
 		cat > "$T/ext/index.ts" <<EOF2
-import { BOX_STYLES, SPINNER_FRAMES } from "@underactive/pi-topping-primitives/$SUBPATH";
+import { BOX_STYLES, SPINNER_FRAMES, thinkingLevelLabel } from "@underactive/pi-topping-primitives/$SUBPATH";
 (globalThis as { __fakePrim?: unknown }).__fakePrim = {
 	corner: BOX_STYLES.rounded.topLeft,
 	frames: SPINNER_FRAMES.length,
 	frozen: Object.isFrozen(SPINNER_FRAMES) && Object.isFrozen(BOX_STYLES.heavy),
+	label: thinkingLevelLabel("xhigh", "ascii"),
 };
 export default function () {}
 EOF2
