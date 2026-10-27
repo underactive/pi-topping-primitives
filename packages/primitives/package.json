@@ -58,6 +58,11 @@
 			"compiled": "./dist/models/index.js",
 			"default": "./src/models/index.ts"
 		},
+		"./classifier": {
+			"types": "./dist/classifier/index.d.ts",
+			"compiled": "./dist/classifier/index.js",
+			"default": "./src/classifier/index.ts"
+		},
 		"./color": {
 			"types": "./dist/color/index.d.ts",
 			"compiled": "./dist/color/index.js",

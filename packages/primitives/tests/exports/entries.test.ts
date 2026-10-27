@@ -13,6 +13,7 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 import * as abortNs from "@underactive/pi-topping-primitives/abort";
 import * as activityNs from "@underactive/pi-topping-primitives/activity";
 import * as activityTuiNs from "@underactive/pi-topping-primitives/activity-tui";
+import * as classifierNs from "@underactive/pi-topping-primitives/classifier";
 import * as colorNs from "@underactive/pi-topping-primitives/color";
 import * as contractsNs from "@underactive/pi-topping-primitives/contracts";
 import * as envNs from "@underactive/pi-topping-primitives/env";
@@ -33,6 +34,7 @@ const SUBPATHS = [
 	"./activity-tui",
 	"./menu",
 	"./models",
+	"./classifier",
 	"./color",
 	"./text",
 	"./glyphs",
@@ -49,6 +51,7 @@ const NAMESPACES: Record<string, Record<string, unknown>> = {
 	"./activity-tui": activityTuiNs as unknown as Record<string, unknown>,
 	"./menu": menuNs as unknown as Record<string, unknown>,
 	"./models": modelsNs as unknown as Record<string, unknown>,
+	"./classifier": classifierNs as unknown as Record<string, unknown>,
 	"./color": colorNs as unknown as Record<string, unknown>,
 	"./text": textNs as unknown as Record<string, unknown>,
 	"./glyphs": glyphsNs as unknown as Record<string, unknown>,

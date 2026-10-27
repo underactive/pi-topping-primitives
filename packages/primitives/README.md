@@ -6,17 +6,17 @@ Shared runtime pieces for the pi-topping family: cross-extension contracts (name
 
 ## Install
 
-Version 0.1.0 (contracts only) is published; 0.2.0 adds `./settings`; 0.3.0 adds `./activity` and `./activity-tui`; 0.4.0 adds `./menu`; 0.5.0 adds `./models`; 0.6.0 adds `./color`, `./text` and `./glyphs`; 0.7.0 corrects `xterm256ToRgb`'s cube levels; 0.8.0 adds `./process`; 0.9.0 adds `./env` and `./abort`; 0.10.0 removes the pi-topping-compact entry names and types from `./contracts` (breaking); 0.11.0 adds the thinking-level labels to `./glyphs`. A topping takes it as a runtime dependency:
+Version 0.1.0 (contracts only) is published; 0.2.0 adds `./settings`; 0.3.0 adds `./activity` and `./activity-tui`; 0.4.0 adds `./menu`; 0.5.0 adds `./models`; 0.6.0 adds `./color`, `./text` and `./glyphs`; 0.7.0 corrects `xterm256ToRgb`'s cube levels; 0.8.0 adds `./process`; 0.9.0 adds `./env` and `./abort`; 0.10.0 removes the pi-topping-compact entry names and types from `./contracts` (breaking); 0.11.0 adds the thinking-level labels to `./glyphs`; 0.12.0 adds `./classifier`. A topping takes it as a runtime dependency:
 
 ```sh
-npm install @underactive/pi-topping-primitives@^0.11.0
+npm install @underactive/pi-topping-primitives@^0.12.0
 ```
 
 That writes a `dependencies` entry. The code is loaded by pi at runtime, so it does not belong in `devDependencies`.
 
 ## Exported subpaths
 
-The package exports `./contracts`, `./settings`, `./activity`, `./activity-tui` (the last two from 0.3.0), `./menu` (from 0.4.0), `./models` (from 0.5.0), `./color`, `./text` and `./glyphs` (from 0.6.0), `./process` (from 0.8.0), and `./env` and `./abort` (from 0.9.0); there is deliberately no root `"."` export. Future helper subpaths are not part of the package API until their implementation lands and they are added to `exports`. None is planned.
+The package exports `./contracts`, `./settings`, `./activity`, `./activity-tui` (the last two from 0.3.0), `./menu` (from 0.4.0), `./models` (from 0.5.0), `./color`, `./text` and `./glyphs` (from 0.6.0), `./process` (from 0.8.0), and `./env` and `./abort` (from 0.9.0), and `./classifier` (from 0.12.0); there is deliberately no root `"."` export. Future helper subpaths are not part of the package API until their implementation lands and they are added to `exports`. None is planned.
 
 ## Settings
 
@@ -256,6 +256,40 @@ if (picker.handleInput(data) === "confirm") use(picker.getSelected());
 The row budget reserves scroll information when the item count equals the available list space as well as when it exceeds it. At equality this displays one fewer item plus scroll information; `maxVisibleRows` is a cap, not a promise to show every item that could fit without a scrollbar. A host needing ten item rows can budget twelve total rows plus one while filtering (header + ten items + a possible scroll row).
 
 `thinkingOptionsForModel(levels, { fallback })` uses a copied fallback on any empty filtered result, including `undefined` and `[]`; the default is empty. `registryLevelOptions` exposes the same policy. The only allowed module state is the catalogue WeakMap, keyed by the host registry so it dies with that object; each package copy owns an independent cache. The catalogue snapshots `getAvailable()` the first time it is asked and does not observe `registry.refresh()` (pi refreshes in place after a login or a models.json reload), so a host whose picker must reflect those reads `getAvailable()` and `find()` directly and passes `thinkingOptionsForModel` as `levelOptions`. No global theme or runtime pi-coding-agent import is used.
+
+## Classifier
+
+`./classifier` is the Jev classifier plumbing routesense and persona-audit share: the known model chain and its credentialed catalogue, one normalized `classify` call, answer readers, the circuit breaker, and the picker that lets a user pin a model. Nothing here is agentic — no tools, no repository access — so a host that needs the tree keeps that work in its own phase and classifies a summary.
+
+```ts
+import {
+	AUTO_CLASSIFIER,
+	classifierPickerOptions,
+	CircuitBreaker,
+	preferredClassifier,
+	runClassification,
+	selectJevModel,
+	showClassifierPicker,
+} from "@underactive/pi-topping-primitives/classifier";
+```
+
+| Export | Purpose |
+| --- | --- |
+| `JEV_MODELS`, `JevModel`, `modelName(model)` | The five providers pi serves Jev through, in auto order, and `provider/model-id` formatting |
+| `selectJevModel(registry, preferred?)`, `availableClassifiers(registry)` | The first credentialed model, honouring a pin, and the credentialed catalogue sorted known-first |
+| `runClassification(registry, model, context, options)` | One `classify` call normalized into answers or a `timeout`/`aborted`/`error` failure with latency and cost |
+| `choiceAnswer`, `boolAnswer`, `scoreAnswer` | Readers over a resolved answer set; `undefined` for absent, wrong-typed or out-of-range answers |
+| `CircuitBreaker`, `BreakerState` | LiteLLM's breaker: a recognized timeout opens the circuit for the cooldown, one probe is admitted, non-timeout errors never open it |
+| `JevClassifierConfig`, `AUTO_CLASSIFIER`, `preferredClassifier`, `clampTimeoutMs`, `clampCooldownSeconds` | The persisted selection shape and its bounds |
+| `classifierPickerOptions`, `ClassifierPickerComponent`, `showClassifierPicker` | `auto`, every credentialed classifier with its API, an unavailable pin, and the framed overlay that picks one |
+
+Semantics:
+
+- **Every registry surface is structural.** `JevRegistry` (`findOfType`, `getProviderAuthStatus`), `ClassifyRegistry` (`classify`) and `ClassifierCatalog` (`getModelsOfType`) are separate interfaces, so a host passes pi's `ModelRegistry` for all three and a test passes a three-method stub.
+- **`runClassification` never rejects.** The registry's own `classify` never rejects either, but a host stub can throw; a throw is reported as an `error` failure. `kind: "timeout"` covers a reported timeout, deadline-shaped wording, and a call that outlived `timeoutMs`. Retries are pinned to zero: a classifier is a fast, cheap judgement, and a retry doubles the latency the deadline exists to bound.
+- **A pin that is unavailable is skipped, not honored.** `selectJevModel` tries the pin first and falls through to the known chain, so a revoked key degrades to the next credentialed model rather than failing the phase.
+- **The picker takes the host's keys.** `showClassifierPicker` hands the `KeybindingsManager` from pi's `ui.custom` to the component, so a user who remapped `tui.editor.deleteCharBackward` still edits the filter. A host constructing `ClassifierPickerComponent` directly may omit it, in which case pi's global keybindings answer. Colour is structural (`ClassifierPickerTheme`), and there is no module state.
+- **`preferredClassifier` rejects a half pin.** A selection with only `provider` or only `model` reads as auto rather than resolving to an arbitrary model; a host's own sanitize decides whether to warn.
 
 ## Color
 

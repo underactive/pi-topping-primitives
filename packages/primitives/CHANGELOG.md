@@ -6,6 +6,10 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- `./classifier`: the Jev classifier plumbing routesense and persona-audit share. `JEV_MODELS`, `JevModel`, `modelName`, `selectJevModel(registry, preferred?)` and `availableClassifiers(registry)` resolve a credentialed classifier from pi's registry through structural interfaces (`JevRegistry`, `ClassifyRegistry`, `ClassifierCatalog`) that pi's `ModelRegistry` satisfies as-is; `runClassification` normalizes one `classify` call into an answer set or a `timeout`/`aborted`/`error` failure carrying latency and cost, with retries pinned to zero; `choiceAnswer`, `boolAnswer` and `scoreAnswer` read one question's answer and answer `undefined` for an absent, wrong-typed or out-of-range one; `CircuitBreaker` copies LiteLLM's semantics, where a recognized timeout opens the circuit for the cooldown, one probe is admitted afterwards, and non-timeout errors never open it; `JevClassifierConfig`, `AUTO_CLASSIFIER`, `preferredClassifier`, `clampTimeoutMs` and `clampCooldownSeconds` hold the persisted selection and its bounds; and `classifierPickerOptions`, `ClassifierPickerComponent` and `showClassifierPicker` are the framed picker, which matches its filter-editing key through the host's `KeybindingsManager` when pi's `ui.custom` supplies one and through pi's global keybindings otherwise.
+
 ## [0.11.0] - 2026-10-25
 
 ### Added
