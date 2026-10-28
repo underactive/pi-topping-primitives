@@ -43,6 +43,7 @@ const PRIMITIVES: PackageCase = {
 		"./activity-tui",
 		"./menu",
 		"./models",
+		"./classifier",
 		"./color",
 		"./text",
 		"./glyphs",
