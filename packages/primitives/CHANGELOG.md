@@ -6,6 +6,12 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.12.1] - 2026-10-27
+
+### Fixed
+
+- The repo-level package-shape guard (`tests/package-shape.test.ts`) now lists `./classifier` among the planned subpaths, so CI passes for 0.12.0's export map. No source or API change; the published 0.12.0 contents are unaffected.
+
 ## [0.12.0] - 2026-10-27
 
 ### Added
