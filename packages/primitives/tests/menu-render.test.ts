@@ -135,10 +135,39 @@ test("long labels and values wrap instead of truncating with an ellipsis", () =>
 	const text = body.join("\n");
 	assert.ok(text.includes("1. api_key_env · set"));
 	assert.ok(text.includes("OPENROUTER_API_KEY"));
-	assert.ok(text.includes("1. classify_trigger (must not"));
-	assert.ok(text.includes("be every_request)"));
+	assert.ok(text.includes("1. classify_trigger (must"));
+	assert.ok(text.includes("not be every_request)"));
 	assert.ok(!body.some((line) => line.includes("…")));
 	assert.ok(lines.every((line) => visibleWidth(line) <= width));
+});
+
+test("every row keeps two blank cells before the right border, disabled and text rows included", () => {
+	const { menu } = makeMenu({
+		sections: [
+			{
+				title: "S",
+				items: [
+					{ kind: "text", id: "name", label: "Name", value: "x" },
+					{ kind: "number", id: "n", label: "Count", value: 3, min: 0, max: 9 },
+					{ kind: "toggle", id: "t", label: "Flag", value: true },
+					{
+						kind: "toggle",
+						id: "d",
+						label: "Locked",
+						value: false,
+						disabled: true,
+						disabledReason: "built-in",
+					},
+				],
+			},
+		],
+	});
+	const body = plain(menu, 60)
+		.slice(2, -3)
+		.filter((line) => line.trim() !== "║");
+	assert.ok(body.length >= 4);
+	for (const line of body)
+		assert.ok(line.endsWith("  ║"), `right margin missing: ${line}`);
 });
 
 test("a disabled row renders dim with its reason and is skipped by the cursor", async () => {

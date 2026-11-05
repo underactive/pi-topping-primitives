@@ -111,6 +111,8 @@ const BUSY_SUFFIX = " \u2026";
 const MARKER = "\u276f";
 /** Rows paged when the menu has never been rendered under a height budget. */
 const FALLBACK_PAGE_ROWS = 10;
+/** Blank cells kept between a row's right edge and the border, matching the 2-cell left prefix. */
+const END_PADDING = 2;
 
 interface Editing {
 	id: string;
@@ -1126,7 +1128,6 @@ export class MenuComponent<
 		label: string,
 		suffix: string,
 		innerWidth: number,
-		endPadding: number,
 		selected: boolean,
 	): string[] {
 		const prefixWidth = visibleWidth(prefix);
@@ -1134,15 +1135,18 @@ export class MenuComponent<
 		const suffixWidth = visibleWidth(suffix);
 		const minimumGap = suffixWidth > 0 ? 1 : 0;
 		const inlineLabelWidth =
-			innerWidth - prefixWidth - suffixWidth - minimumGap - endPadding;
+			innerWidth - prefixWidth - suffixWidth - minimumGap - END_PADDING;
 		if (labelWidth <= inlineLabelWidth) {
 			const gap =
-				innerWidth - prefixWidth - labelWidth - suffixWidth - endPadding;
-			const content = `${prefix}${label}${" ".repeat(Math.max(minimumGap, gap))}${suffix}${" ".repeat(endPadding)}`;
+				innerWidth - prefixWidth - labelWidth - suffixWidth - END_PADDING;
+			const content = `${prefix}${label}${" ".repeat(Math.max(minimumGap, gap))}${suffix}${" ".repeat(END_PADDING)}`;
 			return [this.#renderItemContentRow(content, innerWidth, selected)];
 		}
 
-		const labelAvailableWidth = Math.max(1, innerWidth - prefixWidth);
+		const labelAvailableWidth = Math.max(
+			1,
+			innerWidth - prefixWidth - END_PADDING,
+		);
 		const labelLines = wrapTextWithAnsi(label, labelAvailableWidth);
 		const continuationIndent = " ".repeat(
 			Math.min(prefixWidth, Math.max(0, innerWidth - 1)),
@@ -1157,7 +1161,7 @@ export class MenuComponent<
 		if (suffixWidth > 0) {
 			const suffixAvailableWidth = Math.max(
 				1,
-				innerWidth - continuationIndent.length,
+				innerWidth - continuationIndent.length - END_PADDING,
 			);
 			for (const line of wrapTextWithAnsi(suffix, suffixAvailableWidth)) {
 				lines.push(
@@ -1185,7 +1189,6 @@ export class MenuComponent<
 				th.fg("dim", item.label),
 				suffix ? th.fg("dim", suffix) : "",
 				innerWidth,
-				0,
 				false,
 			);
 		}
@@ -1203,7 +1206,6 @@ export class MenuComponent<
 					th.fg(selected ? "accent" : "muted", item.label),
 					suffix,
 					innerWidth,
-					0,
 					selected,
 				);
 			}
@@ -1215,7 +1217,6 @@ export class MenuComponent<
 					th.fg(gated ? "muted" : "text", item.label),
 					th.fg(gated ? "muted" : "accent", state),
 					innerWidth,
-					2,
 					selected,
 				);
 			}
@@ -1234,7 +1235,6 @@ export class MenuComponent<
 					th.fg("dim", item.label),
 					field,
 					innerWidth,
-					1,
 					selected,
 				);
 			}
@@ -1253,7 +1253,6 @@ export class MenuComponent<
 					th.fg(gated ? "muted" : "text", item.label),
 					stateStyled,
 					innerWidth,
-					2,
 					selected,
 				);
 			}
@@ -1265,7 +1264,6 @@ export class MenuComponent<
 						th.fg(gated ? "muted" : "text", item.label),
 						th.fg(gated ? "muted" : "accent", state),
 						innerWidth,
-						2,
 						selected,
 					);
 				}
@@ -1276,7 +1274,6 @@ export class MenuComponent<
 					th.fg(gated ? "muted" : "text", item.label),
 					th.fg(enabled && !gated ? "accent" : "muted", state),
 					innerWidth,
-					2,
 					selected,
 				);
 			}
@@ -1288,7 +1285,6 @@ export class MenuComponent<
 					th.fg("text", item.label),
 					held ? th.fg("accent", "\u2191 \u2193") : "",
 					innerWidth,
-					2,
 					selected,
 				);
 			}
@@ -1303,7 +1299,6 @@ export class MenuComponent<
 					th.fg(gated ? "muted" : "text", item.label),
 					th.fg(color, stateWord),
 					innerWidth,
-					2,
 					selected,
 				);
 			}

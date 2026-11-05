@@ -6,6 +6,10 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Fixed
+
+- `showMenu` rows keep two blank cells before the right border. Disabled rows and text rows used to end flush against it, and wrapped labels now stop two cells short as well, so a long label can break one word earlier than before.
+
 ### Changed
 
 - The pi development baseline moves from 1.4.0 to 1.5.0: the exact `@earendil-works/pi-ai`, `pi-coding-agent` and `pi-tui` devDependency pins, the lockfile and the README compatibility and loader-verification records. No source change; `peerDependencies` stay `*`.
