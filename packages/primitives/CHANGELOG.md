@@ -12,7 +12,7 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Changed
 
-- The pi development baseline moves from 1.4.0 to 1.5.0: the exact `@earendil-works/pi-ai`, `pi-coding-agent` and `pi-tui` devDependency pins, the lockfile and the README compatibility and loader-verification records. No source change; `peerDependencies` stay `*`.
+- The pi development baseline moves from 1.4.0 to 1.5.2: the exact `@earendil-works/pi-ai`, `pi-coding-agent` and `pi-tui` devDependency pins, the lockfile and the README compatibility and loader-verification records. No source change; `peerDependencies` stay `*`.
 
 ## [0.12.1] - 2026-10-27
 
