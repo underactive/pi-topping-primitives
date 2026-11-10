@@ -6,6 +6,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.12.2] - 2026-11-10
+
 ### Changed
 
 - The pi devDependency pins move from 1.4.0 to 1.5.2, in step with `@underactive/pi-topping-primitives`; no API change.

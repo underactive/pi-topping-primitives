@@ -6,6 +6,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.12.2] - 2026-11-10
+
 ### Fixed
 
 - `showMenu` rows keep two blank cells before the right border. Disabled rows and text rows used to end flush against it, and wrapped labels now stop two cells short as well, so a long label can break one word earlier than before.
