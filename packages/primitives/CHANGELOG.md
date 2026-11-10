@@ -6,6 +6,11 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- `showMenu` and `showClassifierPicker` report their titles as OSC 7501 question-blocked status while their overlays wait for input.
+- `scripts/probe-pi-loader.sh` exercises symlinked extension entries and adds real-package probes for `./classifier` and `./contracts`; the text layout tests pin pi-tui's APC cursor-marker slicing behavior.
+
 ## [0.12.2] - 2026-11-10
 
 ### Fixed

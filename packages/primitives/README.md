@@ -259,7 +259,7 @@ The row budget reserves scroll information when the item count equals the availa
 
 ## Classifier
 
-`./classifier` is the Jev classifier plumbing routesense and persona-audit share: the known model chain and its credentialed catalogue, one normalized `classify` call, answer readers, the circuit breaker, and the picker that lets a user pin a model. Nothing here is agentic — no tools, no repository access — so a host that needs the tree keeps that work in its own phase and classifies a summary.
+`./classifier` is the Jev classifier plumbing routesense and persona-audit share: the known model chain and its credentialed catalogue, one normalized `classify` call, answer readers, the circuit breaker, and the picker that lets a user pin a model. Nothing here is agentic — no tools, no repository access — so a host that needs the tree keeps that work in its own phase and classifies a summary. The automatic chain is Jev-specific, but the catalogue and picker include every credentialed classifier pi exposes; known Jev models come first, followed by other models alphabetically, such as `github-copilot/microsoft-decision-1`.
 
 ```ts
 import {
@@ -574,18 +574,20 @@ The recipe's three expectations, all reproduced:
 
 ### Which pi branch runs which code
 
-`bin.pi` is `dist/bundle/cli.js`. The bundle is built with `PI_BUNDLED_NODE` defined, so `isBundledNode`, and with it `usesEmbeddedModules` (`isBunBinary || isNodeSeaBinary || isBundledNode`), is `true` in the shipped chunk, and the CLI passes `{ virtualModules, tryNative: false }` from `dist/core/extensions/loader.js` (lines 481-485 in 1.5.2). A loader running from TypeScript source outside Bun (`isTypeScriptSourceRuntime`) takes a third branch, `{ virtualModules, tsconfigPaths: true }`; the shipped entries run compiled JavaScript, so the probe does not drive it. The unbundled SDK entry `dist/index.js` falls through to `{ alias: getAliases() }` at the same lines. Since 1.5.1 the loader imports the entry file's real path (`jiti.import(canonicalizePath(extensionPath))`, line 490 in 1.5.2), so an extension reached through a symlink resolves its own imports from the real location; the probe's extension directory is a real path, so no row changes.
+`bin.pi` is `dist/bundle/cli.js`. The bundle is built with `PI_BUNDLED_NODE` defined, so `isBundledNode`, and with it `usesEmbeddedModules` (`isBunBinary || isNodeSeaBinary || isBundledNode`), is `true` in the shipped chunk, and the CLI passes `{ virtualModules, tryNative: false }` from `dist/core/extensions/loader.js` (lines 481-485 in 1.5.2). A loader running from TypeScript source outside Bun (`isTypeScriptSourceRuntime`) takes a third branch, `{ virtualModules, tsconfigPaths: true }`; the shipped entries run compiled JavaScript, so the probe does not drive it. The unbundled SDK entry `dist/index.js` falls through to `{ alias: getAliases() }` at the same lines. Since 1.5.1 the loader imports the entry file's real path (`jiti.import(canonicalizePath(extensionPath))`, line 490 in 1.5.2), so an extension reached through a symlink resolves its own imports from the real location; the probe's two symlinked-entry rows load the extension that way.
 
 The section 3 recipe only reproduced the alias branch. The CLI branch was verified separately, by driving `discoverAndLoadExtensions` through each branch in turn.
 
 ### Probe
 
-Four rows, with the extension's `node_modules` holding a physically different pi-tui copy, which is the user's symlinked-checkout shape. The probe drives `<pi-coding-agent>/dist/bundle/index.js`, which is the bundle's SDK entry; the CLI's own entry, `dist/bundle/cli.js`, is not loaded by the probe. Both entries reach the same loader chunk, and the dual-form rows are what the recipe depends on.
+Six rows, with the extension's `node_modules` holding a physically different pi-tui copy, which is the user's symlinked-checkout shape. Two additional rows pass no explicit path and let pi's discovery find the extension through a symlink in the temporary agent's `extensions/` directory, the `~/.pi/agent/extensions` shape; the symlink exists only for those rows, because discovery would otherwise load every other row a second time. The probe drives `<pi-coding-agent>/dist/bundle/index.js`, which is the bundle's SDK entry; the CLI's own entry, `dist/bundle/cli.js`, is not loaded by the probe. Both entries reach the same loader chunk, and the dual-form rows are what the recipe depends on.
 
 | Branch | Form | pi-tui shared with host |
 | --- | --- | --- |
 | bundled chunk (`bundle/index.js`), dual export | ts-source | yes |
 | unbundled SDK (`dist/index.js`), dual export | ts-source | yes |
+| symlinked entry, bundled chunk, dual export | ts-source | yes |
+| symlinked entry, unbundled SDK, dual export | ts-source | yes |
 | bundled chunk (`bundle/index.js`), compiled only | compiled-js | **no** |
 | unbundled SDK (`dist/index.js`), compiled only | compiled-js | **no** |
 
@@ -596,11 +598,11 @@ Both are load-bearing.
 1. A `default` target of TypeScript source shares the host pi-tui under both branches, so the section 3 recipe stands unchanged.
 2. `tryNative: false` does not make compiled JavaScript safe under the bundled CLI. It governs only the module jiti was asked for, not that module's own bare `@earendil-works/*` specifiers, so a compiled dependency still escapes to Node's resolver and duplicates pi-tui.
 
-`PEERS=absent sh scripts/probe-pi-loader.sh` skips the symlink, so the extension directory resolves no pi packages at all, which reproduces the `pi install npm:` shape: that run produced all four rows `same:true`. It is a second invocation of the same probe, not a different script.
+`PEERS=absent sh scripts/probe-pi-loader.sh` skips the peer symlink, so the extension directory resolves no pi packages at all, which reproduces the `pi install npm:` shape: all six fake-loader rows should report `same:true`. It is a second invocation of the same probe, not a different script.
 
 That is exactly the dev-versus-installed inconsistency section 3 fact 2 warns about. The `.ts` default target is therefore required, not merely preferred.
 
-Scope: the evidence covers pi 1.3.0 and 1.4.0 on Node 24.18.0, and pi 1.5.0 and 1.5.2 on Node v24.22.1; no loader run has exercised the declared `>=22.19.0` engine floor. On 1.5.0 and 1.5.2 the second physical pi copy was a separate checkout's pi-tui 1.5.0, and the `PRIM_TGZ` real-package rows for settings, activity, activity-tui, menu, models, color, text, glyphs, process, env and abort loaded without errors under both loader branches and both `PEERS` layouts (44 rows per pi version); `./classifier` and `./contracts` have no real-package probe case. The `compiled` condition is the only thing a test-side change can break; the runtime `default` target is fixed by the loader.
+Scope: the evidence covers pi 1.3.0 and 1.4.0 on Node 24.18.0, and pi 1.5.0 and 1.5.2 on Node v24.22.1; no loader run has exercised the declared `>=22.19.0` engine floor. On 1.5.0 and 1.5.2 the second physical pi copy was a separate checkout's pi-tui 1.5.0. The original `PRIM_TGZ` matrix covered settings, activity, activity-tui, menu, models, color, text, glyphs, process, env and abort (44 rows per pi version); the extended 1.5.2 matrix adds `./classifier` and `./contracts` (52 rows total). The 1.5.2 probe also exercises the symlinked-entry path under both loader branches. The `compiled` condition is the only thing a test-side change can break; the runtime `default` target is fixed by the loader.
 
 ### Re-running
 
@@ -608,6 +610,13 @@ Scope: the evidence covers pi 1.3.0 and 1.4.0 on Node 24.18.0, and pi 1.5.0 and 
 sh scripts/verify-loader.sh
 sh scripts/probe-pi-loader.sh
 PEERS=absent sh scripts/probe-pi-loader.sh
+
+# With a packed primitives tarball and explicit pi / second-checkout paths:
+for peers in present absent; do
+  for subpath in settings activity activity-tui menu models classifier contracts color text glyphs process env abort; do
+    PCA="$PCA" ST="$ST" PEERS=$peers PRIM_TGZ="$TGZ" SUBPATH=$subpath sh scripts/probe-pi-loader.sh
+  done
+done
 ```
 
 `verify-loader.sh` links the pi packages out of `$PT/node_modules/@earendil-works` and imports jiti, so `$PT` has to point at a checkout that has pi installed. jiti can be hoisted or nested, so the script looks for it in four places — the nested `@earendil-works/pi-coding-agent/node_modules/jiti`, then `$PT/node_modules/jiti`, then the managed release root, then `$(npm root -g)/jiti` — and prints the location it used.
