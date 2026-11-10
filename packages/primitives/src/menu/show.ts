@@ -33,6 +33,7 @@ export async function showMenu<V extends Record<string, MenuValue>>(
 			),
 		{
 			overlay: true,
+			blocked: { kind: "question", message: config.title },
 			overlayOptions: {
 				width: config.layout?.width ?? DEFAULT_WIDTH,
 				maxHeight: config.layout?.maxHeight ?? DEFAULT_MAX_HEIGHT,

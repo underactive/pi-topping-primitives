@@ -249,6 +249,7 @@ test("showClassifierPicker skips non-TUI and empty contexts and opens an overlay
 	);
 	assert.deepEqual(overlay, {
 		overlay: true,
+		blocked: { kind: "question", message: "t" },
 		overlayOptions: {
 			anchor: "center",
 			width: "90%",

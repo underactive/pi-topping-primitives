@@ -252,6 +252,7 @@ export async function showClassifierPicker(
 			),
 		{
 			overlay: true,
+			blocked: { kind: "question", message: config.title },
 			overlayOptions: {
 				anchor: "center",
 				width: "90%",

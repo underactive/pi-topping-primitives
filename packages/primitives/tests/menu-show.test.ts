@@ -72,6 +72,7 @@ test("in the TUI showMenu mounts a MenuComponent through ui.custom and resolves 
 	assert.equal(captured.length, 1);
 	assert.deepEqual(captured[0]?.options, {
 		overlay: true,
+		blocked: { kind: "question", message: "T" },
 		overlayOptions: { width: "90%", maxHeight: "85%" },
 	});
 });
@@ -117,6 +118,7 @@ test("layout overrides reach the overlay options", async () => {
 	);
 	assert.deepEqual(captured[0]?.options, {
 		overlay: true,
+		blocked: { kind: "question", message: "T" },
 		overlayOptions: { width: 76, maxHeight: "75%" },
 	});
 	await showMenu(
@@ -125,6 +127,7 @@ test("layout overrides reach the overlay options", async () => {
 	);
 	assert.deepEqual(captured[1]?.options, {
 		overlay: true,
+		blocked: { kind: "question", message: "T" },
 		overlayOptions: { width: "90%", maxHeight: "100%" },
 	});
 });
