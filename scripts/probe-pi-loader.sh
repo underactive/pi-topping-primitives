@@ -12,9 +12,13 @@
 # asked for, not that module's own bare specifiers, so the dependency's pi-tui import still resolves
 # through the extension's node_modules rather than the host's alias.
 #
-# PEERS=absent skips the symlink, so the extension directory resolves no pi packages at all. That is
-# the `pi install npm:` shape, and it is the run that produced all four rows `same:true`. Without
-# that control the claim would rest on an observation no script in this repo could reproduce.
+# Two dual-form rows also reach the extension through a symlink in the temporary agent's
+# extensions/ directory, found by pi's own discovery rather than passed explicitly: the
+# `~/.pi/agent/extensions` shape, which exercises the loader's canonicalized entry import (1.5.1+).
+# The symlink exists only for those two rows; discovery scans extensions/ before the explicit paths
+# and dedupes without following symlinks, so leaving it in place would load every other row twice.
+# PEERS=absent skips the peer symlink, so the target resolves no pi packages at all; that is the
+# `pi install npm:` shape, and all six fake-loader rows should report `same:true`.
 PT=${PT:-$HOME/Development/projects/pi/pi-topping}
 ST=${ST:-$HOME/Development/projects/pi/pi-topping-statusline}
 PEERS=${PEERS:-present}
@@ -35,6 +39,7 @@ import { depTui, form } from "@underactive/fake-prim";
 (globalThis as { __fakePrim?: unknown }).__fakePrim = { form, same: host.visibleWidth === depTui.visibleWidth };
 export default function () {}
 EOF
+mkdir -p "$T/agent/extensions"
 
 # Resolve the pi-coding-agent package under test. Three probes, in order: an explicit $PCA, the
 # managed install pointed at by $PI_ROOT (default ~/.pi/agent), then the global npm prefix.
@@ -83,9 +88,11 @@ have_unbundled=1
 [ -f "$unbundled_entry" ] || { have_unbundled=0; echo "note: skipping the SDK branch, no $unbundled_entry" >&2; }
 
 probe() {
+	# A third argument of "discover" passes no explicit path, leaving the load to discovery.
+	if [ "$3" = discover ]; then entry_paths=; else entry_paths="'$T/ext/index.ts'"; fi
 	( cd "$T/cwd" && JITI_FS_CACHE=false PI_CODING_AGENT_DIR="$T/agent" node --input-type=module -e "
 const { discoverAndLoadExtensions } = await import('$PCA/dist/$1');
-const r = await discoverAndLoadExtensions(['$T/ext/index.ts'], '$T/cwd', '$T/agent');
+const r = await discoverAndLoadExtensions([$entry_paths], '$T/cwd', '$T/agent');
 console.log('$2 ->', JSON.stringify(globalThis.__fakePrim), r.errors.map((e) => e.error).join('; '));" )
 }
 printf '{ "name": "@underactive/fake-prim", "type": "module", "exports": { ".": { "compiled": "./dist/index.js", "default": "./src/index.ts" } } }\n' > "$P/package.json"
@@ -93,21 +100,27 @@ printf '{ "name": "@underactive/fake-prim", "type": "module", "exports": { ".": 
 [ "$have_bundled" = 1 ] && probe bundle/index.js "bundled chunk (bundle/index.js), dual form"
 # Expect: unbundled SDK, dual form -> {"form":"ts-source","same":true}
 [ "$have_unbundled" = 1 ] && probe index.js "unbundled SDK (dist/index.js), dual form"
+# Expect: both symlinked entry rows resolve imports from the real extension location.
+ln -s "$T/ext" "$T/agent/extensions/fake-extension"
+[ "$have_bundled" = 1 ] && probe bundle/index.js "symlinked entry, bundled chunk, dual form" discover
+[ "$have_unbundled" = 1 ] && probe index.js "symlinked entry, unbundled SDK, dual form" discover
+rm "$T/agent/extensions/fake-extension"
 printf '{ "name": "@underactive/fake-prim", "type": "module", "exports": { ".": "./dist/index.js" } }\n' > "$P/package.json"
 # Expect: bundled chunk, compiled only -> {"form":"compiled-js","same":false} with peers present
 [ "$have_bundled" = 1 ] && probe bundle/index.js "bundled chunk, compiled only"
 # Expect: unbundled SDK, compiled only -> {"form":"compiled-js","same":false} with peers present
 [ "$have_unbundled" = 1 ] && probe index.js "unbundled SDK, compiled only"
 # Real-package rows. With PRIM_TGZ set to a packed primitives tarball, load a multi-file subpath
-# (SUBPATH, default settings; one of settings, activity, activity-tui, menu, models, color, text,
-# glyphs, process, env, abort) from node_modules through both loader branches. Pass: no load errors and the extension's
+# (SUBPATH, default settings; one of settings, activity, activity-tui, menu, models, classifier,
+# contracts, color, text, glyphs, process, env, abort) from node_modules through both loader branches. Pass: no load errors and the extension's
 # own calls return what the row expects. activity-tui is the first subpath with a runtime pi-tui
 # import of its own, so its rows are the ones that show the dependency resolving pi-tui through the
 # host's alias. menu goes further: it constructs a component whose keys go through pi-tui's
 # KeybindingsManager, renders it, and presses Enter. models builds the picker from a one-model
 # fake registry through registryLevelOptions (pi-ai's getSupportedThinkingLevels), renders at
-# width 60 and presses Enter. color has no runtime pi import at all (the rows show that it loads
-# and computes with peers absent); text measures a CJK string through pi-tui's visibleWidth and
+# width 60 and presses Enter. classifier exercises the credentialed catalogue and picker options;
+# contracts parses both shared payload shapes. color has no runtime pi import at all (the rows show
+# that it loads and computes with peers absent); text measures a CJK string through pi-tui's visibleWidth and
 # sliceByColumn, which is the row that proves the host alias reaches it; glyphs is data only;
 # process reads a project agent file through pi-coding-agent's parseFrontmatter and CONFIG_DIR_NAME
 # (the PEERS=absent rows are the proof that both resolve through the host alias) and spawns nothing;
@@ -120,6 +133,8 @@ printf '{ "name": "@underactive/fake-prim", "type": "module", "exports": { ".": 
 # Expect for env: {"yes":true,"no":false,"off":false,"on":true}
 # Expect for abort: {"named":true,"plain":false,"registered":1,"after":0,"noTimer":true,"timedOut":false}
 # Expect for process: {"agents":[["probe",["read","grep"],"high"]],"atLeast":true,"inv":{"command":"pi","args":["--version"],"via":"path"},"mapped":[2,4,6],"tracked":0}
+# Expect for classifier: known Jev first, then configured non-Jev models in name order.
+# Expect for contracts: both shared payload shapes parse after sanitizing their fields.
 if [ -n "$PRIM_TGZ" ]; then
 	SUBPATH=${SUBPATH:-settings}
 	RP="$T/ext/node_modules/@underactive/pi-topping-primitives"
@@ -191,6 +206,38 @@ const picker = new TwoPaneModelThinking({ theme, refs: [{ provider: "probe", id:
 const rows = picker.render(60).length;
 if (picker.handleInput("\\r") !== "confirm") throw new Error("models probe did not confirm");
 (globalThis as { __fakePrim?: unknown }).__fakePrim = { rows, pick: picker.getSelected() };
+export default function () {}
+EOF2
+		;;
+	classifier)
+		cat > "$T/ext/index.ts" <<EOF2
+import { availableClassifiers, classifierPickerOptions } from "@underactive/pi-topping-primitives/$SUBPATH";
+const models = [
+	{ provider: "openrouter", id: "typesafe/jev-1.13", api: "typesafe-system-one" },
+	{ provider: "github-copilot", id: "microsoft-decision-1", api: "typesafe-system-one" },
+	{ provider: "openrouter", id: "cloudflare/clairic", api: "openai-completions" },
+	{ provider: "hidden", id: "not-configured", api: "typesafe-system-one" },
+];
+const registry = {
+	getModelsOfType: () => models,
+	getProviderAuthStatus: (provider: string) => ({ configured: provider !== "hidden" }),
+};
+const available = availableClassifiers(registry);
+(globalThis as { __fakePrim?: unknown }).__fakePrim = {
+	available: available.map(({ provider, id }) => provider + "/" + id),
+	choices: classifierPickerOptions(available, "typesafe/jev-latest", "auto").map(({ value }) => value),
+};
+export default function () {}
+EOF2
+		;;
+	contracts)
+		cat > "$T/ext/index.ts" <<EOF2
+import { CHANNELS, parseEmbeddedAnnouncement, parseRoutedModel } from "@underactive/pi-topping-primitives/$SUBPATH";
+(globalThis as { __fakePrim?: unknown }).__fakePrim = {
+	channel: CHANNELS.routedModel,
+	route: parseRoutedModel({ version: 1, provider: " openai ", modelId: " claude-sonnet-4 ", reason: "user", thinkingLevel: "high", ignored: true }),
+	embedded: parseEmbeddedAnnouncement({ embedded: true, ignored: true }),
+};
 export default function () {}
 EOF2
 		;;
@@ -285,7 +332,7 @@ export default function () {}
 EOF2
 		;;
 	*)
-		echo "probe-pi-loader: unknown SUBPATH '$SUBPATH' (expected settings, activity, activity-tui, menu, models, color, text, glyphs, process, env or abort)" >&2
+		echo "probe-pi-loader: unknown SUBPATH '$SUBPATH' (expected settings, activity, activity-tui, menu, models, classifier, contracts, color, text, glyphs, process, env or abort)" >&2
 		rm -rf "$T"
 		exit 1
 		;;
