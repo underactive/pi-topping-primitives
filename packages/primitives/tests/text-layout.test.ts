@@ -1,6 +1,10 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { stripTerminalSequences, visibleWidth } from "@earendil-works/pi-tui";
+import {
+	sliceByColumn,
+	stripTerminalSequences,
+	visibleWidth,
+} from "@earendil-works/pi-tui";
 import {
 	ELLIPSIS,
 	fitCell,
@@ -264,6 +268,13 @@ test("truncateVisible is a prefix for escape-free text (T-08)", () => {
 test("truncateVisible drops a wide character straddling the cut instead of overflowing (T-08)", () => {
 	assert.equal(truncateVisible("日本", 3), "日");
 	assert.equal(truncateVisible("日本語", 4), "日本");
+});
+
+test("APC cursor markers stay before the truncation cut but do not cross a slice start", () => {
+	const cursor = "\x1b_pi:c\x07";
+	const text = `abc${cursor}def`;
+	assert.equal(truncateVisible(text, 4), `abc${cursor}d`);
+	assert.equal(sliceByColumn(text, 4, 2, true), "ef");
 });
 
 test("fitCell leaves fitting text unchanged (T-09)", () => {
