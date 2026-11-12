@@ -6,6 +6,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.13.0] - 2026-11-12
+
 ### Added
 
 - `showMenu` and `showClassifierPicker` report their titles as OSC 7501 question-blocked status while their overlays wait for input.
